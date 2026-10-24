@@ -1,10 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 
-/// 配置详情：头像/标题做共享元素过渡，下面用 Tab 切换三类信息。
 class ProfileDetailPage extends StatelessWidget {
   const ProfileDetailPage({
     super.key,
@@ -66,6 +67,40 @@ class ProfileDetailPage extends StatelessWidget {
   }
 }
 
+/// 详情页头像：与列表、首页一致，优先读 avatarPath。
+class _DetailAvatar extends StatelessWidget {
+  const _DetailAvatar({required this.profile, this.size = 64});
+
+  final Profile profile;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? path = profile.avatarPath;
+
+    if (path != null && path.isNotEmpty && File(path).existsSync()) {
+      return ClipOval(
+        child: Image.file(
+          File(path),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (
+            BuildContext context,
+            Object error,
+            StackTrace? stackTrace,
+          ) {
+            return ProfileAvatar(name: profile.name, size: size);
+          },
+        ),
+      );
+    }
+
+    return ProfileAvatar(name: profile.name, size: size);
+  }
+}
+
 class _DetailHeader extends StatelessWidget {
   const _DetailHeader({required this.profile, this.heroTag});
 
@@ -88,7 +123,7 @@ class _DetailHeader extends StatelessWidget {
         children: <Widget>[
           Hero(
             tag: heroTag ?? 'avatar-${profile.id}',
-            child: ProfileAvatar(name: profile.name, size: 64),
+            child: _DetailAvatar(profile: profile, size: 64),
           ),
           const SizedBox(width: TideSpace.x4),
           Expanded(
