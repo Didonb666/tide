@@ -105,6 +105,9 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: TideSpace.x2),
+const Divider(height: 1),
+const CustomAccentTile(),
           ListTile(
   title: const Text('高级设置'),
   subtitle: const Text('调色板 / Hex 主色 / 屏幕帧率'),
