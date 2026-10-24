@@ -1,3 +1,5 @@
+import 'dart:ui' show FramePhase;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
