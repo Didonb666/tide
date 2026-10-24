@@ -185,8 +185,27 @@ jobs:
         run: flutter pub get
 
       - name: 6. 编译 Release EXE
-        run: flutter build windows --release
+        shell: pwsh
+        run: |
+          flutter build windows --release 2>&1 | Tee-Object -FilePath windows-build.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            Write-Host ""
+            Write-Host "================ 构建失败，最后 80 行 ================"
+            Get-Content windows-build.log -Tail 80
+            Write-Host "====================================================="
+            exit $code
+          }
 
+      - name: 6b. 失败时上传完整构建日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-log
+          path: windows-build.log
+          if-no-files-found: warn
+          retention-days: 7
+          
       - name: 7. 收集产物（exe 必须带着同目录的 dll 和 data 才能运行）
         shell: pwsh
         run: |
