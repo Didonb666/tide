@@ -66,17 +66,18 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
           ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
-        run: |
-          gomobile init
-          gomobile bind \
-            -target=android/arm64 \
-            -androidapi 26 \
-            -javapkg com.tide.core \
-            -tags with_gvisor \
-            -ldflags "-s -w -extldflags=-Wl,-z,max-page-size=16384" \
-            -o core.aar .
-          ls -lh core.aar
-
+ run: |
+  go get golang.org/x/mobile/cmd/gobind@latest
+  go mod tidy
+  gomobile init
+  gomobile bind \
+    -target=android/arm64 \
+    -androidapi 26 \
+    -javapkg com.tide.core \
+    -tags with_gvisor \
+    -ldflags "-s -w -extldflags=-Wl,-z,max-page-size=16384" \
+    -o core.aar .
+  ls -lh core.aar
       - name: 7. 上传 AAR
         uses: actions/upload-artifact@v4
         with:
