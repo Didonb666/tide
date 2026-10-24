@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
-/// 主色调预设。每个预设给浅色/深色两套 accent 与 accentSoft。
+/// 主色调预设。
 enum TideAccent {
   green(
     '极客绿',
@@ -47,7 +47,7 @@ enum TideAccent {
       brightness == Brightness.light ? _lightSoft : _darkSoft;
 }
 
-/// 在现有 TideTheme 的基础上替换主色，其余 Token 完全复用。
+/// 在现有 TideTheme 上替换主色，并让 Scaffold 透明以露出全局背景层。
 abstract final class AppTheme {
   static ThemeData light(TideAccent accent) =>
       _apply(TideTheme.light(), accent, Brightness.light);
@@ -66,11 +66,15 @@ abstract final class AppTheme {
     );
 
     return base.copyWith(
+      scaffoldBackgroundColor: Colors.transparent,
       extensions: <ThemeExtension<dynamic>>[colors],
       colorScheme: base.colorScheme.copyWith(
         primary: colors.accent,
         secondary: colors.accent,
         tertiary: colors.info,
+      ),
+      appBarTheme: base.appBarTheme.copyWith(
+        backgroundColor: Colors.transparent,
       ),
     );
   }
