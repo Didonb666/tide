@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
-"""把 mihomo 的 AAR 接进 `flutter create` 生成的 Android 工程。
+"""给 flutter create 生成的 Android 工程打补丁：
 
-为什么需要脚本而不是直接改文件：
-  `android/app/build.gradle.kts` 是 CI 里由 `flutter create` 生成的，
-  仓库里没有这个文件。所以只能在生成之后做一次确定性的补丁。
-
-它做两件事：
-  1. minSdk 改成 26（gomobile 的 -androidapi 26，AAR 的 minSdk 也是 26，
-     不改会直接报 "uses-sdk:minSdkVersion 21 cannot be smaller than version 26"）；
-  2. 追加 AAR 依赖（追加一个 dependencies {} 块是合法的，Gradle 允许重复调用）。
+1. 包名统一成 com.fstool.app（namespace + applicationId）；
+2. minSdk 提到 26（gomobile 的 AAR 要求）；
+3. 引入 mihomo 的 core.aar。
 """
 
 from __future__ import annotations
@@ -28,15 +23,26 @@ def main() -> int:
     text = GRADLE.read_text(encoding="utf-8")
     original = text
 
-    # Flutter 模板：minSdk = flutter.minSdkVersion
-    text, n1 = re.subn(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", text)
+    # 1) 包名
+    text = text.replace("com.tide.tide", "com.fstool.app")
+    text = re.sub(
+        r'namespace\s*=\s*"[^"]+"',
+        'namespace = "com.fstool.app"',
+        text,
+        count=1,
+    )
+    text = re.sub(
+        r'applicationId\s*=\s*"[^"]+"',
+        'applicationId = "com.fstool.app"',
+        text,
+        count=1,
+    )
 
-    # 兼容老一点的 Groovy 模板：minSdkVersion flutter.minSdkVersion
+    # 2) minSdk
+    text, n1 = re.subn(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", text)
     text, n2 = re.subn(r"minSdkVersion\s+flutter\.minSdkVersion", "minSdkVersion 26", text)
 
-    if n1 + n2 == 0:
-        print("[!] 没有找到 minSdk 声明，请检查生成的 build.gradle.kts")
-
+    # 3) AAR
     if "libs/core.aar" not in text:
         text = text.rstrip() + (
             "\n\n// 由 scripts/patch_android_gradle.py 注入：mihomo 内核\n"
@@ -48,10 +54,9 @@ def main() -> int:
     if text != original:
         GRADLE.write_text(text, encoding="utf-8")
 
-    print(f"[ok] minSdk 补丁: {n1 + n2} 处；AAR 依赖已就绪")
-    print("----- 结果预览 -----")
+    print(f"[ok] 包名 -> com.fstool.app；minSdk 补丁 {n1 + n2} 处；AAR 依赖已就绪")
     for line in GRADLE.read_text(encoding="utf-8").splitlines():
-        if "minSdk" in line or "core.aar" in line or "dependencies" in line:
+        if "namespace" in line or "applicationId" in line or "minSdk" in line or "core.aar" in line:
             print("   " + line)
     return 0
 
