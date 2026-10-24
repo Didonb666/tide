@@ -108,7 +108,7 @@ class SettingsPage extends StatelessWidget {
   subtitle: const Text('调色板 / Hex 主色 / 屏幕帧率'),
   trailing: const Icon(Icons.chevron_right_rounded),
   onTap: () => Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const AdvancedSettingsPage()),
+       MaterialPageRoute<void>(builder: (_) => AdvancedSettingsPage()),
   ),
 ),
           const SectionHeader(title: '背景设置'),
