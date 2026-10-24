@@ -1,26 +1,96 @@
 name: Build APK & EXE
 
-# 什么时候自动跑：
-#   1. 你往 main（或 master）分支推送代码；
-#   2. 有人提交 Pull Request；
-#   3. 你手动点 "Run workflow"。
+# 三个 Job：
+#   core    —— 用 Go + gomobile 把 mihomo 编成 Android 用的 core.aar（约 15~25 分钟）
+#   android —— 下载 core.aar，接进 APK（依赖 core）
+#   windows —— 独立编 Windows 版本，不受 core 影响
 on:
   push:
     branches: [main, master]
   pull_request:
   workflow_dispatch:
 
-# 同一分支只保留最新一次构建，避免排队浪费额度。
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   # ---------------------------------------------------------------------------
-  # Job 1：Android APK（Ubuntu 上跑）
+  # Job 1：编译 mihomo 内核
+  # ---------------------------------------------------------------------------
+  core:
+    name: 编译 mihomo 内核（AAR）
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 1. 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 2. 安装 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.x"
+          cache: false
+
+      - name: 3. 安装 Android NDK
+        id: ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27c
+
+      - name: 4. 安装 gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: 5. 拉取 mihomo 源码依赖
+        working-directory: native/corebridge
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          go version
+          echo "NDK: $ANDROID_NDK_HOME"
+          ls "$ANDROID_NDK_HOME" | head -n 5
+          go mod tidy
+          go mod download
+          go list -m github.com/metacubex/mihomo
+
+      - name: 6. 编译 core.aar
+        working-directory: native/corebridge
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+          ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
+        run: |
+          gomobile init
+          gomobile bind \
+            -target=android/arm64 \
+            -androidapi 26 \
+            -javapkg com.tide.core \
+            -tags with_gvisor \
+            -ldflags "-s -w -extldflags=-Wl,-z,max-page-size=16384" \
+            -o core.aar .
+          ls -lh core.aar
+
+      - name: 7. 上传 AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mihomo-core-aar
+          path: native/corebridge/core.aar
+          if-no-files-found: error
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Job 2：Android APK（需要 Job 1 的 AAR）
   # ---------------------------------------------------------------------------
   android:
     name: 构建 Android APK
+    needs: core
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -28,7 +98,7 @@ jobs:
       - name: 1. 检出仓库代码
         uses: actions/checkout@v4
 
-      - name: 2. 安装 JDK 17（Android Gradle 需要）
+      - name: 2. 安装 JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -39,39 +109,41 @@ jobs:
         with:
           channel: stable
           cache: true
-          # 想锁定版本时取消下面这行注释（版本号去 flutter.dev/releases 查）：
-          # flutter-version: 3.35.1
 
-      - name: 4. 打印环境信息
-        run: |
-          flutter --version
-          java -version
-
-      - name: 5. 生成 Android 平台目录
-        # 仓库里只保留了自定义的 MainActivity / Manifest / 图标相关文件，
-        # gradle、gradle wrapper、res 这些模板文件由这条命令补齐。
-        # `flutter create` 默认不覆盖已存在的文件，所以自定义代码不会被冲掉。
+      - name: 4. 生成 Android 平台目录
+        # gradle、gradle wrapper、res 等模板由这条命令补齐；
+        # 已存在的自定义文件（MainActivity / Manifest）不会被覆盖。
         run: flutter create --platforms=android --org com.tide --project-name tide .
 
-      - name: 5b. 自检：自定义原生文件还在
+      - name: 5. 下载内核 AAR
+        uses: actions/download-artifact@v4
+        with:
+          name: mihomo-core-aar
+          path: android/app/libs
+
+      - name: 6. 修改 build.gradle.kts（minSdk 26 + 引入 AAR）
+        run: python3 scripts/patch_android_gradle.py
+
+      - name: 7. 自检：原生文件与 AAR 就位
         run: |
+          ls -lh android/app/libs/core.aar
           grep -q "TunnelChannel" android/app/src/main/kotlin/com/tide/tide/MainActivity.kt \
             && echo "OK: MainActivity 未被覆盖" \
-            || echo "::warning::MainActivity 可能被 flutter create 覆盖，请检查仓库里的 android/ 目录"
-          grep -q 'android:label="Tide"' android/app/src/main/AndroidManifest.xml \
-            && echo "OK: Manifest 未被覆盖" \
-            || echo "::warning::Manifest 可能被 flutter create 覆盖"
+            || echo "::warning::MainActivity 可能被 flutter create 覆盖"
+          grep -q "BIND_VPN_SERVICE" android/app/src/main/AndroidManifest.xml \
+            && echo "OK: Manifest 含 VPN 服务" \
+            || echo "::warning::Manifest 缺少 VPN 服务声明"
 
-      - name: 6. 拉取 Dart 依赖
+      - name: 8. 拉取 Dart 依赖
         run: flutter pub get
 
-      - name: 7. 编译 Release APK
+      - name: 9. 编译 Release APK
         run: flutter build apk --release
 
-      - name: 8. 显示产物信息
+      - name: 10. 显示产物信息
         run: ls -lh build/app/outputs/flutter-apk/
 
-      - name: 9. 上传 APK（在 Actions 页面可下载）
+      - name: 11. 上传 APK
         uses: actions/upload-artifact@v4
         with:
           name: tide-android-apk
@@ -80,7 +152,7 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Job 2：Windows EXE（Windows 上跑）
+  # Job 3：Windows EXE
   # ---------------------------------------------------------------------------
   windows:
     name: 构建 Windows EXE
@@ -101,7 +173,6 @@ jobs:
         run: flutter config --enable-windows-desktop
 
       - name: 4. 生成 Windows 平台目录
-        # 生成 CMake / runner 等模板；我们自定义的文件不会被覆盖。
         run: flutter create --platforms=windows --org com.tide --project-name tide .
 
       - name: 5. 拉取 Dart 依赖
@@ -125,9 +196,7 @@ jobs:
           Copy-Item -Path (Join-Path $dir '*') -Destination dist/windows -Recurse -Force
           Get-ChildItem dist/windows | Select-Object Name, Length
 
-      - name: 8. 上传 EXE（在 Actions 页面可下载，解压即用）
-        # 直接上传目录：GitHub 会自动压成一个 zip，解压后就是程序目录，
-        # 不会出现"zip 里还套一个 zip"的情况。
+      - name: 8. 上传 EXE（解压即用）
         uses: actions/upload-artifact@v4
         with:
           name: tide-windows-x64
