@@ -48,7 +48,36 @@ jobs:
           go install golang.org/x/mobile/cmd/gobind@latest
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      - name: 5. 拉取 mihomo 源码依赖
+      - name: 5. 克隆 mihomo 源码并打补丁（跳过读取 packages.xml）
+        run: |
+          git clone --depth 1 --branch v1.19.33 https://github.com/MetaCubeX/mihomo.git native/mihomo
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          p = Path("native/mihomo/listener/sing_tun/server_android.go")
+          src = p.read_text(encoding="utf-8")
+
+          pattern = r"func \(l \*Listener\) buildAndroidRules\(tunOptions \*tun\.Options\) error \{.*?\n\}"
+          replacement = (
+              "func (l *Listener) buildAndroidRules(tunOptions *tun.Options) error {\n"
+              "\t// PATCHED: 普通 App 无权读取 /data/system/packages.xml。\n"
+              "\t// 本项目不做分应用代理，直接跳过 Android 的 per-app 规则构建。\n"
+              "\t_ = tunOptions\n"
+              "\treturn nil\n"
+              "}"
+          )
+
+          patched, count = re.subn(pattern, replacement, src, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit("patch failed: buildAndroidRules anchor not found")
+
+          p.write_text(patched, encoding="utf-8")
+          print("patched buildAndroidRules -> no-op")
+          PY
+          grep -n "PATCHED" native/mihomo/listener/sing_tun/server_android.go
+
+      - name: 6. 拉取 mihomo 源码依赖
         working-directory: native/corebridge
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
@@ -78,7 +107,7 @@ jobs:
           echo "--- 关键模块版本 ---"
           go list -m github.com/metacubex/mihomo golang.org/x/mobile
 
-      - name: 6. 编译 core.aar
+      - name: 7. 编译 core.aar
         working-directory: native/corebridge
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
@@ -90,7 +119,6 @@ jobs:
           # gomobile 会生成 <前缀>.<Go包名>.<类名>，
           # 即 com.tide + core + Core = com.tide.core.Core，
           # 与 Kotlin 里的 import com.tide.core.Core 对应。
-          # 如果写成 com.tide.core，真实类名会变成 com.tide.core.core.Core，Kotlin 就找不到。
           gomobile bind \
             -target=android/arm64 \
             -androidapi 26 \
@@ -100,7 +128,7 @@ jobs:
             -o core.aar .
           ls -lh core.aar
 
-      - name: 7. 上传 AAR
+      - name: 8. 上传 AAR
         uses: actions/upload-artifact@v4
         with:
           name: mihomo-core-aar
@@ -134,8 +162,6 @@ jobs:
           cache: true
 
       - name: 4. 生成 Android 平台目录
-        # gradle、gradle wrapper、res 等模板由这条命令补齐；
-        # 已存在的自定义文件（MainActivity / Manifest）不会被覆盖。
         run: flutter create --platforms=android --org com.tide --project-name tide .
 
       - name: 5. 下载内核 AAR
@@ -223,7 +249,6 @@ jobs:
       - name: 6. 编译 Release EXE
         shell: pwsh
         run: |
-          # 把完整输出同时写进日志文件，失败时打印末尾并上传，避免"只看到 Build process failed"
           flutter build windows --release 2>&1 | Tee-Object -FilePath windows-build.log
           $code = $LASTEXITCODE
           if ($code -ne 0) {
@@ -243,7 +268,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: 7. 收集产物（exe 必须带着同目录的 dll 和 data 才能运行）
+      - name: 7. 收集产物
         shell: pwsh
         run: |
           $exe = Get-ChildItem -Path build/windows -Recurse -Filter tide.exe |
