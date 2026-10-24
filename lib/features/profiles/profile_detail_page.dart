@@ -24,7 +24,7 @@ class ProfileDetailPage extends StatelessWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: colors.canvas,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
@@ -152,7 +152,8 @@ class _GroupsTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.only(top: TideSpace.x2),
       itemCount: profile.groups.length,
-      separatorBuilder: (BuildContext context, int index) => const Hairline(inset: TideSpace.page),
+      separatorBuilder: (BuildContext context, int index) =>
+          const Hairline(inset: TideSpace.page),
       itemBuilder: (BuildContext context, int index) {
         final GroupInfo group = profile.groups[index];
         return ListTile(
@@ -170,7 +171,11 @@ class _GroupsTab extends StatelessWidget {
                 style: text.bodySmall?.copyWith(color: context.colors.accent),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.chevron_right, size: 18, color: context.colors.inkTertiary),
+              Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: context.colors.inkTertiary,
+              ),
             ],
           ),
           onTap: () {
@@ -204,7 +209,8 @@ class _RulesTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.only(top: TideSpace.x2),
       itemCount: profile.rules.length,
-      separatorBuilder: (BuildContext context, int index) => const Hairline(inset: TideSpace.x4 + 28),
+      separatorBuilder: (BuildContext context, int index) =>
+          const Hairline(inset: TideSpace.x4 + 28),
       itemBuilder: (BuildContext context, int index) {
         final String rule = profile.rules[index];
         final int comma = rule.indexOf(',');
@@ -269,7 +275,8 @@ class _ProvidersTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.only(top: TideSpace.x2),
       itemCount: profile.providers.length,
-      separatorBuilder: (BuildContext context, int index) => const Hairline(inset: TideSpace.page),
+      separatorBuilder: (BuildContext context, int index) =>
+          const Hairline(inset: TideSpace.page),
       itemBuilder: (BuildContext context, int index) {
         final ProviderInfo p = profile.providers[index];
         return ListTile(
@@ -279,7 +286,8 @@ class _ProvidersTab extends StatelessWidget {
             '${p.behavior} · ${p.count} 条 · ${relativeTime(p.updatedAt)}更新',
             style: text.bodySmall,
           ),
-          trailing: Icon(Icons.refresh, size: 18, color: context.colors.inkTertiary),
+          trailing:
+              Icon(Icons.refresh, size: 18, color: context.colors.inkTertiary),
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('演示模式：真实更新会调用 PUT /providers/rules/${p.name}')),
