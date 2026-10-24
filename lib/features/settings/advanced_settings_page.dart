@@ -4,7 +4,6 @@ import '../../core/display_mode_service.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
-import 'advanced_settings_page.dart';
 
 class AdvancedSettingsPage extends StatefulWidget {
   const AdvancedSettingsPage({super.key});
@@ -61,7 +60,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
         padding: const EdgeInsets.only(bottom: 40),
         children: <Widget>[
           const SizedBox(height: 8),
-          _SectionTitle(title: '主色调'),
+          const _SectionTitle(title: '主色调'),
           _Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,12 +72,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                     for (final TideAccent preset in TideAccent.values)
                       _PresetDot(
                         preset: preset,
-                        selected: settings.accentColor ==
-                                AppTheme.resolveAccent(
-                                  preset.seed,
-                                  Theme.of(context).brightness,
-                                ) ||
-                            settings.accent == preset,
+                        selected: settings.accent == preset,
                         onTap: () {
                           settings.setAccent(preset);
                           _hexCtrl.text = settings.accentHex;
@@ -129,13 +123,13 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               ],
             ),
           ),
-          _SectionTitle(title: '屏幕刷新率'),
+          const _SectionTitle(title: '屏幕刷新率'),
           _Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 DropdownButtonFormField<int>(
-                  initialValue: settings.refreshRate,
+                  value: settings.refreshRate,
                   decoration: const InputDecoration(
                     labelText: '目标帧率',
                     border: OutlineInputBorder(),
