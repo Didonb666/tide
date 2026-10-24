@@ -56,12 +56,11 @@ class Profile {
   final String name;
   final ProfileSource source;
 
-  /// 用户导入的原始 Clash.Meta YAML。
-  /// 第二阶段会原样交给 mihomo 解析（不落盘、不改写），所以必须保存原文。
-  /// 为空表示"演示数据"，不能用于真正连接。
+  /// 用户导入的原始 Clash.Meta YAML（内置配置也放这里）。
+  /// 连接时原样交给 mihomo 解析，不落盘、不改写。
   final String rawYaml;
 
-  /// 规则条数。演示数据是写死的；导入的是粗略估算（真实值由内核解析给出）。
+  /// 规则条数。展示用；真实值由内核解析给出。
   final int ruleCount;
   final DateTime updatedAt;
   final String groupSummary;
@@ -104,7 +103,6 @@ class LogEntry {
 }
 
 /// 粗略估算 YAML 里的规则条数，**仅用于导入后的 UI 反馈**。
-/// 真实条数必须由内核解析后通过 API 给出（见 docs/PHASE2_CORE.md）。
 int estimateRuleCount(String yaml) {
   var count = 0;
   var inRules = false;
@@ -117,7 +115,6 @@ int estimateRuleCount(String yaml) {
     final bool topLevel = !line.startsWith(' ') && !line.startsWith('\t');
     if (topLevel) {
       inRules = trimmed.startsWith('rules:');
-      // 兼容单行 JSON / flow 风格：rules: ["A,B", "C,D"]
       if (inRules && trimmed.contains('[')) {
         count += ','.allMatches(trimmed).length + 1;
       }
@@ -130,17 +127,62 @@ int estimateRuleCount(String yaml) {
   return count;
 }
 
-/// 内置的"直连测试"配置。
+/// 内置「专线」配置：VLESS + Reality。
 ///
-/// 它不包含任何代理节点，`MATCH,DIRECT` 让所有流量走直连。
-/// 用途：在不导入真实订阅的情况下，验证「TUN 建立 + 内核启动 + DNS 劫持」是否工作。
-/// 如果能连上并且网页能打开，说明第二阶段的基础设施是通的。
+/// 关键点：
+///   - find-process-mode: off —— 避免内核读取 /data/system/packages.xml（无权限）；
+///   - dns.enable: true —— TUN 的 DNS 劫持需要内核 DNS 模块开启，否则域名解析会失败；
+///   - MATCH,PROXY —— 所有流量走这个节点，够用且可预测。
+const String kBuiltinVlessConfig = '''
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: true
+find-process-mode: off
+
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: normal
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+proxies:
+  - name: "内置节点-Geto"
+    type: vless
+    server: 154.201.90.47
+    port: 17434
+    uuid: bbf62abe-4bb2-4105-b08d-4df6a5b844fd
+    network: tcp
+    udp: true
+    tls: true
+    flow: xtls-rprx-vision
+    servername: www.amd.com
+    client-fingerprint: chrome
+    reality-opts:
+      public-key: XrSuwj3iTnXIdfLGKnM9dH00b2nvt64x8ZCUPouwzi0
+      short-id: e47fc3fc
+
+proxy-groups:
+  - name: "PROXY"
+    type: select
+    proxies:
+      - "内置节点-Geto"
+
+rules:
+  - MATCH,PROXY
+''';
+
+/// 内置的"直连测试"配置：不经过任何代理，用来验证 TUN / DNS 是否工作。
 const String kSampleDirectConfig = '''
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
 ipv6: true
+find-process-mode: off
 
 dns:
   enable: true
@@ -161,6 +203,26 @@ List<Profile> buildMockProfiles() {
   final DateTime now = DateTime.now();
 
   return <Profile>[
+    // 第一个就是默认激活项（AppController 会把 profiles.first 设为当前配置）
+    Profile(
+      id: 'p-builtin',
+      name: '内置专线',
+      source: ProfileSource.paste,
+      rawYaml: kBuiltinVlessConfig,
+      ruleCount: 1,
+      updatedAt: now,
+      groupSummary: 'PROXY · 内置节点-Geto',
+      groups: const <GroupInfo>[
+        GroupInfo(
+          name: 'PROXY',
+          kind: 'select',
+          now: '内置节点-Geto',
+          nodes: <String>['内置节点-Geto'],
+        ),
+      ],
+      rules: const <String>['MATCH,PROXY'],
+      providers: const <ProviderInfo>[],
+    ),
     Profile(
       id: 'p-direct',
       name: '直连测试（内置）',
@@ -273,4 +335,5 @@ List<Profile> buildMockProfiles() {
       valid: false,
     ),
   ];
+}
 }
