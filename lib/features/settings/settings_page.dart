@@ -5,6 +5,7 @@ import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import 'advanced_settings_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
