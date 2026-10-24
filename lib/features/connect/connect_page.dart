@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
+import '../../core/page_transitions.dart';
 import '../../core/profile.dart';
 import '../../core/tunnel/tunnel_state.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 import '../profiles/profile_detail_page.dart';
 
-/// 连接首页：状态头 + 当前配置 + 卡片式配置列表。
 class ConnectPage extends StatelessWidget {
   const ConnectPage({super.key});
 
@@ -54,8 +54,8 @@ class ConnectPage extends StatelessWidget {
 
   void _openDetail(BuildContext context, Profile profile) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => ProfileDetailPage(
+      tideRoute<void>(
+        ProfileDetailPage(
           profile: profile,
           heroTag: 'hero-connect-${profile.id}',
         ),
@@ -186,7 +186,11 @@ class _HeroCard extends StatelessWidget {
             const SizedBox(height: TideSpace.x3),
             Row(
               children: <Widget>[
-                Icon(Icons.info_outline_rounded, size: 14, color: colors.inkTertiary),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 14,
+                  color: colors.inkTertiary,
+                ),
                 const SizedBox(width: 6),
                 Expanded(child: Text(message, style: text.labelSmall)),
               ],
