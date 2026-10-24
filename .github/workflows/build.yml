@@ -65,7 +65,7 @@ jobs:
           # 而我们根本不会编译测试，所以用 -e 忽略这类加载错误即可。
           go mod tidy -e || echo "::warning::tidy 报告了非致命错误，继续构建"
           go list -m github.com/metacubex/mihomo
-          
+
       - name: 6. 编译 core.aar
         working-directory: native/corebridge
         env:
@@ -187,6 +187,7 @@ jobs:
       - name: 6. 编译 Release EXE
         shell: pwsh
         run: |
+          # 把完整输出同时写进日志文件，失败时打印末尾并上传，避免"只看到 Build process failed"
           flutter build windows --release 2>&1 | Tee-Object -FilePath windows-build.log
           $code = $LASTEXITCODE
           if ($code -ne 0) {
@@ -205,7 +206,7 @@ jobs:
           path: windows-build.log
           if-no-files-found: warn
           retention-days: 7
-          
+
       - name: 7. 收集产物（exe 必须带着同目录的 dll 和 data 才能运行）
         shell: pwsh
         run: |
