@@ -47,8 +47,20 @@ enum TideAccent {
       brightness == Brightness.light ? _lightSoft : _darkSoft;
 }
 
-/// 在现有 TideTheme 上替换主色，并让 Scaffold 透明以露出全局背景层。
+/// 在 TideTheme 上替换主色，并把 surface 做半透明，让全局背景透出来。
 abstract final class AppTheme {
+  /// 卡片 / 导航 / Tab 栏的底色透明度：越小越透。
+  static const double darkSurfaceAlpha = 0.74;
+  static const double lightSurfaceAlpha = 0.88;
+
+  /// 卡片内次级底色（状态胶囊、输入框）的透明度。
+  static const double darkMutedAlpha = 0.55;
+  static const double lightMutedAlpha = 0.66;
+
+  /// 底部弹窗要保持可读，所以接近不透明。
+  static const double darkSheetAlpha = 0.96;
+  static const double lightSheetAlpha = 0.98;
+
   static ThemeData light(TideAccent accent) =>
       _apply(TideTheme.light(), accent, Brightness.light);
 
@@ -60,14 +72,31 @@ abstract final class AppTheme {
     TideAccent accent,
     Brightness brightness,
   ) {
-    final TideColors colors = base.extension<TideColors>()!.copyWith(
+    final bool isDark = brightness == Brightness.dark;
+
+    final TideColors baseColors = base.extension<TideColors>()!;
+
+    final TideColors colors = baseColors.copyWith(
       accent: accent.accentFor(brightness),
       accentSoft: accent.softFor(brightness),
+      // 关键：把实底换成半透明底，背景就能透过所有用 surface 的控件。
+      surface: baseColors.surface.withOpacity(
+        isDark ? darkSurfaceAlpha : lightSurfaceAlpha,
+      ),
+      surfaceMuted: baseColors.surfaceMuted.withOpacity(
+        isDark ? darkMutedAlpha : lightMutedAlpha,
+      ),
+    );
+
+    final Color sheetColor = baseColors.surface.withOpacity(
+      isDark ? darkSheetAlpha : lightSheetAlpha,
     );
 
     return base.copyWith(
+      // 页面本身透明，背景层才看得到。
       scaffoldBackgroundColor: Colors.transparent,
       extensions: <ThemeExtension<dynamic>>[colors],
+      // 注意：colorScheme 仍用不透明色，避免 Dialog / 菜单变半透明导致文字看不清。
       colorScheme: base.colorScheme.copyWith(
         primary: colors.accent,
         secondary: colors.accent,
@@ -75,6 +104,17 @@ abstract final class AppTheme {
       ),
       appBarTheme: base.appBarTheme.copyWith(
         backgroundColor: Colors.transparent,
+      ),
+      bottomSheetTheme: base.bottomSheetTheme.copyWith(
+        backgroundColor: sheetColor,
+        modalBackgroundColor: sheetColor,
+      ),
+      // surface 变半透明后，SnackBar 不能用它当文字色，改成固定浅色。
+      snackBarTheme: base.snackBarTheme.copyWith(
+        contentTextStyle: TideType.body.copyWith(
+          color: const Color(0xFFF3F7FB),
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
