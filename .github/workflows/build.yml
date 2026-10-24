@@ -58,13 +58,25 @@ jobs:
         run: |
           go version
           echo "NDK: $ANDROID_NDK_HOME"
+
+          # 新版 gomobile 要求 golang.org/x/mobile 必须在当前模块的依赖图里，
+          # go.mod 已通过 require + tool 指令声明了固定版本。
+          # 万一该版本在 module proxy 上解析不到，就退回 @latest 自动修复。
+          if ! go mod download golang.org/x/mobile; then
+            echo "::warning::固定的 golang.org/x/mobile 版本不可用，改用 @latest 自动修复"
+            go get -tool golang.org/x/mobile/cmd/gobind@latest
+          fi
+
           go mod download
-          # 不能用 `go mod tidy`：它会连"依赖的测试代码"一起分析。
-          # mihomo 的测试依赖链里引用了 golang.org/x/mobile 的一个不存在的版本
-          # (v0.0.0-20240521023034-2b3dfe58d219 -> unknown revision)，
-          # 而我们根本不会编译测试，所以用 -e 忽略这类加载错误即可。
+
+          # 不能用严格的 `go mod tidy`：它会连"依赖的测试代码"一起分析，
+          # 而 mihomo 的测试依赖链里引用了 golang.org/x/mobile 的一个不存在的版本
+          # (v0.0.0-20240521023034-2b3dfe58d219 -> unknown revision)。
+          # 我们根本不编译测试，所以用 -e 忽略这类加载错误即可。
           go mod tidy -e || echo "::warning::tidy 报告了非致命错误，继续构建"
-          go list -m github.com/metacubex/mihomo
+
+          echo "--- 关键模块版本 ---"
+          go list -m github.com/metacubex/mihomo golang.org/x/mobile
 
       - name: 6. 编译 core.aar
         working-directory: native/corebridge
