@@ -4,6 +4,7 @@ import '../../core/display_mode_service.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
+import 'custom_accent_tile.dart';
 
 class AdvancedSettingsPage extends StatefulWidget {
   const AdvancedSettingsPage({super.key});
