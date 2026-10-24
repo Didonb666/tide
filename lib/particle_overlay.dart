@@ -114,11 +114,12 @@ class _ParticlePainter extends CustomPainter {
     for (final _Particle p in particles) {
       final double progress = (p.offset + t * p.speed) % 1.0;
       final double y = progress * (size.height + 40) - 20;
-      final double x =
-          p.x * size.width + math.sin(t * math.pi * 2 + p.phase) * p.drift * size.width;
+      final double x = p.x * size.width +
+          math.sin(t * math.pi * 2 + p.phase) * p.drift * size.width;
       final double fade = math.sin(progress * math.pi).clamp(0.0, 1.0);
 
-      paint.color = Color.lerp(dim, color, 0.45)!.withOpacity(0.10 + 0.16 * fade);
+      paint.color =
+          Color.lerp(dim, color, 0.45)!.withOpacity(0.10 + 0.16 * fade);
       canvas.drawCircle(Offset(x, y), p.size, paint);
     }
   }
