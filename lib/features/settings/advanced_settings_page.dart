@@ -4,6 +4,7 @@ import '../../core/display_mode_service.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
+import 'advanced_settings_page.dart';
 
 class AdvancedSettingsPage extends StatefulWidget {
   const AdvancedSettingsPage({super.key});
