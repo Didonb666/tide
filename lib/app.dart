@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/app_controller.dart';
 import 'core/app_scope.dart';
+import 'core/background_controller.dart';
 import 'core/settings_controller.dart';
 import 'design/app_theme.dart';
 import 'design/tokens.dart';
@@ -9,6 +10,7 @@ import 'features/connect/connect_page.dart';
 import 'features/logs/logs_page.dart';
 import 'features/profiles/profiles_page.dart';
 import 'features/settings/settings_page.dart';
+import 'widgets/aurora_background.dart';
 import 'widgets/common.dart';
 
 class TideApp extends StatelessWidget {
@@ -16,10 +18,12 @@ class TideApp extends StatelessWidget {
     super.key,
     required this.controller,
     required this.settings,
+    required this.background,
   });
 
   final AppController controller;
   final SettingsController settings;
+  final BackgroundController background;
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +31,29 @@ class TideApp extends StatelessWidget {
       controller: controller,
       child: SettingsScope(
         controller: settings,
-        child: AnimatedBuilder(
-          animation: settings,
-          builder: (BuildContext context, Widget? child) {
-            return MaterialApp(
-              title: 'Fstool',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light(settings.accent),
-              darkTheme: AppTheme.dark(settings.accent),
-              themeMode: settings.themeMode,
-              home: const HomeShell(),
-            );
-          },
+        child: BackgroundScope(
+          controller: background,
+          child: AnimatedBuilder(
+            animation: settings,
+            builder: (BuildContext context, Widget? child) {
+              return MaterialApp(
+                title: 'Fstool',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light(settings.accent),
+                darkTheme: AppTheme.dark(settings.accent),
+                themeMode: settings.themeMode,
+                builder: (BuildContext context, Widget? child) {
+                  return Stack(
+                    children: <Widget>[
+                      const AppBackgroundHost(),
+                      if (child != null) child,
+                    ],
+                  );
+                },
+                home: const HomeShell(),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -91,7 +106,7 @@ class _HomeShellState extends State<HomeShell> {
 
     return Scaffold(
       extendBody: true,
-      backgroundColor: context.colors.canvas,
+      backgroundColor: Colors.transparent,
       body: AnimatedSwitcher(
         duration: duration,
         switchInCurve: TideMotion.standard,
