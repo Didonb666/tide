@@ -1,0 +1,7 @@
+# 分析器配置。
+# CI 只负责编译，不跑 `flutter analyze`，所以这里保持最小化：
+# 只把参考实现（docs/reference，里面是仅 Android 可用的旧代码）排除在分析之外。
+analyzer:
+  exclude:
+    - docs/**
+    - build/**
