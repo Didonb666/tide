@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/background_controller.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
@@ -8,12 +9,44 @@ import '../../widgets/common.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
+  Future<void> _pickImage(BuildContext context) async {
+    final BackgroundController bg = BackgroundScope.of(context);
+    try {
+      await bg.pickImage();
+      if (context.mounted) _toast(context, '背景已更换');
+    } catch (error) {
+      if (context.mounted) _toast(context, '选择图片失败：$error');
+    }
+  }
+
+  Future<void> _pickVideo(BuildContext context) async {
+    final BackgroundController bg = BackgroundScope.of(context);
+    try {
+      await bg.pickVideo();
+      if (context.mounted) _toast(context, '视频背景已更换');
+    } catch (error) {
+      if (context.mounted) _toast(context, '选择视频失败：$error');
+    }
+  }
+
+  void _toast(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  String _shortPath(String? path) {
+    if (path == null || path.isEmpty) return '默认极光';
+    final List<String> parts = path.split(RegExp(r'[/\\]'));
+    return parts.isEmpty ? path : parts.last;
+  }
+
   @override
   Widget build(BuildContext context) {
     final SettingsController s = SettingsScope.of(context);
+    final BackgroundController bg = BackgroundScope.of(context);
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
-    final bool dark = context.isDark;
 
     return SafeArea(
       bottom: false,
@@ -70,6 +103,81 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
+          const SectionHeader(title: '背景设置'),
+          _GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      bg.isVideo ? Icons.movie_rounded : Icons.image_rounded,
+                      size: 16,
+                      color: colors.accent,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        bg.hasCustom ? '自定义背景：${_shortPath(bg.mediaPath)}' : '默认极光背景',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall,
+                      ),
+                    ),
+                    if (bg.hasCustom)
+                      TextButton(
+                        onPressed: bg.clearMedia,
+                        child: const Text('恢复默认'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: TideSpace.x3),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: _ActionButton(
+                        icon: Icons.image_outlined,
+                        label: '选择图片',
+                        onTap: () => _pickImage(context),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ActionButton(
+                        icon: Icons.movie_outlined,
+                        label: '选择视频',
+                        onTap: () => _pickVideo(context),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: TideSpace.x4),
+                _SliderRow(
+                  label: '背景透明度',
+                  value: bg.opacity,
+                  max: 1,
+                  divisions: 20,
+                  display: (double v) => '${(v * 100).round()}%',
+                  onChanged: (double v) => bg.setOpacity(v, save: false),
+                  onChangeEnd: (double v) => bg.setOpacity(v, save: true),
+                ),
+                _SliderRow(
+                  label: '背景模糊度',
+                  value: bg.blur,
+                  max: 30,
+                  divisions: 30,
+                  display: (double v) => '${v.round()}',
+                  onChanged: (double v) => bg.setBlur(v, save: false),
+                  onChangeEnd: (double v) => bg.setBlur(v, save: true),
+                ),
+                const SizedBox(height: TideSpace.x2),
+                Text(
+                  '提示：视频背景会自动循环、静音播放；切到后台时自动暂停。模糊度过高会占用较多 GPU。',
+                  style: text.labelSmall,
+                ),
+              ],
+            ),
+          ),
           const SectionHeader(title: '行为'),
           _GlassCard(
             padding: EdgeInsets.zero,
@@ -122,10 +230,7 @@ class SettingsPage extends StatelessWidget {
           const SizedBox(height: TideSpace.x6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
-            child: Text(
-              dark ? 'Fstool · 内核：mihomo' : 'Fstool · 内核：mihomo',
-              style: text.labelSmall,
-            ),
+            child: Text('Fstool · 内核：mihomo', style: text.labelSmall),
           ),
         ],
       ),
@@ -279,6 +384,81 @@ class _AccentDot extends StatelessWidget {
           style: TideType.caption.copyWith(
             color: selected ? colors.ink : colors.inkTertiary,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors.accent,
+        side: BorderSide(color: colors.accent.withOpacity(0.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(TideRadii.md)),
+      ),
+    );
+  }
+}
+
+class _SliderRow extends StatelessWidget {
+  const _SliderRow({
+    required this.label,
+    required this.value,
+    required this.max,
+    required this.divisions,
+    required this.display,
+    required this.onChanged,
+    required this.onChangeEnd,
+  });
+
+  final String label;
+  final double value;
+  final double max;
+  final int divisions;
+  final String Function(double) display;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeEnd;
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+    final TextTheme text = Theme.of(context).textTheme;
+
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Text(label, style: text.bodySmall),
+            const Spacer(),
+            Text(display(value), style: TideType.mono.copyWith(color: colors.accent)),
+          ],
+        ),
+        Slider(
+          value: value.clamp(0.0, max),
+          max: max,
+          divisions: divisions,
+          activeColor: colors.accent,
+          inactiveColor: colors.surfaceMuted,
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
         ),
       ],
     );
