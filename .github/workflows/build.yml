@@ -1,9 +1,10 @@
 name: Build APK & EXE
 
-# 三个 Job：
-#   core    —— 用 Go + gomobile 把 mihomo 编成 Android 用的 core.aar（约 15~25 分钟）
-#   android —— 下载 core.aar，接进 APK（依赖 core）
-#   windows —— 独立编 Windows 版本，不受 core 影响
+# 四个 Job：
+#   dart-check —— 只编译 Dart（约 1~2 分钟），语法错误在这里就暴露，不用等内核
+#   core       —— 用 Go + gomobile 把 mihomo 编成 Android 用的 core.aar（约 15~25 分钟）
+#   android    —— 下载 core.aar，接进 APK
+#   windows    —— 独立编 Windows 版本
 on:
   push:
     branches: [main, master]
@@ -19,10 +20,35 @@ permissions:
 
 jobs:
   # ---------------------------------------------------------------------------
+  # Job 0：Dart 预检（最快失败）
+  # ---------------------------------------------------------------------------
+  dart-check:
+    name: Dart 语法预检（约 2 分钟）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 1. 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 2. 安装 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 3. 拉取 Dart 依赖
+        run: flutter pub get
+
+      - name: 4. 只编译 Dart（不碰 Android / Windows 原生）
+        run: flutter build bundle --release
+
+  # ---------------------------------------------------------------------------
   # Job 1：编译 mihomo 内核
   # ---------------------------------------------------------------------------
   core:
     name: 编译 mihomo 内核（AAR）
+    needs: dart-check
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -82,26 +108,17 @@ jobs:
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
           ANDROID_NDK_ROOT: ${{ steps.ndk.outputs.ndk-path }}
-          # 允许 go 在构建时自动补全 go.mod / go.sum
           GOFLAGS: -mod=mod
         run: |
           go version
           echo "NDK: $ANDROID_NDK_HOME"
 
-          # 新版 gomobile 要求 golang.org/x/mobile 必须在当前模块的依赖图里，
-          # go.mod 已通过 require + tool 指令声明了固定版本。
-          # 万一该版本在 module proxy 上解析不到，就退回 @latest 自动修复。
           if ! go mod download golang.org/x/mobile; then
             echo "::warning::固定的 golang.org/x/mobile 版本不可用，改用 @latest 自动修复"
             go get -tool golang.org/x/mobile/cmd/gobind@latest
           fi
 
           go mod download
-
-          # 不能用严格的 `go mod tidy`：它会连"依赖的测试代码"一起分析，
-          # 而 mihomo 的测试依赖链里引用了 golang.org/x/mobile 的一个不存在的版本
-          # (v0.0.0-20240521023034-2b3dfe58d219 -> unknown revision)。
-          # 我们根本不编译测试，所以用 -e 忽略这类加载错误即可。
           go mod tidy -e || echo "::warning::tidy 报告了非致命错误，继续构建"
 
           echo "--- 关键模块版本 ---"
@@ -115,10 +132,7 @@ jobs:
           GOFLAGS: -mod=mod
         run: |
           gomobile init
-          # 注意：-javapkg 是"包前缀"，不是完整包名。
-          # gomobile 会生成 <前缀>.<Go包名>.<类名>，
-          # 即 com.tide + core + Core = com.tide.core.Core，
-          # 与 Kotlin 里的 import com.tide.core.Core 对应。
+          # -javapkg 是"包前缀"：com.tide + core + Core = com.tide.core.Core
           gomobile bind \
             -target=android/arm64 \
             -androidapi 26 \
@@ -137,11 +151,11 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
-  # Job 2：Android APK（需要 Job 1 的 AAR）
+  # Job 2：Android APK
   # ---------------------------------------------------------------------------
   android:
     name: 构建 Android APK
-    needs: core
+    needs: [dart-check, core]
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -192,12 +206,12 @@ jobs:
           set -o pipefail
           flutter build apk --release 2>&1 | tee android-build.log
 
-      - name: 9b. 失败时提取编译错误
+      - name: 9b. 失败时提取 Dart / Kotlin 错误
         if: failure()
         run: |
-          echo "================ Kotlin / Dart 编译错误 ================"
-          grep -E "^e: |^error:|Error:" android-build.log | head -n 80 || true
-          echo "======================================================="
+          echo "================ 编译错误 ================"
+          grep -E "\.dart:[0-9]+:[0-9]+|^e: |^error:|Error:" android-build.log | head -n 80 || true
+          echo "=========================================="
 
       - name: 9c. 失败时上传完整构建日志
         if: failure()
@@ -224,6 +238,7 @@ jobs:
   # ---------------------------------------------------------------------------
   windows:
     name: 构建 Windows EXE
+    needs: dart-check
     runs-on: windows-latest
     timeout-minutes: 45
 
