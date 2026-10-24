@@ -42,6 +42,7 @@ class Profile {
     required this.id,
     required this.name,
     required this.source,
+    this.rawYaml = '',
     required this.ruleCount,
     required this.updatedAt,
     required this.groupSummary,
@@ -54,6 +55,11 @@ class Profile {
   final String id;
   final String name;
   final ProfileSource source;
+
+  /// 用户导入的原始 Clash.Meta YAML。
+  /// 第二阶段会原样交给 mihomo 解析（不落盘、不改写），所以必须保存原文。
+  /// 为空表示"演示数据"，不能用于真正连接。
+  final String rawYaml;
 
   /// 规则条数。演示数据是写死的；导入的是粗略估算（真实值由内核解析给出）。
   final int ruleCount;
@@ -124,10 +130,49 @@ int estimateRuleCount(String yaml) {
   return count;
 }
 
+/// 内置的"直连测试"配置。
+///
+/// 它不包含任何代理节点，`MATCH,DIRECT` 让所有流量走直连。
+/// 用途：在不导入真实订阅的情况下，验证「TUN 建立 + 内核启动 + DNS 劫持」是否工作。
+/// 如果能连上并且网页能打开，说明第二阶段的基础设施是通的。
+const String kSampleDirectConfig = '''
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: true
+
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: normal
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+proxies: []
+proxy-groups: []
+
+rules:
+  - MATCH,DIRECT
+''';
+
 List<Profile> buildMockProfiles() {
   final DateTime now = DateTime.now();
 
   return <Profile>[
+    Profile(
+      id: 'p-direct',
+      name: '直连测试（内置）',
+      source: ProfileSource.paste,
+      rawYaml: kSampleDirectConfig,
+      ruleCount: 1,
+      updatedAt: now,
+      groupSummary: 'MATCH · DIRECT（用于验证内核是否跑通）',
+      groups: const <GroupInfo>[],
+      rules: const <String>['MATCH,DIRECT'],
+      providers: const <ProviderInfo>[],
+    ),
     Profile(
       id: 'p-main',
       name: '主订阅 · 机场 A',

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -94,18 +96,48 @@ class AppController extends ChangeNotifier {
       return;
     }
 
-    final String profileId =
-        activeProfileId ?? (profiles.isEmpty ? 'default' : profiles.first.id);
+    final Profile? profile = activeProfile;
+    if (profile == null) {
+      _fail('还没有选择配置');
+      return;
+    }
+    if (profile.rawYaml.trim().isEmpty) {
+      _fail('「${profile.name}」是演示数据，没有可用的 YAML。请到「配置」页导入真实订阅，或先选「直连测试（内置）」验证内核。');
+      return;
+    }
+
+    // 每次连接都换一把钥匙：secret 随机、端口随机，停止即作废。
+    final String secret = _randomSecret();
+    final int port = 20000 + Random.secure().nextInt(20000);
+
     try {
-      await _platform.connect(profileId);
+      await _platform.connect(
+        profile.id,
+        profile.rawYaml,
+        secret: secret,
+        port: port,
+        ipv6: true,
+      );
       _startLogs();
     } catch (error) {
-      tunnelState = tunnelState.copyWith(
-        phase: TunnelPhase.failed,
-        message: '操作失败：$error',
-      );
-      notifyListeners();
+      _fail('操作失败：$error');
     }
+  }
+
+  void _fail(String message) {
+    tunnelState = tunnelState.copyWith(
+      phase: TunnelPhase.failed,
+      message: message,
+    );
+    notifyListeners();
+  }
+
+  /// 32 字节随机密钥，base64url 后去掉填充，避免在 URL/日志里出现特殊字符。
+  String _randomSecret() {
+    final Random random = Random.secure();
+    final List<int> bytes =
+        List<int>.generate(32, (_) => random.nextInt(256));
+    return base64UrlEncode(bytes).replaceAll('=', '');
   }
 
   void selectProfile(String id) {
@@ -124,9 +156,10 @@ class AppController extends ChangeNotifier {
       id: 'p-${DateTime.now().millisecondsSinceEpoch}',
       name: title,
       source: ProfileSource.paste,
+      rawYaml: yaml,
       ruleCount: rules,
       updatedAt: DateTime.now(),
-      groupSummary: rules == 0 ? '未发现 rules 段' : '已保存原文，等待内核解析策略组',
+      groupSummary: rules == 0 ? '未发现 rules 段' : '已保存原文，连接时交给内核解析',
       groups: const <GroupInfo>[],
       rules: const <String>[],
       providers: const <ProviderInfo>[],

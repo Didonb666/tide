@@ -33,7 +33,13 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
   }
 
   @override
-  Future<void> connect(String profileId) async {
+  Future<void> connect(
+    String profileId,
+    String configYaml, {
+    required String secret,
+    required int port,
+    bool ipv6 = true,
+  }) async {
     if (_state.isConnected || _state.isBusy) return;
 
     _emit(_state.copyWith(
@@ -47,7 +53,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
 
     _emit(_state.copyWith(
       phase: TunnelPhase.connected,
-      message: '已连接（演示模式，未接入内核）',
+      message: '已连接（桌面演示模式，未启动内核）',
     ));
     _startTraffic();
   }

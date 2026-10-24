@@ -48,11 +48,23 @@ class MethodChannelTunnelPlatform implements TunnelPlatform {
   }
 
   @override
-  Future<void> connect(String profileId) async {
+  Future<void> connect(
+    String profileId,
+    String configYaml, {
+    required String secret,
+    required int port,
+    bool ipv6 = true,
+  }) async {
     try {
       await _methods.invokeMethod<void>(
         'connect',
-        <String, Object?>{'profileId': profileId},
+        <String, Object?>{
+          'profileId': profileId,
+          'config': configYaml,
+          'secret': secret,
+          'port': port,
+          'ipv6': ipv6,
+        },
       );
     } on MissingPluginException {
       // 桌面端没有原生实现：交给上层降级处理。

@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  说明：
-  1. 这个文件会被保留（`flutter create` 不会覆盖已存在的文件）。
-  2. 第一阶段**不声明** VpnService —— APK 里只有 UI 与原生通道演示，
-     不会接管手机流量，装到手机上不会影响正常上网。
-  3. 第二阶段接入 mihomo 时，才把 service 声明加回来，
-     参考 docs/reference/android/AndroidManifest.reference.xml。
+  第二阶段：接入 mihomo 内核。
+  相比第一阶段多了：
+    - VPN 前台服务声明（BIND_VPN_SERVICE + specialUse）
+    - 通知权限（Android 13+）
+    - FOREGROUND_SERVICE_SPECIAL_USE（Android 14+）
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="Tide"
@@ -35,6 +37,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- VPN 服务：类型必须是 specialUse（Android 14+ 的硬性要求） -->
+        <service
+            android:name=".TunnelService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="specialUse">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="vpn" />
+        </service>
 
         <meta-data
             android:name="flutterEmbedding"

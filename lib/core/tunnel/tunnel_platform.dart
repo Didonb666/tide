@@ -12,7 +12,18 @@ abstract class TunnelPlatform {
   /// 主动拉一次当前状态（用于首帧，避免等事件）。
   Future<TunnelState> readState();
 
-  Future<void> connect(String profileId);
+  /// 启动隧道。
+  ///
+  /// - [configYaml]：用户导入的原始 Clash.Meta 配置，原样交给内核解析；
+  /// - [secret]：本次会话随机生成的 32 字节密钥，用于保护本机 REST API；
+  /// - [port]：本机 REST API 端口，每次连接随机。
+  Future<void> connect(
+    String profileId,
+    String configYaml, {
+    required String secret,
+    required int port,
+    bool ipv6 = true,
+  });
 
   Future<void> disconnect();
 
