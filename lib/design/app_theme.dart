@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'tokens.dart';
 
-/// 主色调预设。
+/// 预设主色。seed 用于任意颜色计算，*Accent 用于预设圆点展示。
 enum TideAccent {
   green(
     '极客绿',
@@ -19,11 +19,25 @@ enum TideAccent {
     Color(0xFF0D2440),
   ),
   purple(
-    '暗夜紫',
+    '赛博紫',
     Color(0xFF7C5CFF),
     Color(0xFFA98BFF),
     Color(0xFFEFEAFF),
     Color(0xFF1B1433),
+  ),
+  orange(
+    '落日橙',
+    Color(0xFFF2700A),
+    Color(0xFFFFA45C),
+    Color(0xFFFFF0E2),
+    Color(0xFF3A2008),
+  ),
+  rose(
+    '霓虹玫红',
+    Color(0xFFE0356B),
+    Color(0xFFFF7BA8),
+    Color(0xFFFFE8EF),
+    Color(0xFF3A0F1D),
   );
 
   const TideAccent(
@@ -40,6 +54,9 @@ enum TideAccent {
   final Color _lightSoft;
   final Color _darkSoft;
 
+  /// 统一用"浅色版"作为种子，深色模式由 AppTheme 自动提亮。
+  Color get seed => _lightAccent;
+
   Color accentFor(Brightness brightness) =>
       brightness == Brightness.light ? _lightAccent : _darkAccent;
 
@@ -47,39 +64,45 @@ enum TideAccent {
       brightness == Brightness.light ? _lightSoft : _darkSoft;
 }
 
-/// 在 TideTheme 上替换主色，并把 surface 做半透明，让全局背景透出来。
 abstract final class AppTheme {
-  /// 卡片 / 导航 / Tab 栏的底色透明度：越小越透。
   static const double darkSurfaceAlpha = 0.74;
   static const double lightSurfaceAlpha = 0.88;
-
-  /// 卡片内次级底色（状态胶囊、输入框）的透明度。
   static const double darkMutedAlpha = 0.55;
   static const double lightMutedAlpha = 0.66;
-
-  /// 底部弹窗要保持可读，所以接近不透明。
   static const double darkSheetAlpha = 0.96;
   static const double lightSheetAlpha = 0.98;
 
-  static ThemeData light(TideAccent accent) =>
-      _apply(TideTheme.light(), accent, Brightness.light);
+  static ThemeData light(Color seed) =>
+      _apply(TideTheme.light(), seed, Brightness.light);
 
-  static ThemeData dark(TideAccent accent) =>
-      _apply(TideTheme.dark(), accent, Brightness.dark);
+  static ThemeData dark(Color seed) =>
+      _apply(TideTheme.dark(), seed, Brightness.dark);
+
+  /// 深色模式下把用户给的颜色提亮，保证在暗背景上够醒目。
+  static Color resolveAccent(Color seed, Brightness brightness) {
+    if (brightness == Brightness.light) return seed;
+    final HSLColor hsl = HSLColor.fromColor(seed);
+    return hsl
+        .withLightness((hsl.lightness + 0.16).clamp(0.0, 0.92))
+        .withSaturation((hsl.saturation * 0.98).clamp(0.0, 1.0))
+        .toColor();
+  }
 
   static ThemeData _apply(
     ThemeData base,
-    TideAccent accent,
+    Color seed,
     Brightness brightness,
   ) {
     final bool isDark = brightness == Brightness.dark;
-
     final TideColors baseColors = base.extension<TideColors>()!;
+    final Color accent = resolveAccent(seed, brightness);
 
     final TideColors colors = baseColors.copyWith(
-      accent: accent.accentFor(brightness),
-      accentSoft: accent.softFor(brightness),
-      // 关键：把实底换成半透明底，背景就能透过所有用 surface 的控件。
+      accent: accent,
+      accentSoft: Color.alphaBlend(
+        accent.withOpacity(isDark ? 0.18 : 0.14),
+        baseColors.surface,
+      ),
       surface: baseColors.surface.withOpacity(
         isDark ? darkSurfaceAlpha : lightSurfaceAlpha,
       ),
@@ -93,10 +116,8 @@ abstract final class AppTheme {
     );
 
     return base.copyWith(
-      // 页面本身透明，背景层才看得到。
       scaffoldBackgroundColor: Colors.transparent,
       extensions: <ThemeExtension<dynamic>>[colors],
-      // 注意：colorScheme 仍用不透明色，避免 Dialog / 菜单变半透明导致文字看不清。
       colorScheme: base.colorScheme.copyWith(
         primary: colors.accent,
         secondary: colors.accent,
@@ -109,7 +130,6 @@ abstract final class AppTheme {
         backgroundColor: sheetColor,
         modalBackgroundColor: sheetColor,
       ),
-      // surface 变半透明后，SnackBar 不能用它当文字色，改成固定浅色。
       snackBarTheme: base.snackBarTheme.copyWith(
         contentTextStyle: TideType.body.copyWith(
           color: const Color(0xFFF3F7FB),
