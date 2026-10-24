@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'core/app_controller.dart';
 import 'core/app_scope.dart';
+import 'core/settings_controller.dart';
+import 'design/app_theme.dart';
 import 'design/tokens.dart';
 import 'features/connect/connect_page.dart';
 import 'features/logs/logs_page.dart';
@@ -10,26 +12,34 @@ import 'features/settings/settings_page.dart';
 import 'widgets/common.dart';
 
 class TideApp extends StatelessWidget {
-  const TideApp({super.key, required this.controller});
+  const TideApp({
+    super.key,
+    required this.controller,
+    required this.settings,
+  });
 
   final AppController controller;
+  final SettingsController settings;
 
   @override
   Widget build(BuildContext context) {
     return AppScope(
       controller: controller,
-      child: ValueListenableBuilder<ThemeMode>(
-        valueListenable: controller.themeMode,
-        builder: (BuildContext context, ThemeMode mode, Widget? child) {
-          return MaterialApp(
-            title: 'Fstool',
-            debugShowCheckedModeBanner: false,
-            theme: TideTheme.light(),
-            darkTheme: TideTheme.dark(),
-            themeMode: mode,
-            home: const HomeShell(),
-          );
-        },
+      child: SettingsScope(
+        controller: settings,
+        child: AnimatedBuilder(
+          animation: settings,
+          builder: (BuildContext context, Widget? child) {
+            return MaterialApp(
+              title: 'Fstool',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(settings.accent),
+              darkTheme: AppTheme.dark(settings.accent),
+              themeMode: settings.themeMode,
+              home: const HomeShell(),
+            );
+          },
+        ),
       ),
     );
   }
