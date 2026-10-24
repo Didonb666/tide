@@ -86,10 +86,15 @@ jobs:
           GOFLAGS: -mod=mod
         run: |
           gomobile init
+          # 注意：-javapkg 是"包前缀"，不是完整包名。
+          # gomobile 会生成 <前缀>.<Go包名>.<类名>，
+          # 即 com.tide + core + Core = com.tide.core.Core，
+          # 与 Kotlin 里的 import com.tide.core.Core 对应。
+          # 如果写成 com.tide.core，真实类名会变成 com.tide.core.core.Core，Kotlin 就找不到。
           gomobile bind \
             -target=android/arm64 \
             -androidapi 26 \
-            -javapkg com.tide.core \
+            -javapkg com.tide \
             -tags with_gvisor \
             -ldflags "-s -w -extldflags=-Wl,-z,max-page-size=16384" \
             -o core.aar .
@@ -156,7 +161,26 @@ jobs:
         run: flutter pub get
 
       - name: 9. 编译 Release APK
-        run: flutter build apk --release
+        shell: bash
+        run: |
+          set -o pipefail
+          flutter build apk --release 2>&1 | tee android-build.log
+
+      - name: 9b. 失败时提取编译错误
+        if: failure()
+        run: |
+          echo "================ Kotlin / Dart 编译错误 ================"
+          grep -E "^e: |^error:|Error:" android-build.log | head -n 80 || true
+          echo "======================================================="
+
+      - name: 9c. 失败时上传完整构建日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-log
+          path: android-build.log
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: 10. 显示产物信息
         run: ls -lh build/app/outputs/flutter-apk/
