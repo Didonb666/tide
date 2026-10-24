@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  第二阶段：接入 mihomo 内核。
-  相比第一阶段多了：
-    - VPN 前台服务声明（BIND_VPN_SERVICE + specialUse）
-    - 通知权限（Android 13+）
-    - FOREGROUND_SERVICE_SPECIAL_USE（Android 14+）
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,8 +8,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:label="Tide"
+        android:label="Fstool"
         android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="false">
 
         <activity
@@ -38,7 +32,6 @@
             </intent-filter>
         </activity>
 
-        <!-- VPN 服务：类型必须是 specialUse（Android 14+ 的硬性要求） -->
         <service
             android:name=".TunnelService"
             android:exported="false"
