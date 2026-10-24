@@ -103,6 +103,14 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
+          ListTile(
+  title: const Text('高级设置'),
+  subtitle: const Text('调色板 / Hex 主色 / 屏幕帧率'),
+  trailing: const Icon(Icons.chevron_right_rounded),
+  onTap: () => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => const AdvancedSettingsPage()),
+  ),
+),
           const SectionHeader(title: '背景设置'),
           _GlassCard(
             child: Column(
