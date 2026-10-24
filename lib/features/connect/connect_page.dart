@@ -7,7 +7,7 @@ import '../../core/page_transitions.dart';
 import '../../core/profile.dart';
 import '../../core/tunnel/tunnel_state.dart';
 import '../../design/tokens.dart';
-import '../../widgets/common.dart';
+import '../../widgets/common.dart' hide AnimatedNumber;
 import '../../widgets/fx.dart';
 import '../profiles/profile_detail_page.dart';
 
