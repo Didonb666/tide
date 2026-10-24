@@ -1,10 +1,16 @@
+import 'dart:async';
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../core/profile.dart';
 import '../core/tunnel/tunnel_state.dart';
 import '../design/tokens.dart';
 
-/// 26 字节/秒 -> "1.2 MB/s"
+// ---------------------------------------------------------------------------
+// 格式化
+// ---------------------------------------------------------------------------
+
 String formatRate(int bytesPerSecond) {
   if (bytesPerSecond <= 0) return '—';
   const List<String> units = <String>['B/s', 'KB/s', 'MB/s', 'GB/s'];
@@ -37,7 +43,10 @@ String relativeTime(DateTime time) {
   return '${delta.inDays} 天前';
 }
 
-/// 1px 分隔线，左缩进对齐头像右侧。
+// ---------------------------------------------------------------------------
+// 基础元素
+// ---------------------------------------------------------------------------
+
 class Hairline extends StatelessWidget {
   const Hairline({super.key, this.inset = TideSpace.dividerInset});
 
@@ -70,10 +79,7 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
+            child: Text(title, style: Theme.of(context).textTheme.labelMedium),
           ),
           if (trailing != null) trailing!,
         ],
@@ -82,13 +88,8 @@ class SectionHeader extends StatelessWidget {
   }
 }
 
-/// 状态点：根据 phase 取语义色；忙碌时低频脉冲（受"减少动态效果"控制）。
 class PresenceDot extends StatefulWidget {
-  const PresenceDot({
-    super.key,
-    required this.phase,
-    this.size = 8,
-  });
+  const PresenceDot({super.key, required this.phase, this.size = 8});
 
   final TunnelPhase phase;
   final double size;
@@ -158,7 +159,17 @@ class _PresenceDotState extends State<PresenceDot>
                   child: Container(
                     width: widget.size,
                     height: widget.size,
-                    decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
+                    decoration: BoxDecoration(
+                      color: dot,
+                      shape: BoxShape.circle,
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: dot.withOpacity(0.55),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -192,8 +203,9 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: colors.surfaceMuted,
+        color: colors.surfaceMuted.withOpacity(0.8),
         borderRadius: BorderRadius.circular(TideRadii.full),
+        border: Border.all(color: colors.hairline),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -228,7 +240,6 @@ class StatusPill extends StatelessWidget {
   }
 }
 
-/// 圆形头像。用名字派生渐变色，避免为每个配置配图。
 class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({super.key, required this.name, this.size = 46});
 
@@ -256,17 +267,21 @@ class ProfileAvatar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[
-            base.withOpacity(0.95),
-            base.withOpacity(0.62),
-          ],
+          colors: <Color>[base.withOpacity(0.95), base.withOpacity(0.58)],
         ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: base.withOpacity(0.35),
+            blurRadius: 14,
+            spreadRadius: -4,
+          ),
+        ],
       ),
       child: Text(
         name.isEmpty ? '?' : name.substring(0, 1),
         style: TextStyle(
           color: Colors.white,
-          fontSize: size * 0.4,
+          fontSize: size * 0.38,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -287,8 +302,9 @@ class TideBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: fg.withOpacity(0.12),
+        color: fg.withOpacity(0.14),
         borderRadius: BorderRadius.circular(TideRadii.xs),
+        border: Border.all(color: fg.withOpacity(0.25)),
       ),
       child: Text(
         text,
@@ -296,85 +312,6 @@ class TideBadge extends StatelessWidget {
             .textTheme
             .labelSmall
             ?.copyWith(color: fg, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-}
-
-/// 会话流中的一行。点击进入详情（头像做共享元素过渡）。
-class ProfileStreamTile extends StatelessWidget {
-  const ProfileStreamTile({
-    super.key,
-    required this.profile,
-    required this.active,
-    required this.onTap,
-    this.heroTag,
-  });
-
-  final Profile profile;
-  final bool active;
-  final VoidCallback onTap;
-
-  /// 共享元素 tag。**每个页面必须传不同的前缀**，否则两个页面同时存在于树上时
-  /// （例如底部导航切换的 200ms 内）会出现 "multiple heroes share the same tag"。
-  final String? heroTag;
-
-  @override
-  Widget build(BuildContext context) {
-    final TideColors colors = context.colors;
-    final TextTheme text = Theme.of(context).textTheme;
-
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: TideSpace.row,
-        child: Row(
-          children: <Widget>[
-            const SizedBox(width: TideSpace.page),
-            Hero(
-              tag: heroTag ?? 'avatar-${profile.id}',
-              child: ProfileAvatar(name: profile.name, size: TideSpace.avatar),
-            ),
-            const SizedBox(width: TideSpace.x3),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Flexible(
-                        child: Text(
-                          profile.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: text.titleMedium,
-                        ),
-                      ),
-                      if (active) ...<Widget>[
-                        const SizedBox(width: 6),
-                        const TideBadge(text: '当前'),
-                      ],
-                      if (!profile.valid) ...<Widget>[
-                        const SizedBox(width: 6),
-                        TideBadge(text: '校验失败', color: colors.danger),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${relativeTime(profile.updatedAt)} · ${profile.ruleCount} 条规则 · ${profile.groupSummary}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: text.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, size: 18, color: colors.inkTertiary),
-            const SizedBox(width: TideSpace.x3),
-          ],
-        ),
       ),
     );
   }
@@ -399,7 +336,7 @@ class StatCell extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(label, style: text.labelSmall),
-        const SizedBox(height: 2),
+        const SizedBox(height: 3),
         Text(
           value,
           maxLines: 1,
@@ -409,6 +346,562 @@ class StatCell extends StatelessWidget {
               : text.titleSmall,
         ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 玻璃导航栏
+// ---------------------------------------------------------------------------
+
+@immutable
+class GlassNavItem {
+  const GlassNavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+}
+
+class GlassNavBar extends StatelessWidget {
+  const GlassNavBar({
+    super.key,
+    required this.index,
+    required this.onTap,
+    required this.items,
+  });
+
+  final int index;
+  final ValueChanged<int> onTap;
+  final List<GlassNavItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: TideBlur.nav, sigmaY: TideBlur.nav),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colors.surface.withOpacity(0.72),
+            border: Border(
+              top: BorderSide(color: colors.hairline.withOpacity(0.65)),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: TideSpace.navBar,
+              child: Row(
+                children: <Widget>[
+                  for (int i = 0; i < items.length; i++)
+                    Expanded(
+                      child: _NavButton(
+                        item: items[i],
+                        selected: i == index,
+                        onTap: () => onTap(i),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  const _NavButton({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final GlassNavItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+    final Color fg = selected ? colors.accent : colors.inkTertiary;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: TideMotion.standard,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(
+              color: selected ? colors.accent.withOpacity(0.14) : Colors.transparent,
+              borderRadius: BorderRadius.circular(TideRadii.full),
+            ),
+            child: Icon(
+              selected ? item.activeIcon : item.icon,
+              size: 22,
+              color: fg,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            item.label,
+            style: TideType.caption.copyWith(
+              color: fg,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 动画辅助
+// ---------------------------------------------------------------------------
+
+/// 列表错峰淡入 + 上滑。
+class StaggeredFadeIn extends StatefulWidget {
+  const StaggeredFadeIn({
+    super.key,
+    required this.index,
+    required this.child,
+    this.slide = 0.08,
+  });
+
+  final int index;
+  final Widget child;
+  final double slide;
+
+  @override
+  State<StaggeredFadeIn> createState() => _StaggeredFadeInState();
+}
+
+class _StaggeredFadeInState extends State<StaggeredFadeIn>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: TideMotion.stagger,
+  );
+
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final bool reduce = WidgetsBinding
+        .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+
+    if (reduce) {
+      _controller.value = 1;
+      return;
+    }
+
+    final int delayMs = TideMotion.staggerStepMs * widget.index;
+    if (delayMs <= 0) {
+      _controller.forward();
+    } else {
+      _timer = Timer(Duration(milliseconds: delayMs), () {
+        if (mounted) _controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final CurvedAnimation curved = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: Offset(0, widget.slide),
+          end: Offset.zero,
+        ).animate(curved),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// 按下轻微缩放。
+class PressableScale extends StatefulWidget {
+  const PressableScale({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.onLongPress,
+  });
+
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final Widget child;
+
+  @override
+  State<PressableScale> createState() => _PressableScaleState();
+}
+
+class _PressableScaleState extends State<PressableScale> {
+  bool _down = false;
+
+  void _setDown(bool value) {
+    if (_down == value) return;
+    setState(() => _down = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setDown(true),
+      onTapCancel: () => _setDown(false),
+      onTapUp: (_) => _setDown(false),
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: AnimatedScale(
+        scale: _down ? 0.975 : 1,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 配置卡片
+// ---------------------------------------------------------------------------
+
+class ProfileStreamTile extends StatelessWidget {
+  const ProfileStreamTile({
+    super.key,
+    required this.profile,
+    required this.active,
+    required this.onTap,
+    this.heroTag,
+    this.index = 0,
+    this.onLongPress,
+  });
+
+  final Profile profile;
+  final bool active;
+  final VoidCallback onTap;
+  final String? heroTag;
+  final int index;
+  final VoidCallback? onLongPress;
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+    final TextTheme text = Theme.of(context).textTheme;
+    final bool dark = context.isDark;
+
+    return StaggeredFadeIn(
+      index: index,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TideSpace.page,
+          vertical: TideSpace.x1 + 1,
+        ),
+        child: PressableScale(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: Container(
+            padding: const EdgeInsets.all(TideSpace.x3 + 2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(TideRadii.xl),
+              border: Border.all(color: colors.hairline),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  colors.surface,
+                  Color.alphaBlend(
+                    colors.accent.withOpacity(0.04),
+                    colors.surface,
+                  ),
+                ],
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Colors.black.withOpacity(dark ? 0.42 : 0.06),
+                  blurRadius: 22,
+                  spreadRadius: -10,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Row(
+              children: <Widget>[
+                Hero(
+                  tag: heroTag ?? 'avatar-${profile.id}',
+                  child: ProfileAvatar(name: profile.name, size: 44),
+                ),
+                const SizedBox(width: TideSpace.x3),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              profile.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: text.titleMedium,
+                            ),
+                          ),
+                          if (active) ...<Widget>[
+                            const SizedBox(width: 6),
+                            const TideBadge(text: '当前'),
+                          ],
+                          if (!profile.valid) ...<Widget>[
+                            const SizedBox(width: 6),
+                            TideBadge(text: '校验失败', color: colors.danger),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        '${relativeTime(profile.updatedAt)} · ${profile.ruleCount} 条规则 · ${profile.groupSummary}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: TideSpace.x1),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: colors.inkTertiary,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 呼吸 / 流光 连接按钮
+// ---------------------------------------------------------------------------
+
+class ConnectButton extends StatefulWidget {
+  const ConnectButton({
+    super.key,
+    required this.connected,
+    required this.busy,
+    required this.label,
+    required this.onTap,
+  });
+
+  final bool connected;
+  final bool busy;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<ConnectButton> createState() => _ConnectButtonState();
+}
+
+class _ConnectButtonState extends State<ConnectButton>
+    with TickerProviderStateMixin {
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: TideMotion.pulse,
+  );
+  late final AnimationController _flow = AnimationController(
+    vsync: this,
+    duration: TideMotion.flow,
+  );
+
+  bool _down = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant ConnectButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.connected != widget.connected ||
+        oldWidget.busy != widget.busy) {
+      _sync();
+    }
+  }
+
+  void _sync() {
+    if (widget.busy) {
+      _breath.stop();
+      _flow.stop();
+      return;
+    }
+    if (widget.connected) {
+      _breath.stop();
+      if (!_flow.isAnimating) _flow.repeat();
+    } else {
+      _flow.stop();
+      if (!_breath.isAnimating) _breath.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    _flow.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+    final bool dark = context.isDark;
+
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[_breath, _flow]),
+      builder: (BuildContext context, Widget? child) {
+        final double breath = Curves.easeInOut.transform(_breath.value);
+        final double flow = _flow.value;
+
+        final LinearGradient gradient;
+        final Color glowColor;
+        final double glowOpacity;
+        final double glowBlur;
+
+        if (widget.connected) {
+          gradient = LinearGradient(
+            begin: Alignment(-2 + 4 * flow, -0.6),
+            end: Alignment(2 + 4 * flow, 0.6),
+            colors: <Color>[
+              colors.accent,
+              colors.info,
+              colors.accent,
+            ],
+            stops: const <double>[0.0, 0.5, 1.0],
+          );
+          glowColor = colors.info;
+          glowOpacity = 0.34;
+          glowBlur = 26;
+        } else if (widget.busy) {
+          gradient = LinearGradient(
+            colors: <Color>[colors.surfaceMuted, colors.surfaceMuted],
+          );
+          glowColor = colors.inkTertiary;
+          glowOpacity = 0.08;
+          glowBlur = 10;
+        } else {
+          gradient = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[colors.accent, colors.accent.withOpacity(0.82)],
+          );
+          glowColor = colors.accent;
+          glowOpacity = 0.18 + 0.16 * breath;
+          glowBlur = 14 + 12 * breath;
+        }
+
+        return GestureDetector(
+          onTapDown: widget.busy ? null : (_) => setState(() => _down = true),
+          onTapCancel: widget.busy ? null : () => setState(() => _down = false),
+          onTapUp: widget.busy ? null : (_) => setState(() => _down = false),
+          onTap: widget.busy ? null : widget.onTap,
+          child: AnimatedScale(
+            scale: _down ? 0.97 : 1,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              height: 54,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(TideRadii.lg + 2),
+                gradient: gradient,
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: glowColor.withOpacity(dark ? glowOpacity : glowOpacity * 0.75),
+                    blurRadius: glowBlur,
+                    spreadRadius: widget.connected ? 1.5 : 0,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: widget.busy
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colors.inkSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            widget.label,
+                            style: TideType.headline.copyWith(
+                              color: colors.inkSecondary,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            widget.connected
+                                ? Icons.power_settings_new_rounded
+                                : Icons.bolt_rounded,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.label,
+                            style: TideType.headline.copyWith(
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
