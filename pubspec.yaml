@@ -1,0 +1,18 @@
+name: tide
+description: "Tide —— 以 Clash.Meta 规则为核心的跨平台代理客户端（第一阶段：可编译的双端 UI 外壳 + 原生通道隔离）。"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
