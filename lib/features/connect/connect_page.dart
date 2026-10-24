@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -45,7 +47,14 @@ class ConnectPage extends StatelessWidget {
         slivers: <Widget>[
           SliverToBoxAdapter(child: _Header(state: c.tunnelState)),
           SliverToBoxAdapter(
-            child: _HeroCard(controller: c, profile: c.activeProfile),
+            child: _HeroCard(
+              controller: c,
+              profile: c.activeProfile,
+              onAvatarTap: () {
+                final Profile? p = c.activeProfile;
+                if (p != null) _pickAvatar(context, c, p);
+              },
+            ),
           ),
           const SliverToBoxAdapter(child: SectionHeader(title: '全部配置')),
           if (c.profiles.isEmpty)
@@ -114,6 +123,40 @@ class _Header extends StatelessWidget {
   }
 }
 
+/// 首页大卡片头像：与列表卡片一致，优先读 avatarPath。
+class _HeroAvatar extends StatelessWidget {
+  const _HeroAvatar({required this.profile, this.size = 54});
+
+  final Profile profile;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? path = profile.avatarPath;
+
+    if (path != null && path.isNotEmpty && File(path).existsSync()) {
+      return ClipOval(
+        child: Image.file(
+          File(path),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (
+            BuildContext context,
+            Object error,
+            StackTrace? stackTrace,
+          ) {
+            return ProfileAvatar(name: profile.name, size: size);
+          },
+        ),
+      );
+    }
+
+    return ProfileAvatar(name: profile.name, size: size);
+  }
+}
+
 class _RateStat extends StatelessWidget {
   const _RateStat({required this.label, required this.value});
 
@@ -135,10 +178,15 @@ class _RateStat extends StatelessWidget {
 }
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.controller, required this.profile});
+  const _HeroCard({
+    required this.controller,
+    required this.profile,
+    required this.onAvatarTap,
+  });
 
   final AppController controller;
   final Profile? profile;
+  final VoidCallback onAvatarTap;
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +231,10 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: <Widget>[
               if (p != null)
-                ProfileAvatar(name: p.name, size: 54)
+                GestureDetector(
+                  onTap: onAvatarTap,
+                  child: _HeroAvatar(profile: p, size: 54),
+                )
               else
                 Container(
                   width: 54,
