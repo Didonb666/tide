@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
@@ -6,11 +7,33 @@ import '../../core/page_transitions.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import '../../widgets/fx.dart';
 import 'import_sheet.dart';
 import 'profile_detail_page.dart';
 
 class ProfilesPage extends StatelessWidget {
   const ProfilesPage({super.key});
+
+  Future<void> _pickAvatar(
+    BuildContext context,
+    AppController controller,
+    Profile profile,
+  ) async {
+    try {
+      final XFile? file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      if (file == null) return;
+      await controller.updateAvatar(profile.id, file.path);
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更换头像失败：$error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +72,10 @@ class ProfilesPage extends StatelessWidget {
                 TideSpace.page,
                 TideSpace.x2,
               ),
-              child: Text('长按卡片可设为当前配置', style: text.labelSmall),
+              child: Text(
+                '点击头像换图 · 长按卡片设为当前',
+                style: text.labelSmall,
+              ),
             ),
           ),
           if (c.profiles.isEmpty)
@@ -66,11 +92,12 @@ class ProfilesPage extends StatelessWidget {
               itemCount: c.profiles.length,
               itemBuilder: (BuildContext context, int index) {
                 final Profile p = c.profiles[index];
-                return ProfileStreamTile(
+                return ProfileCard(
                   profile: p,
                   index: index,
                   active: p.id == c.activeProfileId,
                   heroTag: 'hero-profiles-${p.id}',
+                  onAvatarTap: () => _pickAvatar(context, c, p),
                   onLongPress: () {
                     c.selectProfile(p.id);
                     ScaffoldMessenger.of(context).showSnackBar(
