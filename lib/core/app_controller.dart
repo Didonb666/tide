@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'profile.dart';
 import 'tunnel/simulated_tunnel.dart';
@@ -10,8 +12,6 @@ import 'tunnel/tunnel_factory.dart';
 import 'tunnel/tunnel_platform.dart';
 import 'tunnel/tunnel_state.dart';
 
-/// 全局状态。刻意不引入 Riverpod / Bloc：
-/// 第一阶段的页面状态很浅，一个 ChangeNotifier 足够，且能让新手少装一堆依赖。
 class AppController extends ChangeNotifier {
   AppController({TunnelPlatform? platform})
       : _platform = platform ?? createTunnelPlatform(),
@@ -25,18 +25,9 @@ class AppController extends ChangeNotifier {
 
   final List<Profile> profiles;
   final List<LogEntry> logs = <LogEntry>[];
-  final ValueNotifier<ThemeMode> themeMode =
-      ValueNotifier<ThemeMode>(ThemeMode.system);
 
   TunnelState tunnelState = const TunnelState();
   String? activeProfileId;
-  int _themeIndex = 0;
-
-  static const List<ThemeMode> _themeOrder = <ThemeMode>[
-    ThemeMode.system,
-    ThemeMode.light,
-    ThemeMode.dark,
-  ];
 
   Profile? get activeProfile {
     for (final Profile p in profiles) {
@@ -51,7 +42,6 @@ class AppController extends ChangeNotifier {
     if (_initialized) return;
     _initialized = true;
 
-    // 原生实现不可用（Windows，或 Android 插件缺失）→ 自动降级，UI 不感知。
     try {
       final bool available = await _platform.isAvailable();
       if (!available) {
@@ -66,24 +56,16 @@ class AppController extends ChangeNotifier {
 
     try {
       tunnelState = await _platform.readState();
-    } catch (_) {
-      // 读不到就保持默认 idle。
-    }
+    } catch (_) {}
 
     if (profiles.isNotEmpty) {
       activeProfileId = profiles.first.id;
     }
-    _seedLogs();
     notifyListeners();
   }
 
   void _onState(TunnelState next) {
     tunnelState = next;
-    if (next.isConnected) {
-      _startLogs();
-    } else {
-      _stopLogs();
-    }
     notifyListeners();
   }
 
@@ -102,11 +84,10 @@ class AppController extends ChangeNotifier {
       return;
     }
     if (profile.rawYaml.trim().isEmpty) {
-      _fail('「${profile.name}」是演示数据，没有可用的 YAML。请到「配置」页导入真实订阅，或先选「直连测试（内置）」验证内核。');
+      _fail('「${profile.name}」没有可用的 YAML，请先导入真实配置。');
       return;
     }
 
-    // 每次连接都换一把钥匙：secret 随机、端口随机，停止即作废。
     final String secret = _randomSecret();
     final int port = 20000 + Random.secure().nextInt(20000);
 
@@ -132,11 +113,9 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 32 字节随机密钥，base64url 后去掉填充，避免在 URL/日志里出现特殊字符。
   String _randomSecret() {
     final Random random = Random.secure();
-    final List<int> bytes =
-        List<int>.generate(32, (_) => random.nextInt(256));
+    final List<int> bytes = List<int>.generate(32, (_) => random.nextInt(256));
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
 
@@ -145,7 +124,6 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 导入粘贴的 YAML。返回新档案，便于页面做高亮动画。
   Profile importProfile(String yaml, {String? name}) {
     final int rules = estimateRuleCount(yaml);
     final String title = (name == null || name.trim().isEmpty)
@@ -171,68 +149,29 @@ class AppController extends ChangeNotifier {
     return profile;
   }
 
-  void setThemeMode(ThemeMode mode) {
-    themeMode.value = mode;
-  }
+  /// 复制用户选的头像到应用目录，避免相册临时文件被系统清理。
+  Future<void> updateAvatar(String profileId, String sourcePath) async {
+    final int index = profiles.indexWhere((Profile p) => p.id == profileId);
+    if (index < 0) return;
 
-  void cycleThemeMode() {
-    _themeIndex = (_themeIndex + 1) % _themeOrder.length;
-    themeMode.value = _themeOrder[_themeIndex];
-  }
+    try {
+      final Directory dir = await getApplicationSupportDirectory();
+      final Directory folder = Directory('${dir.path}/avatars');
+      await folder.create(recursive: true);
 
-  String themeLabel(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return '跟随系统';
-      case ThemeMode.light:
-        return '浅色';
-      case ThemeMode.dark:
-        return '深色';
-    }
-  }
+      String ext = 'jpg';
+      final int dot = sourcePath.lastIndexOf('.');
+      if (dot >= 0 && dot < sourcePath.length - 1) {
+        ext = sourcePath.substring(dot + 1).toLowerCase();
+      }
 
-  void _seedLogs() {
-    final DateTime now = DateTime.now();
-    logs
-      ..clear()
-      ..addAll(<LogEntry>[
-        LogEntry(
-          id: _logSeq++,
-          host: 'www.google.com',
-          outbound: '香港 01',
-          rule: 'DOMAIN-SUFFIX,google.com',
-          bytes: 18432,
-          time: now.subtract(const Duration(seconds: 12)),
-          verdict: LogVerdict.proxied,
-        ),
-        LogEntry(
-          id: _logSeq++,
-          host: 'api.github.com',
-          outbound: '香港 01',
-          rule: 'DOMAIN-KEYWORD,github',
-          bytes: 5120,
-          time: now.subtract(const Duration(seconds: 26)),
-          verdict: LogVerdict.proxied,
-        ),
-        LogEntry(
-          id: _logSeq++,
-          host: '223.5.5.5:53',
-          outbound: 'DIRECT',
-          rule: 'GEOIP,CN',
-          bytes: 128,
-          time: now.subtract(const Duration(seconds: 41)),
-          verdict: LogVerdict.direct,
-        ),
-        LogEntry(
-          id: _logSeq++,
-          host: 'ads.example.net',
-          outbound: 'REJECT',
-          rule: 'RULE-SET,ads',
-          bytes: 0,
-          time: now.subtract(const Duration(seconds: 58)),
-          verdict: LogVerdict.rejected,
-        ),
-      ]);
+      final String dest =
+          '${folder.path}/${profileId}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      await File(sourcePath).copy(dest);
+
+      profiles[index] = profiles[index].copyWith(avatarPath: dest);
+      notifyListeners();
+    } catch (_) {}
   }
 
   void _startLogs() {
@@ -254,8 +193,8 @@ class AppController extends ChangeNotifier {
         LogEntry(
           id: index,
           host: host,
-          outbound: direct ? 'DIRECT' : '香港 01',
-          rule: direct ? 'GEOIP,CN' : 'RULE-SET,proxy',
+          outbound: direct ? 'DIRECT' : 'PROXY',
+          rule: direct ? 'GEOIP,CN' : 'MATCH,PROXY',
           bytes: 1024 + index * 137,
           time: DateTime.now(),
           verdict: direct ? LogVerdict.direct : LogVerdict.proxied,
@@ -276,7 +215,6 @@ class AppController extends ChangeNotifier {
     _stopLogs();
     _subscription?.cancel();
     _platform.dispose();
-    themeMode.dispose();
     super.dispose();
   }
 }
