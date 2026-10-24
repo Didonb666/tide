@@ -1,5 +1,5 @@
 name: tide
-description: "Tide —— 以 Clash.Meta 规则为核心的跨平台代理客户端（第一阶段：可编译的双端 UI 外壳 + 原生通道隔离）。"
+description: "Fstool —— 以 Clash.Meta 规则为核心的跨平台代理客户端。"
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  shared_preferences: ^2.2.2
+  file_selector: ^1.0.3
 
 dev_dependencies:
   flutter_test:
