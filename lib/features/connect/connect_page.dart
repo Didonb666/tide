@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
@@ -7,10 +8,32 @@ import '../../core/profile.dart';
 import '../../core/tunnel/tunnel_state.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import '../../widgets/fx.dart';
 import '../profiles/profile_detail_page.dart';
 
 class ConnectPage extends StatelessWidget {
   const ConnectPage({super.key});
+
+  Future<void> _pickAvatar(
+    BuildContext context,
+    AppController controller,
+    Profile profile,
+  ) async {
+    try {
+      final XFile? file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      if (file == null) return;
+      await controller.updateAvatar(profile.id, file.path);
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('更换头像失败：$error')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +60,12 @@ class ConnectPage extends StatelessWidget {
               itemCount: c.profiles.length,
               itemBuilder: (BuildContext context, int index) {
                 final Profile p = c.profiles[index];
-                return ProfileStreamTile(
+                return ProfileCard(
                   profile: p,
                   index: index,
                   active: p.id == c.activeProfileId,
                   heroTag: 'hero-connect-${p.id}',
+                  onAvatarTap: () => _pickAvatar(context, c, p),
                   onTap: () => _openDetail(context, p),
                 );
               },
@@ -86,6 +110,26 @@ class _Header extends StatelessWidget {
           StatusPill(phase: state.phase),
         ],
       ),
+    );
+  }
+}
+
+class _RateStat extends StatelessWidget {
+  const _RateStat({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme text = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(label, style: text.labelSmall),
+        const SizedBox(height: 3),
+        AnimatedNumber(value: value, formatter: formatRate),
+      ],
     );
   }
 }
@@ -176,7 +220,7 @@ class _HeroCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TideSpace.x5),
-          ConnectButton(
+          ConnectButtonFx(
             connected: state.isConnected,
             busy: state.isBusy,
             label: _buttonLabel(state),
@@ -200,16 +244,10 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: StatCell(
-                  label: '下行',
-                  value: formatRate(state.downBytesPerSec),
-                ),
+                child: _RateStat(label: '下行', value: state.downBytesPerSec),
               ),
               Expanded(
-                child: StatCell(
-                  label: '上行',
-                  value: formatRate(state.upBytesPerSec),
-                ),
+                child: _RateStat(label: '上行', value: state.upBytesPerSec),
               ),
               Expanded(
                 child: StatCell(label: '连接', value: '${state.connectionCount}'),
