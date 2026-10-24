@@ -1,13 +1,10 @@
-// Package core 把「未修改的 mihomo」包成 gomobile 可以绑定的 Android 库。
+// Package core 把 mihomo 包成 gomobile 可以绑定的 Android 库。
 //
 // 它只做四件事：
 //   1. 用 mihomo 自己的 parser 解析 YAML（权威校验）；
 //   2. 用 hub.ApplyConfig 启动内核（规则、代理、DNS、REST API 全由内核负责）；
 //   3. 把 Android VpnService 建好的 TUN fd 交给 mihomo 的 sing_tun 监听器；
 //   4. 提供停止与版本查询。
-//
-// 为什么不用 gomobile 直接绑 mihomo 本体：mihomo 是 main 包，gomobile 不能绑 main。
-// 所以这里放一个普通包 core，暴露少量函数，由 gomobile 生成 com.tide.core.Core。
 package core
 
 import (
@@ -20,6 +17,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/metacubex/mihomo/component/process"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/hub"
@@ -36,8 +34,6 @@ var (
 )
 
 // options 由 Kotlin 侧以 JSON 传入。
-// 之所以用 JSON 而不是一长串参数：gomobile 对参数个数和类型很挑剔，
-// 一个字符串参数最容易演进，也不会因为加字段就要改 Java 签名。
 type options struct {
 	FD         int    `json:"fd"`
 	Stack      string `json:"stack"`
@@ -51,14 +47,7 @@ type options struct {
 }
 
 // Start 是 Kotlin 唯一需要调用的启动函数。
-//
-//	home       —— 内核工作目录（放 geo 数据、cache.db、规则集缓存），Android 上是 filesDir
-//	configYAML —— 用户导入的原始 Clash.Meta 配置文本（不需要先落盘）
-//	optionsJSON—— 见上面的 options 结构
-//
-// 返回 error 会被 gomobile 转成 Java 异常，Kotlin 侧捕获后进入失败态。
 func Start(home string, configYAML string, optionsJSON string) (err error) {
-	// 内核里有大量 goroutine，一次 panic 就会带走整个 App。边界处兜住。
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("mihomo panic: %v", r)
@@ -93,6 +82,12 @@ func Start(home string, configYAML string, optionsJSON string) (err error) {
 	// TUN 由 Android 的 VpnService 创建，禁止内核再去创建设备。
 	raw.Tun.Enable = false
 
+	// 关键：关闭进程/应用名查找。
+	// Android 上普通 App 无权读取 /data/system/packages.xml，
+	// 一旦规则里出现 PROCESS-NAME / 分应用相关匹配，内核就会去读它并失败。
+	// （TUN 的 buildAndroidRules 已在内核源码里打补丁跳过，这里再兜一层。）
+	raw.FindProcessMode = process.FindProcessOff
+
 	// 控制面只绑本机：Kotlin 传入 127.0.0.1:<随机端口> 与 32 字节随机 secret。
 	raw.AllowLan = false
 	if opt.Controller != "" {
@@ -110,7 +105,7 @@ func Start(home string, configYAML string, optionsJSON string) (err error) {
 	// 启动内核：规则、代理、DNS、外部控制器都在这里就绪。
 	hub.ApplyConfig(cfg)
 
-	// 再挂 TUN 监听器（与 ClashMetaForAndroid 的做法一致）。
+	// 再挂 TUN 监听器。
 	if err := startTun(opt); err != nil {
 		executor.Shutdown()
 		return err
@@ -152,10 +147,7 @@ func stopLocked() error {
 	return firstErr
 }
 
-// Validate 用内核自己的 parser 做一次权威校验，返回 JSON 字符串：
-//
-//	{"ok": true, "version": "1.19.33"}
-//	{"ok": false, "error": "...", "version": "1.19.33"}
+// Validate 用内核自己的 parser 做一次权威校验，返回 JSON 字符串。
 func Validate(home string, configYAML string) string {
 	constant.SetHomeDir(home)
 
@@ -167,6 +159,7 @@ func Validate(home string, configYAML string) string {
 	raw, err := config.UnmarshalRawConfig([]byte(configYAML))
 	if err == nil {
 		raw.Tun.Enable = false
+		raw.FindProcessMode = process.FindProcessOff
 		_, err = config.ParseRawConfig(raw)
 	}
 	if err != nil {
@@ -182,17 +175,12 @@ func Validate(home string, configYAML string) string {
 	return string(data)
 }
 
-// Version 返回编译进库里的 mihomo 版本（由 -ldflags 注入，缺省是源码里的值）。
+// Version 返回编译进库里的 mihomo 版本。
 func Version() string {
 	return constant.Version
 }
 
 // startTun 把 VpnService 的 fd 交给 mihomo 的 sing-tun 监听器。
-//
-// 关键点：
-//   - AutoRoute / AutoDetectInterface 必须为 false：路由和底层网络由 VpnService 管；
-//   - FileDescriptor > 0 时 sing-tun 不会去 open("/dev/net/tun")，直接复用这个 fd；
-//   - DNSHijack 里的地址必须是 VpnService 里 setDnsServer 的同一个地址。
 func startTun(opt options) error {
 	tunOptions := LC.Tun{
 		Enable:              true,
