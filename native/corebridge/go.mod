@@ -3,8 +3,6 @@ module github.com/tide/client-core
 go 1.23.0
 
 require github.com/metacubex/mihomo v1.19.33
-require golang.org/x/mobile v0.0.0-20240521023034-2b3dfe58d219
-tool golang.org/x/mobile/cmd/gobind
 
 // mihomo 自己的 go.mod 里有一条 replace（protobuf 换成了 metacubex 的 fork）。
 // 依赖模块里的 replace 会被 Go 忽略，所以这里必须原样再写一遍，
