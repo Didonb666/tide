@@ -12,6 +12,7 @@ import 'features/profiles/profiles_page.dart';
 import 'features/settings/settings_page.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/common.dart';
+import 'widgets/particle_overlay.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
@@ -39,14 +40,15 @@ class TideApp extends StatelessWidget {
               return MaterialApp(
                 title: 'Fstool',
                 debugShowCheckedModeBanner: false,
-                theme: AppTheme.light(settings.accent),
-                darkTheme: AppTheme.dark(settings.accent),
+                theme: AppTheme.light(settings.accentColor),
+                darkTheme: AppTheme.dark(settings.accentColor),
                 themeMode: settings.themeMode,
                 builder: (BuildContext context, Widget? child) {
                   return Stack(
                     children: <Widget>[
                       const AppBackgroundHost(),
                       if (child != null) child,
+                      const ParticleOverlay(),
                     ],
                   );
                 },
