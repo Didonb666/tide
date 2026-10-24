@@ -1,10 +1,8 @@
 // lib/design/tokens.dart
 //
-// 设计 Token 的唯一来源：颜色、圆角、间距、字体层级、动效时长与曲线。
-// 页面里出现硬编码的 Color / Duration / BorderRadius，一律视为 bug。
-//
-// 视觉取向：借鉴 Telegram 的"信息密度 + 极轻分隔"节奏，
-// 但配色、圆角、字重层级全部原创，不使用任何第三方品牌资产。
+// 设计 Token 唯一来源：颜色、圆角、间距、字级、动效、模糊参数。
+// 视觉基调：Telegram 的信息密度 + iOS 的半透明玻璃质感。
+// 所有品牌元素（配色/圆角/图标用法）均为原创。
 
 import 'dart:ui' show FontFeature;
 
@@ -50,40 +48,39 @@ class TideColors extends ThemeExtension<TideColors> {
   final Color scrim;
 
   static const TideColors light = TideColors(
-    canvas: Color(0xFFF6F7F9),
+    canvas: Color(0xFFF4F6FA),
     surface: Color(0xFFFFFFFF),
-    surfaceMuted: Color(0xFFEDF0F4),
-    hairline: Color(0xFFE3E7EC),
-    ink: Color(0xFF0F141A),
-    inkSecondary: Color(0xFF5B6674),
-    inkTertiary: Color(0xFF8C97A6),
-    accent: Color(0xFF0F8B7E),
-    accentSoft: Color(0xFFE4F3F0),
-    success: Color(0xFF1E9E6A),
-    warning: Color(0xFFC77A16),
-    danger: Color(0xFFD14343),
-    info: Color(0xFF2A6FDB),
-    scrim: Color(0x660A0F14),
+    surfaceMuted: Color(0xFFEDF1F7),
+    hairline: Color(0xFFE1E7EF),
+    ink: Color(0xFF0B1117),
+    inkSecondary: Color(0xFF5A6B7B),
+    inkTertiary: Color(0xFF8A99A8),
+    accent: Color(0xFF0E9C8A),
+    accentSoft: Color(0xFFE3F6F2),
+    success: Color(0xFF12B76A),
+    warning: Color(0xFFD98A00),
+    danger: Color(0xFFF04452),
+    info: Color(0xFF2F80ED),
+    scrim: Color(0x66000000),
   );
 
   static const TideColors dark = TideColors(
-    canvas: Color(0xFF0B0F12),
-    surface: Color(0xFF141A1F),
-    surfaceMuted: Color(0xFF1B2329),
-    hairline: Color(0xFF242E36),
-    ink: Color(0xFFE9EEF3),
-    inkSecondary: Color(0xFF9BA8B5),
-    inkTertiary: Color(0xFF6E7B88),
-    accent: Color(0xFF2FD3BE),
-    accentSoft: Color(0xFF12312E),
-    success: Color(0xFF3DD68C),
-    warning: Color(0xFFE8A33D),
-    danger: Color(0xFFF26D6D),
-    info: Color(0xFF6AA0F5),
+    canvas: Color(0xFF070A10),      // 深灰偏蓝
+    surface: Color(0xFF0E141C),
+    surfaceMuted: Color(0xFF151E28),
+    hairline: Color(0xFF223040),
+    ink: Color(0xFFEAF1F7),
+    inkSecondary: Color(0xFF9FB0C0),
+    inkTertiary: Color(0xFF6C7F91),
+    accent: Color(0xFF2EE6C8),      // 高亮青绿
+    accentSoft: Color(0xFF0E2B29),
+    success: Color(0xFF22E06E),     // 极鲜亮绿
+    warning: Color(0xFFFFB020),
+    danger: Color(0xFFFF4D5E),      // 极鲜亮红
+    info: Color(0xFF5AA8FF),
     scrim: Color(0x99000000),
   );
 
-  /// 连接状态的语义色。不要在 widget 里写 switch。
   Color status({
     required bool connected,
     required bool busy,
@@ -94,6 +91,9 @@ class TideColors extends ThemeExtension<TideColors> {
     if (busy) return warning;
     return inkTertiary;
   }
+
+  /// 闪烁/高光用：把颜色提亮一点。
+  Color glow(double t) => Color.lerp(this == TideColors.dark ? accent : accent, Colors.white, t.clamp(0.0, 1.0))!;
 
   @override
   TideColors copyWith({
@@ -152,13 +152,15 @@ class TideColors extends ThemeExtension<TideColors> {
   }
 }
 
-/// 方便取色：`context.colors.accent`。
+/// 方便取色：`context.colors.accent`
 extension TideColorsX on BuildContext {
   TideColors get colors => Theme.of(this).extension<TideColors>()!;
+
+  bool get isDark => Theme.of(this).brightness == Brightness.dark;
 }
 
 // ---------------------------------------------------------------------------
-// 圆角 / 间距
+// 圆角 / 间距 / 模糊
 // ---------------------------------------------------------------------------
 
 abstract final class TideRadii {
@@ -173,8 +175,8 @@ abstract final class TideRadii {
   static const BorderRadius rSm = BorderRadius.all(Radius.circular(sm));
   static const BorderRadius rMd = BorderRadius.all(Radius.circular(md));
   static const BorderRadius rLg = BorderRadius.all(Radius.circular(lg));
-  static const BorderRadius rSheet =
-      BorderRadius.vertical(top: Radius.circular(sheet));
+  static const BorderRadius rXl = BorderRadius.all(Radius.circular(xl));
+  static const BorderRadius rSheet = BorderRadius.vertical(top: Radius.circular(sheet));
 }
 
 abstract final class TideSpace {
@@ -186,17 +188,21 @@ abstract final class TideSpace {
   static const double x6 = 24;
   static const double x8 = 32;
 
-  /// 页面左右安全边距。
   static const double page = 16;
-
-  /// 会话列表行高（双行）。
   static const double row = 76;
-
-  /// 头像直径。
   static const double avatar = 46;
-
-  /// 分隔线左缩进，对齐头像右侧。
   static const double dividerInset = 78;
+
+  /// 底部玻璃导航栏高度（不含安全区），列表底部要留出这么多空间。
+  static const double navBar = 64;
+}
+
+abstract final class TideBlur {
+  /// 底部导航栏
+  static const double nav = 24;
+
+  /// 卡片 / 弹层
+  static const double panel = 18;
 }
 
 // ---------------------------------------------------------------------------
@@ -208,7 +214,7 @@ abstract final class TideType {
     fontSize: 32,
     height: 38 / 32,
     fontWeight: FontWeight.w700,
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
   );
 
   static const TextStyle title = TextStyle(
@@ -222,6 +228,7 @@ abstract final class TideType {
     fontSize: 17,
     height: 23 / 17,
     fontWeight: FontWeight.w600,
+    letterSpacing: -0.1,
   );
 
   static const TextStyle body = TextStyle(
@@ -243,7 +250,6 @@ abstract final class TideType {
     letterSpacing: 0.2,
   );
 
-  /// 规则文本、IP、流量数字。等宽数字避免每秒跳动。
   static const TextStyle mono = TextStyle(
     fontSize: 13,
     height: 18 / 13,
@@ -264,15 +270,14 @@ abstract final class TideMotion {
   static const Duration large = Duration(milliseconds: 320);
   static const Duration sheetOut = Duration(milliseconds: 220);
   static const Duration pulse = Duration(milliseconds: 1800);
+  static const Duration flow = Duration(milliseconds: 2600);
+  static const Duration stagger = Duration(milliseconds: 460);
+  static const int staggerStepMs = 55;
 
-  /// 减速进场：绝大多数转场与展开。
   static const Curve standard = Cubic(0.2, 0, 0, 1);
-
-  /// 退场。
   static const Curve accelerate = Cubic(0.3, 0, 0.8, 0.15);
 }
 
-/// 尊重系统"减少动态效果"：所有时长都必须经过它。
 extension TideMotionX on BuildContext {
   bool get reduceMotion => MediaQuery.maybeDisableAnimationsOf(this) ?? false;
 
@@ -329,16 +334,6 @@ abstract final class TideTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: TideType.title.copyWith(color: c.ink, fontSize: 20),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: c.surface,
-        selectedItemColor: c.accent,
-        unselectedItemColor: c.inkTertiary,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
-        showUnselectedLabels: true,
-        selectedLabelStyle: TideType.caption,
-        unselectedLabelStyle: TideType.caption,
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: c.surface,
