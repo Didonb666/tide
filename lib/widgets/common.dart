@@ -351,6 +351,43 @@ class StatCell extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
+// 数字滚动
+// ---------------------------------------------------------------------------
+
+class AnimatedNumber extends StatelessWidget {
+  const AnimatedNumber({
+    super.key,
+    required this.value,
+    required this.formatter,
+    this.style,
+  });
+
+  final int value;
+  final String Function(int) formatter;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle effective = style ??
+        TideType.mono.copyWith(color: context.colors.ink);
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: value.toDouble()),
+      duration: const Duration(milliseconds: 520),
+      curve: Curves.easeOutCubic,
+      builder: (BuildContext context, double v, Widget? child) {
+        return Text(
+          formatter(v.round()),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: effective,
+        );
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 玻璃导航栏
 // ---------------------------------------------------------------------------
 
@@ -444,7 +481,8 @@ class _NavButton extends StatelessWidget {
             curve: TideMotion.standard,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             decoration: BoxDecoration(
-              color: selected ? colors.accent.withOpacity(0.14) : Colors.transparent,
+              color:
+                  selected ? colors.accent.withOpacity(0.14) : Colors.transparent,
               borderRadius: BorderRadius.circular(TideRadii.full),
             ),
             child: Icon(
@@ -471,7 +509,6 @@ class _NavButton extends StatelessWidget {
 // 动画辅助
 // ---------------------------------------------------------------------------
 
-/// 列表错峰淡入 + 上滑。
 class StaggeredFadeIn extends StatefulWidget {
   const StaggeredFadeIn({
     super.key,
@@ -545,7 +582,6 @@ class _StaggeredFadeInState extends State<StaggeredFadeIn>
   }
 }
 
-/// 按下轻微缩放。
 class PressableScale extends StatefulWidget {
   const PressableScale({
     super.key,
@@ -589,6 +625,107 @@ class _PressableScaleState extends State<PressableScale> {
   }
 }
 
+/// 3D 倾斜卡片：随手指/鼠标位置倾斜，并带高光扫过。
+class TiltCard extends StatefulWidget {
+  const TiltCard({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.onLongPress,
+    this.radius = 24,
+  });
+
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final Widget child;
+  final double radius;
+
+  @override
+  State<TiltCard> createState() => _TiltCardState();
+}
+
+class _TiltCardState extends State<TiltCard> {
+  Matrix4 _matrix = Matrix4.identity();
+  Offset _pointer = Offset.zero;
+  bool _pressed = false;
+
+  void _update(Offset local, Size size) {
+    if (size.isEmpty) return;
+    final double dx = (local.dx / size.width) * 2 - 1;
+    final double dy = (local.dy / size.height) * 2 - 1;
+    setState(() {
+      _pointer = Offset(dx, dy);
+      _pressed = true;
+      _matrix = Matrix4.identity()
+        ..setEntry(3, 2, 0.0012)
+        ..rotateX(-dy * 0.10)
+        ..rotateY(dx * 0.10)
+        ..scale(_pressed ? 0.985 : 1.0);
+    });
+  }
+
+  void _reset() {
+    if (!_pressed && _pointer == Offset.zero) return;
+    setState(() {
+      _pressed = false;
+      _pointer = Offset.zero;
+      _matrix = Matrix4.identity();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Size size = constraints.biggest;
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (TapDownDetails d) => _update(d.localPosition, size),
+          onPanUpdate: (DragUpdateDetails d) => _update(d.localPosition, size),
+          onTapCancel: _reset,
+          onTapUp: (TapUpDetails d) {
+            widget.onTap();
+            _reset();
+          },
+          onLongPress: widget.onLongPress,
+          child: Transform(
+            alignment: Alignment.center,
+            transform: _matrix,
+            child: Stack(
+              children: <Widget>[
+                widget.child,
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      curve: Curves.easeOut,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(widget.radius),
+                        gradient: _pointer == Offset.zero
+                            ? null
+                            : LinearGradient(
+                                begin: Alignment(-_pointer.dx, -_pointer.dy),
+                                end: Alignment(_pointer.dx, _pointer.dy),
+                                colors: <Color>[
+                                  Colors.white.withOpacity(0.12),
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.05),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 配置卡片
 // ---------------------------------------------------------------------------
@@ -624,13 +761,14 @@ class ProfileStreamTile extends StatelessWidget {
           horizontal: TideSpace.page,
           vertical: TideSpace.x1 + 1,
         ),
-        child: PressableScale(
+        child: TiltCard(
+          radius: 24,
           onTap: onTap,
           onLongPress: onLongPress,
           child: Container(
             padding: const EdgeInsets.all(TideSpace.x3 + 2),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(TideRadii.xl),
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: colors.hairline),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -710,7 +848,7 @@ class ProfileStreamTile extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// 呼吸 / 流光 连接按钮
+// 呼吸 / 流光 / 波纹 连接按钮
 // ---------------------------------------------------------------------------
 
 class ConnectButton extends StatefulWidget {
@@ -742,6 +880,7 @@ class _ConnectButtonState extends State<ConnectButton>
     duration: TideMotion.flow,
   );
 
+  final List<AnimationController> _ripples = <AnimationController>[];
   bool _down = false;
 
   @override
@@ -774,10 +913,28 @@ class _ConnectButtonState extends State<ConnectButton>
     }
   }
 
+  void _spawnRipple() {
+    final AnimationController ripple = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    ripple.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) setState(() => _ripples.remove(ripple));
+        ripple.dispose();
+      }
+    });
+    setState(() => _ripples.add(ripple));
+    ripple.forward();
+  }
+
   @override
   void dispose() {
     _breath.dispose();
     _flow.dispose();
+    for (final AnimationController ripple in _ripples) {
+      ripple.dispose();
+    }
     super.dispose();
   }
 
@@ -801,11 +958,7 @@ class _ConnectButtonState extends State<ConnectButton>
           gradient = LinearGradient(
             begin: Alignment(-2 + 4 * flow, -0.6),
             end: Alignment(2 + 4 * flow, 0.6),
-            colors: <Color>[
-              colors.accent,
-              colors.info,
-              colors.accent,
-            ],
+            colors: <Color>[colors.accent, colors.info, colors.accent],
             stops: const <double>[0.0, 0.5, 1.0],
           );
           glowColor = colors.info;
@@ -830,7 +983,12 @@ class _ConnectButtonState extends State<ConnectButton>
         }
 
         return GestureDetector(
-          onTapDown: widget.busy ? null : (_) => setState(() => _down = true),
+          onTapDown: widget.busy
+              ? null
+              : (_) {
+                  setState(() => _down = true);
+                  _spawnRipple();
+                },
           onTapCancel: widget.busy ? null : () => setState(() => _down = false),
           onTapUp: widget.busy ? null : (_) => setState(() => _down = false),
           onTap: widget.busy ? null : widget.onTap,
@@ -846,57 +1004,94 @@ class _ConnectButtonState extends State<ConnectButton>
                 gradient: gradient,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: glowColor.withOpacity(dark ? glowOpacity : glowOpacity * 0.75),
+                    color: glowColor.withOpacity(
+                      dark ? glowOpacity : glowOpacity * 0.75,
+                    ),
                     blurRadius: glowBlur,
                     spreadRadius: widget.connected ? 1.5 : 0,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: Center(
-                child: widget.busy
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colors.inkSecondary,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(TideRadii.lg + 2),
+                child: Stack(
+                  children: <Widget>[
+                    for (final AnimationController ripple in _ripples)
+                      AnimatedBuilder(
+                        animation: ripple,
+                        builder: (BuildContext context, Widget? child) {
+                          final double t = Curves.easeOut.transform(
+                            ripple.value,
+                          );
+                          return Center(
+                            child: Opacity(
+                              opacity: 1 - t,
+                              child: Transform.scale(
+                                scale: 0.5 + t * 1.5,
+                                child: Container(
+                                  width: 110,
+                                  height: 110,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.65),
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            widget.label,
-                            style: TideType.headline.copyWith(
-                              color: colors.inkSecondary,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(
-                            widget.connected
-                                ? Icons.power_settings_new_rounded
-                                : Icons.bolt_rounded,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            widget.label,
-                            style: TideType.headline.copyWith(
-                              color: Colors.white,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
+                    Center(
+                      child: widget.busy
+                          ? Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      colors.inkSecondary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  widget.label,
+                                  style: TideType.headline.copyWith(
+                                    color: colors.inkSecondary,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(
+                                  widget.connected
+                                      ? Icons.power_settings_new_rounded
+                                      : Icons.bolt_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.label,
+                                  style: TideType.headline.copyWith(
+                                    color: Colors.white,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
