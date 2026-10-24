@@ -1,4 +1,4 @@
-package com.tide.tide
+package com.fstool.app
 
 import android.app.Notification
 import android.app.NotificationChannel
