@@ -8,7 +8,7 @@ import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 import '../profiles/profile_detail_page.dart';
 
-/// 连接首页：状态头 + 当前配置 + 会话流式的配置列表。
+/// 连接首页：状态头 + 当前配置 + 卡片式配置列表。
 class ConnectPage extends StatelessWidget {
   const ConnectPage({super.key});
 
@@ -18,48 +18,35 @@ class ConnectPage extends StatelessWidget {
 
     return SafeArea(
       bottom: false,
-      child: Column(
-        children: <Widget>[
-          _Header(state: c.tunnelState),
-          Expanded(
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverToBoxAdapter(
-                  child: _HeroSection(
-                    controller: c,
-                    profile: c.activeProfile,
-                  ),
-                ),
-                const SliverToBoxAdapter(child: SectionHeader(title: '全部配置')),
-                if (c.profiles.isEmpty)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Center(child: Text('还没有配置，去「配置」页导入')),
-                    ),
-                  )
-                else
-                  SliverList.builder(
-                    itemCount: c.profiles.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Profile p = c.profiles[index];
-                      return Column(
-                        children: <Widget>[
-                          ProfileStreamTile(
-                            profile: p,
-                            active: p.id == c.activeProfileId,
-                            heroTag: 'hero-connect-${p.id}',
-                            onTap: () => _openDetail(context, p),
-                          ),
-                          if (index != c.profiles.length - 1) const Hairline(),
-                        ],
-                      );
-                    },
-                  ),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
-              ],
-            ),
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(child: _Header(state: c.tunnelState)),
+          SliverToBoxAdapter(
+            child: _HeroCard(controller: c, profile: c.activeProfile),
           ),
+          const SliverToBoxAdapter(child: SectionHeader(title: '全部配置')),
+          if (c.profiles.isEmpty)
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(child: Text('还没有配置，去「配置」页导入')),
+              ),
+            )
+          else
+            SliverList.builder(
+              itemCount: c.profiles.length,
+              itemBuilder: (BuildContext context, int index) {
+                final Profile p = c.profiles[index];
+                return ProfileStreamTile(
+                  profile: p,
+                  index: index,
+                  active: p.id == c.activeProfileId,
+                  heroTag: 'hero-connect-${p.id}',
+                  onTap: () => _openDetail(context, p),
+                );
+              },
+            ),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
@@ -94,10 +81,7 @@ class _Header extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Expanded(
-            child: Text(
-              '连接',
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
+            child: Text('连接', style: Theme.of(context).textTheme.displaySmall),
           ),
           StatusPill(phase: state.phase),
         ],
@@ -106,8 +90,8 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _HeroSection extends StatelessWidget {
-  const _HeroSection({required this.controller, required this.profile});
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({required this.controller, required this.profile});
 
   final AppController controller;
   final Profile? profile;
@@ -116,6 +100,7 @@ class _HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
+    final bool dark = context.isDark;
     final TunnelState state = controller.tunnelState;
     final Profile? p = profile;
     final String? message = state.message;
@@ -125,13 +110,28 @@ class _HeroSection extends StatelessWidget {
         TideSpace.page,
         TideSpace.x2,
         TideSpace.page,
-        0,
+        TideSpace.x1,
       ),
-      padding: const EdgeInsets.all(TideSpace.x4),
+      padding: const EdgeInsets.all(TideSpace.x4 + 2),
       decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: TideRadii.rLg,
+        borderRadius: BorderRadius.circular(TideRadii.xl + 2),
         border: Border.all(color: colors.hairline),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            colors.surface,
+            Color.alphaBlend(colors.accent.withOpacity(0.06), colors.surface),
+          ],
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withOpacity(dark ? 0.40 : 0.07),
+            blurRadius: 28,
+            spreadRadius: -12,
+            offset: const Offset(0, 16),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,16 +139,16 @@ class _HeroSection extends StatelessWidget {
           Row(
             children: <Widget>[
               if (p != null)
-                ProfileAvatar(name: p.name, size: 56)
+                ProfileAvatar(name: p.name, size: 54)
               else
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 54,
+                  height: 54,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: colors.surfaceMuted,
                   ),
-                  child: Icon(Icons.layers_outlined, color: colors.inkTertiary),
+                  child: Icon(Icons.layers_rounded, color: colors.inkTertiary),
                 ),
               const SizedBox(width: TideSpace.x3),
               Expanded(
@@ -161,7 +161,7 @@ class _HeroSection extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: text.titleMedium,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       p == null
                           ? '去「配置」页导入 Clash.Meta YAML'
@@ -175,37 +175,24 @@ class _HeroSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TideSpace.x4),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: FilledButton(
-              onPressed: state.isBusy ? null : controller.toggleConnection,
-              style: FilledButton.styleFrom(
-                backgroundColor:
-                    state.isConnected ? colors.danger : colors.accent,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: colors.surfaceMuted,
-                disabledForegroundColor: colors.inkTertiary,
-                shape: const RoundedRectangleBorder(borderRadius: TideRadii.rMd),
-                textStyle: text.titleMedium?.copyWith(color: Colors.white),
-              ),
-              child: Text(_buttonLabel(state)),
-            ),
+          const SizedBox(height: TideSpace.x5),
+          ConnectButton(
+            connected: state.isConnected,
+            busy: state.isBusy,
+            label: _buttonLabel(state),
+            onTap: controller.toggleConnection,
           ),
           if (message != null) ...<Widget>[
             const SizedBox(height: TideSpace.x3),
             Row(
               children: <Widget>[
-                Icon(Icons.info_outline, size: 14, color: colors.inkTertiary),
+                Icon(Icons.info_outline_rounded, size: 14, color: colors.inkTertiary),
                 const SizedBox(width: 6),
-                Expanded(
-                  child: Text(message, style: text.labelSmall),
-                ),
+                Expanded(child: Text(message, style: text.labelSmall)),
               ],
             ),
           ],
-          const SizedBox(height: TideSpace.x4),
+          const SizedBox(height: TideSpace.x5),
           Row(
             children: <Widget>[
               Expanded(
