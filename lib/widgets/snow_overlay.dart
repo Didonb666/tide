@@ -52,11 +52,11 @@ class _SnowOverlayState extends State<SnowOverlay>
     if (!file.existsSync()) return;
 
     file.readAsBytes().then((List<int> bytes) {
-      return ui.decodeImageFromList(bytes);
-    }).then((ui.Image img) {
-      if (mounted && _imagePath == path) {
-        setState(() => _image = img);
-      }
+      ui.decodeImageFromList(bytes, (ui.Image img) {
+        if (mounted && _imagePath == path) {
+          setState(() => _image = img);
+        }
+      });
     }).catchError((Object _) {});
   }
 
