@@ -206,7 +206,6 @@ class _HeroCard extends StatelessWidget {
         TideSpace.x1,
       ),
       radius: 30,
-      sigma: 20,
       padding: const EdgeInsets.all(TideSpace.x4 + 2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
