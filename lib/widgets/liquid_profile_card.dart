@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../core/profile.dart';
 import '../design/tokens.dart';
 import 'common.dart';
-import 'fx.dart' show TiltCard;
 import 'liquid_glass_container.dart';
 
 class LiquidProfileCard extends StatelessWidget {
