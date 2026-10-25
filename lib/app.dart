@@ -50,7 +50,7 @@ class TideApp extends StatelessWidget {
                     children: <Widget>[
                       const AppBackgroundHost(),
                       if (child != null) child,
-                      const _ParticleOverlay(),
+                      const SnowOverlay(),
                     ],
                   );
                 },
