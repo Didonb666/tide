@@ -14,6 +14,7 @@ import 'features/profiles/profiles_page.dart';
 import 'features/settings/settings_page.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/liquid_nav_bar.dart';
+import 'widgets/snow_overlay.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
