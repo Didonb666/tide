@@ -10,6 +10,7 @@ import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 import '../../widgets/liquid_glass_container.dart';
+import 'liquid_effects_panel.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
