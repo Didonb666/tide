@@ -146,6 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
           // ---------------------------------------------------------------- 性能
           const SectionHeader(title: '性能'),
           _GlassCard(
+            const LiquidEffectsPanel(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
