@@ -157,121 +157,115 @@ class _LiquidConnectButtonState extends State<LiquidConnectButton>
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: BackdropFilter(
-                  filter: const ColorFilter.mode(
-                    Colors.transparent,
-                    BlendMode.srcOver,
-                  ).let(),
+                child: Container(
+                  padding: const EdgeInsets.all(1),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        Color(0x8CFFFFFF),
+                        Color(0x14FFFFFF),
+                        Color(0x33000000),
+                      ],
+                      stops: <double>[0.0, 0.5, 1.0],
+                    ),
+                  ),
                   child: Container(
-                    padding: const EdgeInsets.all(1),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: <Color>[
-                          Color(0x8CFFFFFF),
-                          Color(0x14FFFFFF),
-                          Color(0x33000000),
-                        ],
-                        stops: <double>[0.0, 0.5, 1.0],
+                      borderRadius: BorderRadius.circular(19),
+                      gradient: LinearGradient(
+                        begin: Alignment(-2 + 4 * flow, -0.6),
+                        end: Alignment(2 + 4 * flow, 0.6),
+                        colors: fill,
+                        stops: fill.length == 3
+                            ? const <double>[0.0, 0.5, 1.0]
+                            : null,
                       ),
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(19),
-                        gradient: LinearGradient(
-                          begin: Alignment(-2 + 4 * flow, -0.6),
-                          end: Alignment(2 + 4 * flow, 0.6),
-                          colors: fill,
-                          stops: fill.length == 3
-                              ? const <double>[0.0, 0.5, 1.0]
-                              : null,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(19),
-                        child: Stack(
-                          children: <Widget>[
-                            for (final AnimationController ripple in _ripples)
-                              AnimatedBuilder(
-                                animation: ripple,
-                                builder: (BuildContext context, Widget? child) {
-                                  final double t =
-                                      Curves.easeOut.transform(ripple.value);
-                                  return Center(
-                                    child: Opacity(
-                                      opacity: 1 - t,
-                                      child: Transform.scale(
-                                        scale: 0.5 + t * 1.6,
-                                        child: Container(
-                                          width: 110,
-                                          height: 110,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: Colors.white
-                                                  .withOpacity(0.6),
-                                              width: 2,
-                                            ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(19),
+                      child: Stack(
+                        children: <Widget>[
+                          for (final AnimationController ripple in _ripples)
+                            AnimatedBuilder(
+                              animation: ripple,
+                              builder: (BuildContext context, Widget? child) {
+                                final double t =
+                                    Curves.easeOut.transform(ripple.value);
+                                return Center(
+                                  child: Opacity(
+                                    opacity: 1 - t,
+                                    child: Transform.scale(
+                                      scale: 0.5 + t * 1.6,
+                                      child: Container(
+                                        width: 110,
+                                        height: 110,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white
+                                                .withOpacity(0.6),
+                                            width: 2,
                                           ),
                                         ),
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            Center(
-                              child: widget.busy
-                                  ? Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                              Colors.white70,
-                                            ),
+                                  ),
+                                );
+                              },
+                            ),
+                          Center(
+                            child: widget.busy
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      const SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Colors.white70,
                                           ),
                                         ),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          widget.label,
-                                          style: TideType.headline.copyWith(
-                                            color: Colors.white70,
-                                            shadows: glassTextShadow,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        Icon(
-                                          widget.connected
-                                              ? Icons.power_settings_new_rounded
-                                              : Icons.bolt_rounded,
-                                          size: 20,
-                                          color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        widget.label,
+                                        style: TideType.headline.copyWith(
+                                          color: Colors.white70,
                                           shadows: glassTextShadow,
                                         ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          widget.label,
-                                          style: TideType.headline.copyWith(
-                                            color: Colors.white,
-                                            letterSpacing: 0.3,
-                                            shadows: glassTextShadow,
-                                          ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Icon(
+                                        widget.connected
+                                            ? Icons.power_settings_new_rounded
+                                            : Icons.bolt_rounded,
+                                        size: 20,
+                                        color: Colors.white,
+                                        shadows: glassTextShadow,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        widget.label,
+                                        style: TideType.headline.copyWith(
+                                          color: Colors.white,
+                                          letterSpacing: 0.3,
+                                          shadows: glassTextShadow,
                                         ),
-                                      ],
-                                    ),
-                            ),
-                          ],
-                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
