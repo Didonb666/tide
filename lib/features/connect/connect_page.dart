@@ -10,7 +10,10 @@ import '../../core/profile.dart';
 import '../../core/tunnel/tunnel_state.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart' hide AnimatedNumber;
-import '../../widgets/fx.dart';
+import '../../widgets/fx.dart' show AnimatedNumber;
+import '../../widgets/liquid_connect_button.dart';
+import '../../widgets/liquid_glass_container.dart';
+import '../../widgets/liquid_profile_card.dart';
 import '../profiles/profile_detail_page.dart';
 
 class ConnectPage extends StatelessWidget {
@@ -69,7 +72,7 @@ class ConnectPage extends StatelessWidget {
               itemCount: c.profiles.length,
               itemBuilder: (BuildContext context, int index) {
                 final Profile p = c.profiles[index];
-                return ProfileCard(
+                return LiquidProfileCard(
                   profile: p,
                   index: index,
                   active: p.id == c.activeProfileId,
@@ -79,7 +82,7 @@ class ConnectPage extends StatelessWidget {
                 );
               },
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          const SliverToBoxAdapter(child: SizedBox(height: 140)),
         ],
       ),
     );
@@ -123,7 +126,6 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 首页大卡片头像：与列表卡片一致，优先读 avatarPath。
 class _HeroAvatar extends StatelessWidget {
   const _HeroAvatar({required this.profile, this.size = 54});
 
@@ -192,39 +194,20 @@ class _HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
-    final bool dark = context.isDark;
     final TunnelState state = controller.tunnelState;
     final Profile? p = profile;
     final String? message = state.message;
 
-    return Container(
+    return LiquidGlassContainer(
       margin: const EdgeInsets.fromLTRB(
         TideSpace.page,
         TideSpace.x2,
         TideSpace.page,
         TideSpace.x1,
       ),
+      radius: 30,
+      sigma: 20,
       padding: const EdgeInsets.all(TideSpace.x4 + 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TideRadii.xl + 2),
-        border: Border.all(color: colors.hairline),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            colors.surface,
-            Color.alphaBlend(colors.accent.withOpacity(0.06), colors.surface),
-          ],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(dark ? 0.40 : 0.07),
-            blurRadius: 28,
-            spreadRadius: -12,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -271,7 +254,7 @@ class _HeroCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TideSpace.x5),
-          ConnectButtonFx(
+          LiquidConnectButton(
             connected: state.isConnected,
             busy: state.isBusy,
             label: _buttonLabel(state),
