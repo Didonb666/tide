@@ -9,6 +9,7 @@ import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import '../../widgets/liquid_glass_container.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -336,32 +337,14 @@ class _GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TideColors colors = context.colors;
-    final bool dark = context.isDark;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: TideSpace.page, vertical: 2),
-      padding: padding ?? const EdgeInsets.all(TideSpace.x4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(TideRadii.xl),
-        border: Border.all(color: colors.hairline),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            colors.surface,
-            Color.alphaBlend(colors.accent.withOpacity(0.035), colors.surface),
-          ],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(dark ? 0.40 : 0.05),
-            blurRadius: 24,
-            spreadRadius: -12,
-            offset: const Offset(0, 12),
-          ),
-        ],
+    return LiquidGlassContainer(
+      radius: TideRadii.xl,
+      sigma: 12,
+      margin: const EdgeInsets.symmetric(
+        horizontal: TideSpace.page,
+        vertical: 2,
       ),
+      padding: padding ?? const EdgeInsets.all(TideSpace.x4),
       child: child,
     );
   }
