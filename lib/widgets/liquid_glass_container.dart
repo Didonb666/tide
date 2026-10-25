@@ -11,21 +11,6 @@ import '../design/tokens.dart';
 enum LiquidEffectLevel { full, static }
 
 /// 真·液态玻璃容器。
-///
-/// 四层特效：
-/// 1. 贝塞尔流体边缘：5 秒循环，四个圆角半径各自以不同相位起伏（约 ±1.4px），
-///    产生缓慢的“融化/呼吸”感；
-/// 2. 折射：ImageFilter.compose 把高斯模糊与 1.003 倍矩阵缩放叠加，
-///    模拟光穿过液体时的轻微扭曲；
-/// 3. 色散：路径向红/蓝两侧各偏移 1.4px 描边（BlendMode.plus 叠加），
-///    模拟三棱镜分光；
-/// 4. 边缘高光：顶部锐利白色反光（垂直渐变描边）+ 底部微弱辉光
-///    + 内圈 3px 模糊发光（模拟内阴影）。
-///
-/// 性能红线：
-/// - sigma == 0 时自动降级为 static（不启动动画、不做色散）；
-/// - 系统开启“减弱动画”时自动降级；
-/// - 每一层都包在 RepaintBoundary 里。
 class LiquidGlassContainer extends StatefulWidget {
   const LiquidGlassContainer({
     super.key,
@@ -132,10 +117,10 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
               sigmaY: widget.sigma,
             ),
             inner: ImageFilter.matrix(
-              Matrix4.identity()
-                ..scale(1.003, 1.003, 1.0)
-                ..translate(-0.001, -0.001, 0.0)
-                .storage,
+              (Matrix4.identity()
+                    ..scale(1.003, 1.003, 1.0)
+                    ..translate(-0.001, -0.001, 0.0))
+                  .storage,
               filterQuality: FilterQuality.medium,
             ),
           )
