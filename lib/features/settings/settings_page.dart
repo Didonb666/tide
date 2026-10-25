@@ -340,6 +340,7 @@ class _GlassCard extends StatelessWidget {
     return LiquidGlassContainer(
       radius: TideRadii.xl,
       sigma: 12,
+      effect: LiquidEffectLevel.static,
       margin: const EdgeInsets.symmetric(
         horizontal: TideSpace.page,
         vertical: 2,
