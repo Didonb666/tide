@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'profile.dart';
 import 'tunnel/simulated_tunnel.dart';
@@ -61,6 +62,18 @@ class AppController extends ChangeNotifier {
     if (profiles.isNotEmpty) {
       activeProfileId = profiles.first.id;
     }
+
+    // 关键修复：头像路径持久化在 SharedPreferences，重启后恢复。
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      for (int i = 0; i < profiles.length; i++) {
+        final String? path = prefs.getString('avatar.${profiles[i].id}');
+        if (path != null && path.isNotEmpty && File(path).existsSync()) {
+          profiles[i] = profiles[i].copyWith(avatarPath: path);
+        }
+      }
+    } catch (_) {}
+
     notifyListeners();
   }
 
@@ -149,7 +162,7 @@ class AppController extends ChangeNotifier {
     return profile;
   }
 
-  /// 复制用户选的头像到应用目录，避免相册临时文件被系统清理。
+  /// 复制用户选的头像到应用目录并持久化路径，重启不丢。
   Future<void> updateAvatar(String profileId, String sourcePath) async {
     final int index = profiles.indexWhere((Profile p) => p.id == profileId);
     if (index < 0) return;
@@ -170,6 +183,10 @@ class AppController extends ChangeNotifier {
       await File(sourcePath).copy(dest);
 
       profiles[index] = profiles[index].copyWith(avatarPath: dest);
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('avatar.$profileId', dest);
+
       notifyListeners();
     } catch (_) {}
   }
