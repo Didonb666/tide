@@ -6,8 +6,7 @@ import '../../core/app_scope.dart';
 import '../../core/page_transitions.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
-import '../../widgets/common.dart';
-import '../../widgets/fx.dart';
+import '../../widgets/liquid_profile_card.dart';
 import 'import_sheet.dart';
 import 'profile_detail_page.dart';
 
@@ -92,7 +91,7 @@ class ProfilesPage extends StatelessWidget {
               itemCount: c.profiles.length,
               itemBuilder: (BuildContext context, int index) {
                 final Profile p = c.profiles[index];
-                return ProfileCard(
+                return LiquidProfileCard(
                   profile: p,
                   index: index,
                   active: p.id == c.activeProfileId,
@@ -117,7 +116,7 @@ class ProfilesPage extends StatelessWidget {
                 );
               },
             ),
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          const SliverToBoxAdapter(child: SizedBox(height: 140)),
         ],
       ),
     );
