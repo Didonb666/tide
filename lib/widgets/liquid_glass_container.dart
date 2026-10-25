@@ -2,6 +2,8 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../design/tokens.dart';
+
 /// 全 App 玻璃质感的基石：高斯模糊 + 极低透明底色 + 渐变高光边框。
 class LiquidGlassContainer extends StatelessWidget {
   const LiquidGlassContainer({
