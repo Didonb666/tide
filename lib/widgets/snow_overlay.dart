@@ -51,7 +51,7 @@ class _SnowOverlayState extends State<SnowOverlay>
     final File file = File(path);
     if (!file.existsSync()) return;
 
-    file.readAsBytes().then((List<int> bytes) {
+    file.readAsBytes().then((bytes) {
       ui.decodeImageFromList(bytes, (ui.Image img) {
         if (mounted && _imagePath == path) {
           setState(() => _image = img);
