@@ -176,7 +176,7 @@ class _LabeledSlider extends StatelessWidget {
     required this.label,
     required this.value,
     required this.max,
-    required this.min,
+    this.min = 0,
     required this.divisions,
     required this.display,
     required this.onChanged,
