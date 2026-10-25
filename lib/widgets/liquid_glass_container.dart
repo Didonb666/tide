@@ -1,16 +1,13 @@
 import 'dart:math' as math;
-import 'dart:ui' show FilterQuality, ImageFilter;
+import 'dart:ui' show FilterQuality, ImageFilter, TileMode;
 
 import 'package:flutter/material.dart';
 
+import '../core/settings_controller.dart';
 import '../design/tokens.dart';
 
-/// 特效等级：
-/// - full   ：流体形变 + 折射 + 色散（主控区：首页大卡、底部导航）
-/// - static ：静态磨砂（列表卡片、设置分组，省电）
 enum LiquidEffectLevel { full, static }
 
-/// 真·液态玻璃容器。
 class LiquidGlassContainer extends StatefulWidget {
   const LiquidGlassContainer({
     super.key,
@@ -18,7 +15,8 @@ class LiquidGlassContainer extends StatefulWidget {
     this.radius = 28,
     this.padding = const EdgeInsets.all(16),
     this.margin,
-    this.sigma = 18,
+    this.sigma,
+    this.highlight,
     this.borderWidth = 1.2,
     this.tint,
     this.effect = LiquidEffectLevel.full,
@@ -29,13 +27,14 @@ class LiquidGlassContainer extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry? margin;
 
-  /// 模糊强度。列表卡片传 0（组件会自动降级为 static）。
-  final double sigma;
+  /// 传 null 表示跟随全局「玻璃模糊」设置。
+  final double? sigma;
+
+  /// 传 null 表示跟随全局「高光强度」设置。
+  final double? highlight;
+
   final double borderWidth;
-
-  /// 可选着色（连接按钮、激活卡片等）。
   final Color? tint;
-
   final LiquidEffectLevel effect;
 
   @override
@@ -49,28 +48,20 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
     duration: const Duration(seconds: 5),
   );
 
+  double get _sigma =>
+      (widget.sigma ?? SettingsScope.maybeOf(context)?.glassBlur ?? 18)
+          .clamp(0.0, 30.0);
+
+  double get _highlight =>
+      (widget.highlight ?? SettingsScope.maybeOf(context)?.glassHighlight ?? 1.0)
+          .clamp(0.0, 1.0);
+
   bool get _animated {
     if (widget.effect != LiquidEffectLevel.full) return false;
-    if (widget.sigma <= 0) return false;
+    if (_sigma <= 0) return false;
     final bool reduce = WidgetsBinding
         .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
     return !reduce;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (_animated) _controller.repeat();
-  }
-
-  @override
-  void didUpdateWidget(covariant LiquidGlassContainer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_animated && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (!_animated && _controller.isAnimating) {
-      _controller.stop();
-    }
   }
 
   @override
@@ -94,6 +85,8 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
   Widget _buildContent(double t, Widget child) {
     final bool dark = context.isDark;
     final bool animated = _animated;
+    final double sigma = _sigma;
+    final double highlight = _highlight;
     final double radius = widget.radius;
     final double innerRadius = (radius - widget.borderWidth).clamp(0.0, radius);
 
@@ -113,8 +106,9 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
     final ImageFilter filter = animated
         ? ImageFilter.compose(
             outer: ImageFilter.blur(
-              sigmaX: widget.sigma,
-              sigmaY: widget.sigma,
+              sigmaX: sigma,
+              sigmaY: sigma,
+              tileMode: TileMode.decal,
             ),
             inner: ImageFilter.matrix(
               (Matrix4.identity()
@@ -124,17 +118,17 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
               filterQuality: FilterQuality.medium,
             ),
           )
-        : ImageFilter.blur(sigmaX: widget.sigma, sigmaY: widget.sigma);
+        : ImageFilter.blur(
+            sigmaX: sigma,
+            sigmaY: sigma,
+            tileMode: TileMode.decal,
+          );
 
+    // 关键修复：模糊层用【静态】圆角剪裁。
+    // 之前每帧重建贝塞尔 ClipPath，滚动时图层反复失效导致模糊消失。
     final Widget glass = ClipPath(
-      clipper: _LiquidClipper(
-        radius: radius,
-        t: t,
-        animate: animated,
-      ),
-      child: widget.sigma > 0
-          ? BackdropFilter(filter: filter, child: fill)
-          : fill,
+      clipper: _GlassClipper(radius),
+      child: sigma > 0 ? BackdropFilter(filter: filter, child: fill) : fill,
     );
 
     return RepaintBoundary(
@@ -150,6 +144,7 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
                   animate: animated,
                   dark: dark,
                   borderWidth: widget.borderWidth,
+                  highlight: highlight,
                 ),
               ),
             ),
@@ -161,6 +156,12 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
 
   @override
   Widget build(BuildContext context) {
+    if (_animated && !_controller.isAnimating) {
+      _controller.repeat();
+    } else if (!_animated && _controller.isAnimating) {
+      _controller.stop();
+    }
+
     final Widget content = AnimatedBuilder(
       animation: _controller,
       child: widget.child,
@@ -174,18 +175,11 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
   }
 }
 
-/// 玻璃上的文字阴影，防止亮色壁纸下看不清。
 const List<Shadow> glassTextShadow = <Shadow>[
   Shadow(color: Color(0x73000000), blurRadius: 8, offset: Offset(0, 1)),
 ];
 
-// ---------------------------------------------------------------------------
-// 流体贝塞尔路径
-// ---------------------------------------------------------------------------
-
 abstract final class LiquidGlassPath {
-  /// 生成玻璃轮廓。四个角的半径各自以不同相位轻微起伏，
-  /// 幅度约 1.4px，肉眼可见“融化感”但不至于显得在抖动。
   static Path build(Size size, double radius, double t, bool animate) {
     if (size.isEmpty) return Path();
 
@@ -223,32 +217,19 @@ abstract final class LiquidGlassPath {
   }
 }
 
-class _LiquidClipper extends CustomClipper<Path> {
-  const _LiquidClipper({
-    required this.radius,
-    required this.t,
-    required this.animate,
-  });
+/// 静态圆角剪裁：保证 BackdropFilter 图层稳定，滚动不掉模糊。
+class _GlassClipper extends CustomClipper<Path> {
+  const _GlassClipper(this.radius);
 
   final double radius;
-  final double t;
-  final bool animate;
 
   @override
-  Path getClip(Size size) =>
-      LiquidGlassPath.build(size, radius, animate ? t : 0.0, animate);
+  Path getClip(Size size) => LiquidGlassPath.build(size, radius, 0, false);
 
   @override
-  bool shouldReclip(covariant _LiquidClipper oldClipper) {
-    return oldClipper.t != t ||
-        oldClipper.radius != radius ||
-        oldClipper.animate != animate;
-  }
+  bool shouldReclip(covariant _GlassClipper oldClipper) =>
+      oldClipper.radius != radius;
 }
-
-// ---------------------------------------------------------------------------
-// 边缘高光 / 色散 / 内发光
-// ---------------------------------------------------------------------------
 
 class _LiquidEdgePainter extends CustomPainter {
   _LiquidEdgePainter({
@@ -257,6 +238,7 @@ class _LiquidEdgePainter extends CustomPainter {
     required this.animate,
     required this.dark,
     required this.borderWidth,
+    required this.highlight,
   });
 
   final double radius;
@@ -264,14 +246,15 @@ class _LiquidEdgePainter extends CustomPainter {
   final bool animate;
   final bool dark;
   final double borderWidth;
+  final double highlight;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Path path =
         LiquidGlassPath.build(size, radius, animate ? t : 0.0, animate);
     final Rect rect = Offset.zero & size;
+    final double h = highlight.clamp(0.0, 1.0);
 
-    // 1. 外围环境阴影（玻璃悬浮感）
     canvas.drawShadow(
       path,
       Colors.black.withOpacity(dark ? 0.48 : 0.18),
@@ -280,61 +263,57 @@ class _LiquidEdgePainter extends CustomPainter {
     );
 
     if (animate) {
-      // 2. 色散反光：红/蓝各偏移 1.4px，plus 混合叠加
       final Paint red = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.8
-        ..color = const Color(0x2EFF3B30)
+        ..color = const Color(0xFFFF3B30).withOpacity(0.18 * h)
         ..blendMode = BlendMode.plus;
       final Paint blue = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.8
-        ..color = const Color(0x2E2B7FFF)
+        ..color = const Color(0xFF2B7FFF).withOpacity(0.18 * h)
         ..blendMode = BlendMode.plus;
 
       canvas.drawPath(path.shift(const Offset(-1.4, -0.4)), red);
       canvas.drawPath(path.shift(const Offset(1.4, 0.4)), blue);
     }
 
-    // 3. 主边框：顶部锐利白光 → 向下逐渐消失
     final Paint border = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          Color(0xF2FFFFFF),
-          Color(0x61FFFFFF),
-          Color(0x1AFFFFFF),
-          Color(0x0AFFFFFF),
+          Color.fromRGBO(255, 255, 255, (0.95 * h).clamp(0.0, 1.0)),
+          Color.fromRGBO(255, 255, 255, (0.38 * h).clamp(0.0, 1.0)),
+          Color.fromRGBO(255, 255, 255, (0.10 * h).clamp(0.0, 1.0)),
+          Color.fromRGBO(255, 255, 255, (0.04 * h).clamp(0.0, 1.0)),
         ],
-        stops: <double>[0.0, 0.28, 0.75, 1.0],
+        stops: const <double>[0.0, 0.28, 0.75, 1.0],
       ).createShader(rect);
     canvas.drawPath(path, border);
 
-    // 4. 底部微弱辉光（光源从上方打下来，底部只留一丝反光）
     final Paint bottomGlow = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          Color(0x00FFFFFF),
-          Color(0x00FFFFFF),
-          Color(0x2EFFFFFF),
-          Color(0x14FFFFFF),
+          const Color(0x00FFFFFF),
+          const Color(0x00FFFFFF),
+          Color.fromRGBO(255, 255, 255, (0.18 * h).clamp(0.0, 1.0)),
+          Color.fromRGBO(255, 255, 255, (0.08 * h).clamp(0.0, 1.0)),
         ],
-        stops: <double>[0.0, 0.72, 0.92, 1.0],
+        stops: const <double>[0.0, 0.72, 0.92, 1.0],
       ).createShader(rect);
     canvas.drawPath(path, bottomGlow);
 
-    // 5. 内圈发光（模拟 inset 内阴影：模糊描边向内侧晕开）
     final Paint innerGlow = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
-      ..color = Colors.white.withOpacity(animate ? 0.10 : 0.07)
+      ..color = Colors.white.withOpacity((animate ? 0.10 : 0.07) * h)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
     canvas.drawPath(path, innerGlow);
   }
@@ -345,6 +324,7 @@ class _LiquidEdgePainter extends CustomPainter {
         oldDelegate.dark != dark ||
         oldDelegate.radius != radius ||
         oldDelegate.animate != animate ||
-        oldDelegate.borderWidth != borderWidth;
+        oldDelegate.borderWidth != borderWidth ||
+        oldDelegate.highlight != highlight;
   }
 }
