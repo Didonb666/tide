@@ -9,6 +9,7 @@ import '../../design/tokens.dart';
 import '../../widgets/liquid_profile_card.dart';
 import 'import_sheet.dart';
 import 'profile_detail_page.dart';
+import '../../widgets/liquid_glass_container.dart';
 
 class ProfilesPage extends StatelessWidget {
   const ProfilesPage({super.key});
