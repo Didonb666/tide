@@ -13,7 +13,7 @@ import 'features/logs/logs_page.dart';
 import 'features/profiles/profiles_page.dart';
 import 'features/settings/settings_page.dart';
 import 'widgets/aurora_background.dart';
-import 'widgets/common.dart';
+import 'widgets/liquid_nav_bar.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
@@ -80,23 +80,23 @@ class _HomeShellState extends State<HomeShell> {
     SettingsPage(),
   ];
 
-  static const List<GlassNavItem> _navItems = <GlassNavItem>[
-    GlassNavItem(
+  static const List<LiquidNavItem> _navItems = <LiquidNavItem>[
+    LiquidNavItem(
       icon: Icons.power_settings_new_outlined,
       activeIcon: Icons.power_settings_new_rounded,
       label: '连接',
     ),
-    GlassNavItem(
+    LiquidNavItem(
       icon: Icons.layers_outlined,
       activeIcon: Icons.layers_rounded,
       label: '配置',
     ),
-    GlassNavItem(
+    LiquidNavItem(
       icon: Icons.article_outlined,
       activeIcon: Icons.article_rounded,
       label: '日志',
     ),
-    GlassNavItem(
+    LiquidNavItem(
       icon: Icons.settings_outlined,
       activeIcon: Icons.settings_rounded,
       label: '设置',
@@ -131,7 +131,7 @@ class _HomeShellState extends State<HomeShell> {
           child: _pages[_index],
         ),
       ),
-      bottomNavigationBar: GlassNavBar(
+      bottomNavigationBar: LiquidNavBar(
         index: _index,
         onTap: (int value) => setState(() => _index = value),
         items: _navItems,
@@ -139,10 +139,6 @@ class _HomeShellState extends State<HomeShell> {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// 粒子飘落（内联，避免多一个文件依赖）
-// ---------------------------------------------------------------------------
 
 class _ParticleOverlay extends StatefulWidget {
   const _ParticleOverlay({this.count = 26});
