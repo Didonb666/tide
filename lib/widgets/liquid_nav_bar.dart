@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/settings_controller.dart';
 import '../design/tokens.dart';
 import 'liquid_glass_container.dart';
 
@@ -16,7 +17,6 @@ class LiquidNavItem {
   final String label;
 }
 
-/// 悬浮式液态玻璃导航栏：大圆角、独立滑动药丸、渐变反光。
 class LiquidNavBar extends StatelessWidget {
   const LiquidNavBar({
     super.key,
@@ -32,21 +32,22 @@ class LiquidNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
+    final SettingsController? settings = SettingsScope.maybeOf(context);
+    final double bottom = (settings?.navBottomOffset ?? 16).clamp(0.0, 48.0);
+    final double inset = (settings?.navSideInset ?? 20).clamp(8.0, 40.0);
 
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        padding: EdgeInsets.fromLTRB(inset, 0, inset, bottom),
         child: LiquidGlassContainer(
           radius: 36,
-          sigma: 18,
           padding: EdgeInsets.zero,
           child: SizedBox(
             height: 72,
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                final double itemWidth =
-                    constraints.maxWidth / items.length;
+                final double itemWidth = constraints.maxWidth / items.length;
 
                 return Stack(
                   children: <Widget>[
