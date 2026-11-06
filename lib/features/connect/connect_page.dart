@@ -4,14 +4,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
-import '../../core/page_transitions.dart';
 import '../../core/profile.dart';
 import '../../core/tunnel/tunnel_state.dart';
 import '../../design/tokens.dart';
+import '../../widgets/announcement_dialog.dart';
 import '../../widgets/common.dart' hide AnimatedNumber;
 import '../../widgets/fx.dart' show AnimatedNumber;
 import '../../widgets/liquid_glass_container.dart';
-import '../profiles/profile_detail_page.dart';
 
 class ConnectPage extends StatelessWidget {
   const ConnectPage({super.key});
@@ -107,10 +106,7 @@ class ConnectPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text('选择节点', style: text.titleMedium),
                   const SizedBox(height: 4),
-                  Text(
-                    '切换后立即使用新节点连接',
-                    style: text.labelSmall,
-                  ),
+                  Text('切换后立即使用新节点连接', style: text.labelSmall),
                   const SizedBox(height: 8),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 380),
@@ -143,8 +139,7 @@ class ConnectPage extends StatelessWidget {
                                       Icons.circle_outlined,
                                       color: colors.inkTertiary,
                                     ),
-                              onTap: () =>
-                                  Navigator.of(sheetContext).pop(p),
+                              onTap: () => Navigator.of(sheetContext).pop(p),
                             ),
                         ],
                       ),
@@ -240,60 +235,74 @@ class _TitleRow extends StatelessWidget {
 // 公告卡
 // ---------------------------------------------------------------------------
 
-class _AnnouncementCard extends StatelessWidget {
+class _AnnouncementCard extends StatefulWidget {
   const _AnnouncementCard({required this.controller});
 
   final AppController controller;
 
   @override
+  State<_AnnouncementCard> createState() => _AnnouncementCardState();
+}
+
+class _AnnouncementCardState extends State<_AnnouncementCard> {
+  /// 同一次运行里只自动弹一次（切标签回来不重复弹）。
+  static bool _shownThisSession = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_shownThisSession) return;
+      _shownThisSession = true;
+      maybeShowAnnouncementOnLaunch(context);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
-    final Profile? p = controller.activeProfile;
 
-    return LiquidGlassContainer(
-      radius: 24,
-      sigma: 0,
-      effect: LiquidEffectLevel.static,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.accent.withOpacity(0.14),
-                  border: Border.all(color: colors.accent.withOpacity(0.25)),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => showAnnouncementDialog(context),
+      child: LiquidGlassContainer(
+        radius: 24,
+        sigma: 0,
+        effect: LiquidEffectLevel.static,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.accent.withOpacity(0.14),
+                    border: Border.all(color: colors.accent.withOpacity(0.25)),
+                  ),
+                  child: Icon(
+                    Icons.campaign_rounded,
+                    size: 22,
+                    color: colors.accent,
+                  ),
                 ),
-                child: Icon(
-                  Icons.campaign_rounded,
-                  size: 22,
-                  color: colors.accent,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text('官方公告', style: text.labelSmall),
+                      const SizedBox(height: 2),
+                      Text(kFstoolAnnouncement.title, style: text.titleMedium),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('官方公告', style: text.labelSmall),
-                    const SizedBox(height: 2),
-                    Text('公告', style: text.titleMedium),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: p == null
-                    ? null
-                    : () => Navigator.of(context).push<void>(
-                          tideRoute<void>(ProfileDetailPage(profile: p)),
-                        ),
-                child: Row(
+                Row(
                   children: <Widget>[
                     Text(
                       '查看',
@@ -306,15 +315,12 @@ class _AnnouncementCard extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '欢迎使用 Fstool。当前内核 mihomo v1.19.33，支持 VMess / VLESS / Trojan / Shadowsocks。',
-            style: text.bodySmall,
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(kFstoolAnnouncement.summary, style: text.bodySmall),
+          ],
+        ),
       ),
     );
   }
@@ -454,7 +460,12 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 13),
       child: Row(
         children: <Widget>[
-          Text(label, style: text.bodyMedium?.copyWith(color: context.colors.inkSecondary)),
+          Text(
+            label,
+            style: text.bodyMedium?.copyWith(
+              color: context.colors.inkSecondary,
+            ),
+          ),
           const Spacer(),
           Flexible(
             child: Align(
