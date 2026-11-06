@@ -1,6 +1,7 @@
 package com.fstool.app
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.view.Display
 import io.flutter.embedding.android.FlutterActivity
@@ -52,6 +53,14 @@ class MainActivity : FlutterActivity() {
                             result.success(openApp(pkg))
                         }
                     }
+                    "openUrl" -> {
+                        val url = call.argument<String>("url")
+                        if (url.isNullOrBlank()) {
+                            result.success(false)
+                        } else {
+                            result.success(openUrl(url))
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -68,6 +77,17 @@ class MainActivity : FlutterActivity() {
                 startActivity(intent)
                 true
             }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun openUrl(url: String): Boolean {
+        return try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            true
         } catch (e: Exception) {
             false
         }
