@@ -1,14 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../core/settings_controller.dart';
 import '../design/tokens.dart';
 
-/// 顶层雪花/粒子层。全部参数从 SettingsController 读取：
-/// 图片（可选）、数量、大小、速度。IgnorePointer 不挡点击。
 class SnowOverlay extends StatefulWidget {
   const SnowOverlay({super.key});
 
@@ -16,47 +17,62 @@ class SnowOverlay extends StatefulWidget {
   State<SnowOverlay> createState() => _SnowOverlayState();
 }
 
-class _SnowOverlayState extends State<SnowOverlay>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 22),
-  );
+class _SnowOverlayState extends State<SnowOverlay> {
+  final ValueNotifier<double> _phase = ValueNotifier<double>(0);
+  Timer? _timer;
+  Stopwatch? _stopwatch;
 
   ui.Image? _image;
-  String? _imagePath;
+  String? _imageKey;
   int _count = -1;
   List<_Snow> _snow = <_Snow>[];
+
+  static const String _assetSnow = 'assets/images/snowflake.png';
 
   @override
   void initState() {
     super.initState();
     final bool reduce = WidgetsBinding
         .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
-    if (!reduce) _controller.repeat();
+    if (!reduce) {
+      _stopwatch = Stopwatch()..start();
+      _timer = Timer.periodic(const Duration(milliseconds: 16), (Timer timer) {
+        if (!mounted) return;
+        _phase.value = (_stopwatch!.elapsedMicroseconds / 22000000.0) % 1.0;
+      });
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _timer?.cancel();
+    _phase.dispose();
     super.dispose();
   }
 
   void _maybeLoadImage(String? path) {
-    if (path == _imagePath) return;
-    _imagePath = path;
+    final String key = (path == null || path.isEmpty) ? '@asset' : 'file:$path';
+    if (key == _imageKey) return;
+    _imageKey = key;
     _image = null;
 
-    if (path == null || path.isEmpty) return;
-    final File file = File(path);
-    if (!file.existsSync()) return;
+    void apply(ui.Image img) {
+      if (mounted && _imageKey == key) {
+        setState(() => _image = img);
+      }
+    }
 
+    if (key == '@asset') {
+      rootBundle.load(_assetSnow).then((ByteData data) {
+        ui.decodeImageFromList(data.buffer.asUint8List(), apply);
+      }).catchError((Object _) {});
+      return;
+    }
+
+    final File file = File(path!);
+    if (!file.existsSync()) return;
     file.readAsBytes().then((bytes) {
-      ui.decodeImageFromList(bytes, (ui.Image img) {
-        if (mounted && _imagePath == path) {
-          setState(() => _image = img);
-        }
-      });
+      ui.decodeImageFromList(bytes, apply);
     }).catchError((Object _) {});
   }
 
@@ -94,12 +110,12 @@ class _SnowOverlayState extends State<SnowOverlay>
     return IgnorePointer(
       child: RepaintBoundary(
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: _phase,
           builder: (BuildContext context, Widget? child) {
             return CustomPaint(
               size: Size.infinite,
               painter: _SnowPainter(
-                t: _controller.value * speed,
+                t: _phase.value * speed,
                 snow: _snow,
                 image: _image,
                 sizeScale: size / 10,
