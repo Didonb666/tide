@@ -55,6 +55,17 @@ class ProfilesPage extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Expanded(child: Text('配置', style: text.displaySmall)),
+                                    IconButton(
+                    onPressed: () async {
+                      final Profile? scanned = await showScanSheet(context, c);
+                      if (scanned == null || !context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('已导入：${scanned.name}')),
+                      );
+                    },
+                    icon: const Icon(Icons.qr_code_scanner_rounded),
+                    tooltip: '扫码导入',
+                  ),
                   IconButton(
                     onPressed: () => _import(context, c),
                     icon: const Icon(Icons.add_rounded),
