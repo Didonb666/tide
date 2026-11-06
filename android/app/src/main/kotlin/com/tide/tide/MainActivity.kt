@@ -11,6 +11,7 @@ class MainActivity : FlutterActivity() {
 
     private var tunnelChannel: TunnelChannel? = null
     private var displayChannel: MethodChannel? = null
+    private var appsChannel: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -35,6 +36,40 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+        }
+
+        appsChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "fstool/apps"
+        ).also { channel ->
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "openApp" -> {
+                        val pkg = call.argument<String>("package")
+                        if (pkg.isNullOrBlank()) {
+                            result.success(false)
+                        } else {
+                            result.success(openApp(pkg))
+                        }
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+    }
+
+    private fun openApp(packageName: String): Boolean {
+        return try {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            if (intent == null) {
+                false
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                true
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 
