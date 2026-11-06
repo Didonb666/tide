@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 
-import '../core/page_transitions.dart';
-import '../design/tokens.dart';
-import '../features/folia/folia_web_page.dart';
-import 'liquid_glass_container.dart';
+import 'core/page_transitions.dart';
+import 'design/tokens.dart';
+import 'features/folia/folia_web_page.dart';
+import 'widgets/liquid_glass_container.dart';
 
 /// 首页右下角：应用内打开 Folia（资源已打包进 APK）。
 class FoliaButton extends StatefulWidget {
