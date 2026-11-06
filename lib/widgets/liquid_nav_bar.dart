@@ -134,7 +134,7 @@ class _LiquidNavBarState extends State<LiquidNavBar> {
                             transform: Matrix4.identity()
                               ..setEntry(3, 2, 0.001)
                               ..scale(1.0, 1 - 0.10 * stretch)
-                              ..skewX(_dx / itemWidth * 0.06),
+                              ..setEntry(0, 1, _dx / itemWidth * 0.06),
                             child: _GlassPill(dragging: _dragging),
                           ),
                         ),
