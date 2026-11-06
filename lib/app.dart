@@ -113,26 +113,16 @@ class _HomeShellState extends State<HomeShell> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: AnimatedSwitcher(
-        duration: duration,
-        switchInCurve: TideMotion.standard,
-        switchOutCurve: TideMotion.standard,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.02, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
+      body: Stack(
+        children: <Widget>[
+          IndexedStack(index: _index, children: _pages),
+          if (_index == 0)
+            const Positioned(
+              right: 20,
+              bottom: 112,
+              child: FoliaButton(),
             ),
-          );
-        },
-                child: IndexedStack(
-          index: _index,
-          children: _pages,
-        ),
+        ],
       ),
       bottomNavigationBar: LiquidNavBar(
         index: _index,
