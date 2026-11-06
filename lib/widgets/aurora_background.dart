@@ -1,111 +1,12 @@
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../core/background_controller.dart';
-import '../design/tokens.dart';
 
-/// 极光流动背景：三个缓慢漂移的径向渐变光斑。
-class AuroraBackground extends StatefulWidget {
-  const AuroraBackground({super.key});
-
-  @override
-  State<AuroraBackground> createState() => _AuroraBackgroundState();
-}
-
-class _AuroraBackgroundState extends State<AuroraBackground>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 26),
-  )..repeat();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final TideColors colors = context.colors;
-    final bool dark = context.isDark;
-
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        return CustomPaint(
-          size: Size.infinite,
-          painter: _AuroraPainter(
-            t: _controller.value,
-            colors: <Color>[
-              colors.accent,
-              colors.info,
-              const Color(0xFF7C5CFF),
-            ],
-            base: dark ? const Color(0xFF070A10) : const Color(0xFFEAF2FB),
-            dark: dark,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _AuroraPainter extends CustomPainter {
-  _AuroraPainter({
-    required this.t,
-    required this.colors,
-    required this.base,
-    required this.dark,
-  });
-
-  final double t;
-  final List<Color> colors;
-  final Color base;
-  final bool dark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    canvas.drawRect(rect, Paint()..color = base);
-
-    for (int i = 0; i < colors.length; i++) {
-      final double phase = t * 2 * math.pi + i * 2.09;
-      final Offset center = Offset(
-        size.width * (0.5 + 0.38 * math.sin(phase)),
-        size.height * (0.5 + 0.38 * math.cos(phase * 1.13 + i)),
-      );
-      final Paint paint = Paint()
-        ..shader = RadialGradient(
-          colors: <Color>[
-            colors[i].withOpacity(dark ? 0.36 : 0.30),
-            colors[i].withOpacity(0.0),
-          ],
-          stops: const <double>[0.0, 1.0],
-        ).createShader(
-          Rect.fromCircle(
-            center: center,
-            radius: size.shortestSide * 0.62,
-          ),
-        );
-      canvas.drawRect(rect, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _AuroraPainter oldDelegate) {
-    return oldDelegate.t != t ||
-        oldDelegate.base != base ||
-        oldDelegate.dark != dark;
-  }
-}
-
-/// 全局背景层：优先自定义媒体（图片/视频），否则极光。
-/// 挂在 MaterialApp.builder 的 Stack 最底层。
+/// 全局背景层：默认静态图；用户选了图片/视频后替换。
 class AppBackgroundHost extends StatefulWidget {
   const AppBackgroundHost({super.key});
 
@@ -153,8 +54,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
 
     if (target == null || !mounted) return;
 
-    final VideoPlayerController video =
-        VideoPlayerController.file(File(target));
+    final VideoPlayerController video = VideoPlayerController.file(File(target));
     video.setLooping(true);
     video.setVolume(0);
     _video = video;
@@ -164,7 +64,6 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
       setState(() {});
       video.play();
     }).catchError((Object _) {
-      // 平台不支持视频时回退极光，不崩溃。
       if (!mounted || _videoPath != target) return;
       _videoPath = null;
       _video = null;
@@ -180,11 +79,27 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
     return AnimatedBuilder(
       animation: bg,
       builder: (BuildContext context, Widget? child) {
-        final Widget media;
+        // 默认背景：静态图，不做透明度/模糊，保证画面原样。
+        if (!bg.hasCustom) {
+          return Positioned.fill(
+            child: Image.asset(
+              'assets/images/default_background.webp',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (
+                BuildContext context,
+                Object error,
+                StackTrace? stackTrace,
+              ) {
+                return const ColoredBox(color: Color(0xFF070A10));
+              },
+            ),
+          );
+        }
 
-        if (bg.mediaPath == null) {
-          media = const AuroraBackground();
-        } else if (bg.isVideo) {
+        final Widget media;
+        if (bg.isVideo) {
           final VideoPlayerController? video = _video;
           if (video != null && video.value.isInitialized) {
             media = SizedBox.expand(
@@ -198,7 +113,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
               ),
             );
           } else {
-            media = const AuroraBackground();
+            media = const ColoredBox(color: Color(0xFF070A10));
           }
         } else {
           media = Image.file(
@@ -207,8 +122,12 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
             width: double.infinity,
             height: double.infinity,
             gaplessPlayback: true,
-            errorBuilder: (BuildContext context, Object error, StackTrace? stack) {
-              return const AuroraBackground();
+            errorBuilder: (
+              BuildContext context,
+              Object error,
+              StackTrace? stackTrace,
+            ) {
+              return const ColoredBox(color: Color(0xFF070A10));
             },
           );
         }
