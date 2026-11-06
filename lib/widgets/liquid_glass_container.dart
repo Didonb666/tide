@@ -224,14 +224,12 @@ class _GlassClipper extends CustomClipper<Path> {
   final double radius;
 
   @override
-  Path getClip(Size size) =>
-      LiquidGlassPath.build(size, radius, 0.0, false);
+  Path getClip(Size size) => LiquidGlassPath.build(size, radius, 0.0, false);
 
   @override
-  bool shouldReclip(covariant _LiquidClipper oldClipper) =>
+  bool shouldReclip(covariant _GlassClipper oldClipper) =>
       oldClipper.radius != radius;
 }
-
 class _LiquidEdgePainter extends CustomPainter {
   _LiquidEdgePainter({
     required this.radius,
