@@ -249,41 +249,43 @@ class ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
-    final int hash = name.runes.fold<int>(0, (int sum, int rune) => sum + rune);
-    final List<Color> palette = <Color>[
-      colors.accent,
-      colors.info,
-      colors.warning,
-      colors.success,
-    ];
-    final Color base = palette[hash % palette.length];
 
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[base.withOpacity(0.95), base.withOpacity(0.58)],
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: base.withOpacity(0.35),
-            blurRadius: 14,
-            spreadRadius: -4,
-          ),
-        ],
-      ),
-      child: Text(
-        name.isEmpty ? '?' : name.substring(0, 1),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: size * 0.38,
-          fontWeight: FontWeight.w600,
-        ),
+    return ClipOval(
+      child: Image.asset(
+        'assets/images/default_avatar.jpg',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (
+          BuildContext context,
+          Object error,
+          StackTrace? stackTrace,
+        ) {
+          return Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  colors.accent.withOpacity(0.95),
+                  colors.accent.withOpacity(0.55),
+                ],
+              ),
+            ),
+            child: Text(
+              name.isEmpty ? '?' : name.substring(0, 1),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: size * 0.38,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
