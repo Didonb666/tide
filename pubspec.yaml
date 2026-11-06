@@ -27,6 +27,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/folia/
 
 flutter_launcher_icons:
   android: true
