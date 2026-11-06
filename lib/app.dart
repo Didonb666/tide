@@ -127,9 +127,9 @@ class _HomeShellState extends State<HomeShell> {
             ),
           );
         },
-        child: KeyedSubtree(
-          key: ValueKey<int>(_index),
-          child: _pages[_index],
+                child: IndexedStack(
+          index: _index,
+          children: _pages,
         ),
       ),
       bottomNavigationBar: LiquidNavBar(
