@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 
 import '../core/settings_controller.dart';
 import '../design/tokens.dart';
@@ -17,7 +18,7 @@ class LiquidNavItem {
   final String label;
 }
 
-class LiquidNavBar extends StatelessWidget {
+class LiquidNavBar extends StatefulWidget {
   const LiquidNavBar({
     super.key,
     required this.index,
@@ -28,6 +29,48 @@ class LiquidNavBar extends StatelessWidget {
   final int index;
   final ValueChanged<int> onTap;
   final List<LiquidNavItem> items;
+
+  @override
+  State<LiquidNavBar> createState() => _LiquidNavBarState();
+}
+
+class _LiquidNavBarState extends State<LiquidNavBar> {
+  double _dx = 0;
+  bool _dragging = false;
+
+  int _indexAt(double itemWidth) {
+    final int n = widget.items.length;
+    if (n == 0) return 0;
+    final double baseWidth = itemWidth - 12;
+    final double center = widget.index * itemWidth + 6 + baseWidth / 2 + _dx;
+    return (center / itemWidth).round().clamp(0, n - 1);
+  }
+
+  void _move(double totalDx, double itemWidth) {
+    final int n = widget.items.length;
+    final double maxRight = (n - 1 - widget.index) * itemWidth;
+    final double maxLeft = widget.index * itemWidth;
+    final double clamped = totalDx.clamp(-maxLeft, maxRight);
+
+    if (clamped == _dx) return;
+
+    final int before = _indexAt(itemWidth);
+    setState(() => _dx = clamped);
+    if (_indexAt(itemWidth) != before) HapticFeedback.selectionClick();
+  }
+
+  void _endDrag(double itemWidth) {
+    final int target = _indexAt(itemWidth);
+    setState(() {
+      _dragging = false;
+      _dx = 0;
+    });
+
+    if (target != widget.index) {
+      HapticFeedback.selectionClick();
+      widget.onTap(target);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,35 +90,70 @@ class LiquidNavBar extends StatelessWidget {
             height: 72,
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                final double itemWidth = constraints.maxWidth / items.length;
+                final double itemWidth =
+                    constraints.maxWidth / widget.items.length;
+                final double baseWidth = itemWidth - 12;
+                final double stretch = (_dx.abs() / itemWidth).clamp(0.0, 1.0);
+                final double pillWidth = baseWidth * (1 + 0.55 * stretch);
+                final double center =
+                    widget.index * itemWidth + 6 + baseWidth / 2 + _dx;
+                final double pillLeft = center - pillWidth / 2;
 
-                return Stack(
-                  children: <Widget>[
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 320),
-                      curve: Curves.easeOutCubic,
-                      left: index * itemWidth + 6,
-                      top: 8,
-                      width: itemWidth - 12,
-                      height: 56,
-                      child: const RepaintBoundary(
-                        child: _GlassPill(),
-                      ),
-                    ),
-                    Row(
-                      children: <Widget>[
-                        for (int i = 0; i < items.length; i++)
-                          Expanded(
-                            child: _NavTab(
-                              item: items[i],
-                              selected: i == index,
-                              accent: colors.accent,
-                              onTap: () => onTap(i),
-                            ),
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onLongPressStart: (LongPressStartDetails details) {
+                    HapticFeedback.mediumImpact();
+                    setState(() => _dragging = true);
+                  },
+                  onLongPressMoveUpdate: (LongPressMoveUpdateDetails details) {
+                    _move(details.offsetFromOrigin.dx, itemWidth);
+                  },
+                  onLongPressEnd: (LongPressEndDetails details) =>
+                      _endDrag(itemWidth),
+                  onLongPressCancel: () {
+                    if (!_dragging) return;
+                    setState(() {
+                      _dragging = false;
+                      _dx = 0;
+                    });
+                  },
+                  child: Stack(
+                    children: <Widget>[
+                      AnimatedPositioned(
+                        duration: _dragging
+                            ? Duration.zero
+                            : const Duration(milliseconds: 520),
+                        curve: Curves.elasticOut,
+                        left: pillLeft,
+                        top: 8 - 2 * stretch,
+                        width: pillWidth,
+                        height: 56 + 4 * stretch,
+                        child: RepaintBoundary(
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()
+                              ..setEntry(3, 2, 0.001)
+                              ..scale(1.0, 1 - 0.10 * stretch)
+                              ..skewX(_dx / itemWidth * 0.06),
+                            child: _GlassPill(dragging: _dragging),
                           ),
-                      ],
-                    ),
-                  ],
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          for (int i = 0; i < widget.items.length; i++)
+                            Expanded(
+                              child: _NavTab(
+                                item: widget.items[i],
+                                selected: i == widget.index,
+                                accent: colors.accent,
+                                onTap: () => widget.onTap(i),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -87,34 +165,36 @@ class LiquidNavBar extends StatelessWidget {
 }
 
 class _GlassPill extends StatelessWidget {
-  const _GlassPill();
+  const _GlassPill({required this.dragging});
+
+  final bool dragging;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
-            Color(0x8CFFFFFF),
-            Color(0x1AFFFFFF),
-            Color(0x33000000),
+            const Color(0x8CFFFFFF),
+            dragging ? const Color(0x33FFFFFF) : const Color(0x1AFFFFFF),
+            const Color(0x33000000),
           ],
-          stops: <double>[0.0, 0.55, 1.0],
+          stops: const <double>[0.0, 0.55, 1.0],
         ),
       ),
       padding: const EdgeInsets.all(1),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(27),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: <Color>[
-              Color(0x2EFFFFFF),
-              Color(0x0DFFFFFF),
+              dragging ? const Color(0x40FFFFFF) : const Color(0x2EFFFFFF),
+              const Color(0x0DFFFFFF),
             ],
           ),
         ),
