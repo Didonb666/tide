@@ -1,66 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../core/app_launcher.dart';
 import '../../design/tokens.dart';
+import 'folia_bundle_server.dart';
 
-/// 应用内全屏 Folia（Web 版），不需要安装 Folia APK。
+/// 应用内 Folia：资源来自 APK 内打包的前端构建，不需要联网下载。
 class FoliaWebPage extends StatefulWidget {
-  const FoliaWebPage({super.key, required this.url});
-
-  final String url;
+  const FoliaWebPage({super.key});
 
   @override
   State<FoliaWebPage> createState() => _FoliaWebPageState();
 }
 
 class _FoliaWebPageState extends State<FoliaWebPage> {
-  late final WebViewController _controller;
-
+  WebViewController? _controller;
   int _progress = 0;
-  bool _failed = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
+    _boot();
+  }
 
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFF09090B))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int value) {
-            if (!mounted) return;
-            setState(() => _progress = value);
-          },
-          onPageFinished: (String url) {
-            if (!mounted) return;
-            setState(() {
-              _progress = 100;
-              _failed = false;
-            });
-          },
-          onWebResourceError: (WebResourceError error) {
-            if (!mounted) return;
-            if (error.isForMainFrame ?? true) {
-              setState(() => _failed = true);
-            }
-          },
-        ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+  @override
+  void dispose() {
+    FoliaBundleServer.stop();
+    super.dispose();
+  }
+
+  Future<void> _boot() async {
+    try {
+      final int port = await FoliaBundleServer.start();
+      if (!FoliaBundleServer.hasBundle) {
+        if (!mounted) return;
+        setState(() => _error = 'APK 里没有找到 Folia 资源（构建步骤可能没跑成功）');
+        return;
+      }
+      if (!mounted) return;
+
+      final WebViewController controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(const Color(0xFF09090B))
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int value) {
+              if (!mounted) return;
+              setState(() => _progress = value);
+            },
+            onPageFinished: (String url) {
+              if (!mounted) return;
+              setState(() => _progress = 100);
+            },
+            onWebResourceError: (WebResourceError error) {
+              if (!mounted) return;
+              if (error.isForMainFrame ?? true) {
+                setState(() => _error = error.description);
+              }
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse('http://127.0.0.1:$port/index.html'));
+
+      setState(() => _controller = controller);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _error = '启动本地资源服务失败：$error');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final TextTheme text = Theme.of(context).textTheme;
+    final WebViewController? controller = _controller;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
-        if (await _controller.canGoBack()) {
-          await _controller.goBack();
+        final WebViewController? c = controller;
+        if (c != null && await c.canGoBack()) {
+          await c.goBack();
           return;
         }
         if (!mounted) return;
@@ -78,23 +98,11 @@ class _FoliaWebPageState extends State<FoliaWebPage> {
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back),
-                      tooltip: '返回',
                     ),
-                    Expanded(
-                      child: Text(
-                        'Folia',
-                        style: text.titleMedium,
-                      ),
-                    ),
+                    Expanded(child: Text('Folia', style: text.titleMedium)),
                     IconButton(
-                      onPressed: () => _controller.reload(),
+                      onPressed: () => controller?.reload(),
                       icon: const Icon(Icons.refresh_rounded),
-                      tooltip: '刷新',
-                    ),
-                    IconButton(
-                      onPressed: () => FoliaLauncher.openExternal(widget.url),
-                      icon: const Icon(Icons.open_in_browser_rounded),
-                      tooltip: '用浏览器打开',
                     ),
                   ],
                 ),
@@ -107,8 +115,9 @@ class _FoliaWebPageState extends State<FoliaWebPage> {
               Expanded(
                 child: Stack(
                   children: <Widget>[
-                    WebViewWidget(controller: _controller),
-                    if (_failed)
+                    if (controller != null)
+                      WebViewWidget(controller: controller),
+                    if (_error != null)
                       Container(
                         color: const Color(0xFF09090B),
                         alignment: Alignment.center,
@@ -117,7 +126,7 @@ class _FoliaWebPageState extends State<FoliaWebPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             const Icon(
-                              Icons.wifi_off_rounded,
+                              Icons.error_outline_rounded,
                               size: 40,
                               color: Colors.white38,
                             ),
@@ -130,7 +139,7 @@ class _FoliaWebPageState extends State<FoliaWebPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '检查网络后重试；也可以在首页长按音符按钮，换成你自己的 Folia 地址。',
+                              _error!,
                               textAlign: TextAlign.center,
                               style: text.bodySmall?.copyWith(
                                 color: Colors.white54,
@@ -139,8 +148,12 @@ class _FoliaWebPageState extends State<FoliaWebPage> {
                             const SizedBox(height: 16),
                             FilledButton(
                               onPressed: () {
-                                setState(() => _failed = false);
-                                _controller.reload();
+                                setState(() {
+                                  _error = null;
+                                  _controller = null;
+                                  _progress = 0;
+                                });
+                                _boot();
                               },
                               child: const Text('重试'),
                             ),
