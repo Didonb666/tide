@@ -15,10 +15,6 @@ class FoliaLauncher {
   /// 公共 Folia Web 实例（第三方部署，开箱即用）。
   static const String defaultUrl = 'https://music.aikun-bili.top/';
 
-  // ---------------------------------------------------------------------------
-  // 网址
-  // ---------------------------------------------------------------------------
-
   static Future<String> webUrl() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -40,10 +36,6 @@ class FoliaLauncher {
     } catch (_) {}
   }
 
-  // ---------------------------------------------------------------------------
-  // Windows 桌面版
-  // ---------------------------------------------------------------------------
-
   static Future<String?> savedExe() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -61,7 +53,6 @@ class FoliaLauncher {
     } catch (_) {}
   }
 
-  /// 先试记住的路径，再扫描常见安装目录。
   static Future<bool> openWindowsFolia() async {
     final String? saved = await savedExe();
     if (saved != null && File(saved).existsSync() && await startExe(saved)) {
@@ -119,10 +110,6 @@ class FoliaLauncher {
       return false;
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // 外部浏览器
-  // ---------------------------------------------------------------------------
 
   static Future<bool> openExternal(String url) async {
     final String target = url.trim();
