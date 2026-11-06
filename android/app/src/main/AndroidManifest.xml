@@ -25,9 +25,9 @@
     <application
         android:label="Fstool"
         android:icon="@mipmap/ic_launcher"
-        android:enableOnBackInvokedCallback="true"
-        android:usesCleartextTraffic="false">
-
+        android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true">
+        
         <activity
             android:name=".MainActivity"
             android:exported="true"
