@@ -85,7 +85,8 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
   Widget _buildContent(double t, Widget child) {
     final bool dark = context.isDark;
     final bool animated = _animated;
-    final double sigma = _sigma;
+    final double sigma =
+        widget.effect == LiquidEffectLevel.static ? 0.0 : _sigma;
     final double highlight = _highlight;
     final double radius = widget.radius;
     final double innerRadius = (radius - widget.borderWidth).clamp(0.0, radius);
