@@ -45,6 +45,7 @@ class TideApp extends StatelessWidget {
                 theme: AppTheme.light(settings.accentColor),
                 darkTheme: AppTheme.dark(settings.accentColor),
                 themeMode: settings.themeMode,
+                            scrollBehavior: const TideScrollBehavior(),
                 builder: (BuildContext context, Widget? child) {
                   return Stack(
                     children: <Widget>[
@@ -263,5 +264,22 @@ class _ParticlePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ParticlePainter oldDelegate) {
     return oldDelegate.t != t || oldDelegate.color != color;
+  }
+}
+
+
+
+/// 关掉 Android 12+ 的拉伸回弹：它会在列表拉到尽头时整体缩放内容，
+/// 导致 BackdropFilter 采样错位，玻璃看起来"掉模糊"。
+class TideScrollBehavior extends MaterialScrollBehavior {
+  const TideScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
   }
 }
