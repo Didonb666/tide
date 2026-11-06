@@ -37,6 +37,19 @@ jobs:
           channel: stable
           cache: true
 
+      - name: 8a. 构建并打包 Folia 前端
+        run: |
+          set -e
+          git clone --depth 1 https://github.com/maimai993/folia-sonnet.git /tmp/folia-src
+          cd /tmp/folia-src
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npm run build
+          test -f dist/index.html
+          mkdir -p "$GITHUB_WORKSPACE/assets/folia"
+          cp -R dist/. "$GITHUB_WORKSPACE/assets/folia/"
+          echo "Folia dist 大小："
+          du -sh "$GITHUB_WORKSPACE/assets/folia"
+
       - name: 3. 拉取 Dart 依赖
         run: flutter pub get
 
