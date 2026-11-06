@@ -11,6 +11,7 @@ import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 import '../../widgets/liquid_glass_container.dart';
 import 'liquid_effects_panel.dart';
+import '../../widgets/tide_slider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -504,30 +505,13 @@ class _SliderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TideColors colors = context.colors;
-    final TextTheme text = Theme.of(context).textTheme;
-
-    return Column(
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Text(label, style: text.bodySmall),
-            const Spacer(),
-            Text(
-              display(value),
-              style: TideType.mono.copyWith(color: colors.accent),
-            ),
-          ],
-        ),
-        Slider(
-          value: value.clamp(0.0, max),
-          max: max,
-          divisions: divisions,
-          activeColor: colors.accent,
-          inactiveColor: colors.surfaceMuted,
-          onChanged: onChanged,
-        ),
-      ],
+    return TideSlider(
+      label: label,
+      value: value,
+      max: max,
+      divisions: divisions,
+      format: display,
+      onCommit: onChanged,
     );
   }
 }
