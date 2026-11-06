@@ -3,7 +3,8 @@
 
 1. 包名统一成 com.fstool.app（namespace + applicationId）；
 2. minSdk 提到 26（gomobile 的 AAR 要求）；
-3. 引入 mihomo 的 core.aar。
+3. 引入 mihomo 的 core.aar；
+4. 压缩原生库（useLegacyPackaging），显著减小 APK。
 """
 
 from __future__ import annotations
@@ -42,7 +43,21 @@ def main() -> int:
     text, n1 = re.subn(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 26", text)
     text, n2 = re.subn(r"minSdkVersion\s+flutter\.minSdkVersion", "minSdkVersion 26", text)
 
-    # 3) AAR
+    # 3) 压缩原生库：默认 .so 是不压缩存的，改成安装时解压，APK 能小 25%~35%
+    if "useLegacyPackaging" not in text:
+        text = re.sub(
+            r"(?m)^android\s*\{",
+            "android {\n"
+            "    packaging {\n"
+            "        jniLibs {\n"
+            "            useLegacyPackaging = true\n"
+            "        }\n"
+            "    }\n",
+            text,
+            count=1,
+        )
+
+    # 4) AAR 依赖
     if "libs/core.aar" not in text:
         text = text.rstrip() + (
             "\n\n// 由 scripts/patch_android_gradle.py 注入：mihomo 内核\n"
@@ -54,9 +69,12 @@ def main() -> int:
     if text != original:
         GRADLE.write_text(text, encoding="utf-8")
 
-    print(f"[ok] 包名 -> com.fstool.app；minSdk 补丁 {n1 + n2} 处；AAR 依赖已就绪")
+    print(f"[ok] 包名 com.fstool.app；minSdk 补丁 {n1 + n2} 处；AAR 与 native 压缩就绪")
     for line in GRADLE.read_text(encoding="utf-8").splitlines():
-        if "namespace" in line or "applicationId" in line or "minSdk" in line or "core.aar" in line:
+        if any(
+            key in line
+            for key in ("namespace", "applicationId", "minSdk", "core.aar", "useLegacyPackaging")
+        ):
             print("   " + line)
     return 0
 
