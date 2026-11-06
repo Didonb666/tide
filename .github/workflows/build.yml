@@ -210,6 +210,27 @@ jobs:
             && echo "OK: Manifest 含 VPN 服务" \
             || echo "::warning::Manifest 缺少 VPN 服务声明"
 
+      - name: 7b. 安装 Node 24（Folia 前端构建要求）
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: 7c. 构建 Folia 前端并放进 assets
+        run: |
+          set -e
+          node -v
+          git clone --depth 1 https://github.com/maimai993/folia-sonnet.git /tmp/folia-src
+          cd /tmp/folia-src
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          NODE_OPTIONS=--max-old-space-size=4096 npm run build:capacitor
+          test -f dist/index.html
+          mkdir -p "$GITHUB_WORKSPACE/assets/folia"
+          cp -R dist/. "$GITHUB_WORKSPACE/assets/folia/"
+          echo "=== dist 大小 ==="
+          du -sh "$GITHUB_WORKSPACE/assets/folia"
+          echo "=== 文件列表（前 15 个）==="
+          ls "$GITHUB_WORKSPACE/assets/folia" | head -15
+
       - name: 8. 拉取 Dart 依赖
         run: flutter pub get
 
