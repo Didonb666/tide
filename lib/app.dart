@@ -117,6 +117,24 @@ class _HomeShellState extends State<HomeShell> {
       body: Stack(
         children: <Widget>[
           IndexedStack(index: _index, children: _pages),
+
+          // 调试入口：长按屏幕左上角 56×56 区域
+          Positioned(
+            left: 0,
+            top: 0,
+            width: 56,
+            height: 56,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onLongPress: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const GlassLabPage(),
+                ),
+              ),
+              child: const SizedBox.expand(),
+            ),
+          ),
+
           if (_index == 0)
             const Positioned(
               right: 20,
@@ -125,15 +143,7 @@ class _HomeShellState extends State<HomeShell> {
             ),
         ],
       ),
-      bottomNavigationBar: LiquidNavBar(
-        index: _index,
-        onTap: (int value) => setState(() => _index = value),
-        items: _navItems,
-      ),
-    );
-  }
-}
-
+      
 class _ParticleOverlay extends StatefulWidget {
   const _ParticleOverlay({this.count = 26});
 
