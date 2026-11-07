@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import 'core/app_controller.dart';
 import 'core/app_scope.dart';
@@ -13,10 +14,8 @@ import 'features/logs/logs_page.dart';
 import 'features/profiles/profiles_page.dart';
 import 'features/settings/settings_page.dart';
 import 'widgets/aurora_background.dart';
-import 'widgets/liquid_nav_bar.dart';
-import 'widgets/snow_overlay.dart';
 import 'widgets/folia_button.dart';
-import 'features/experimental/glass_lab_page.dart';
+import 'widgets/liquid_nav_bar.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
@@ -47,13 +46,13 @@ class TideApp extends StatelessWidget {
                 theme: AppTheme.light(settings.accentColor),
                 darkTheme: AppTheme.dark(settings.accentColor),
                 themeMode: settings.themeMode,
-                            scrollBehavior: const TideScrollBehavior(),
+                scrollBehavior: const TideScrollBehavior(),
                 builder: (BuildContext context, Widget? child) {
                   return Stack(
                     children: <Widget>[
                       const AppBackgroundHost(),
                       if (child != null) child,
-                      const SnowOverlay(),
+                      const _ParticleOverlay(),
                     ],
                   );
                 },
@@ -109,8 +108,6 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final Duration duration = context.motion(TideMotion.base);
-
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
@@ -118,7 +115,7 @@ class _HomeShellState extends State<HomeShell> {
         children: <Widget>[
           IndexedStack(index: _index, children: _pages),
 
-          // 调试入口：长按屏幕左上角 56×56 区域
+          // 调试入口：长按屏幕左上角 56×56 区域打开液态玻璃实验室
           Positioned(
             left: 0,
             top: 0,
@@ -128,7 +125,7 @@ class _HomeShellState extends State<HomeShell> {
               behavior: HitTestBehavior.translucent,
               onLongPress: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const GlassLabPage(),
+                  builder: (_) => const _GlassLabPage(),
                 ),
               ),
               child: const SizedBox.expand(),
@@ -143,7 +140,121 @@ class _HomeShellState extends State<HomeShell> {
             ),
         ],
       ),
-      
+      bottomNavigationBar: LiquidNavBar(
+        index: _index,
+        onTap: (int value) => setState(() => _index = value),
+        items: _navItems,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 液态玻璃实验室（验证完成后可整段删掉）
+// ---------------------------------------------------------------------------
+
+class _GlassLabPage extends StatefulWidget {
+  const _GlassLabPage();
+
+  @override
+  State<_GlassLabPage> createState() => _GlassLabPageState();
+}
+
+class _GlassLabPageState extends State<_GlassLabPage> {
+  double _tint = 0.5;
+
+  @override
+  Widget build(BuildContext context) {
+    final Brightness b = Theme.of(context).brightness;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(title: const Text('液态玻璃实验室')),
+      body: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/default_background.webp',
+              fit: BoxFit.cover,
+            ),
+          ),
+          ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 60),
+            children: <Widget>[
+              const Text(
+                'Regular · 圆角 26',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              LiquidGlassLayer(
+                settings: LiquidGlassSettings.ios27Regular(
+                  brightness: b,
+                  tintAmount: _tint,
+                ),
+                defaultAppearance:
+                    LiquidGlassAppearance.ios27Regular(brightness: b),
+                child: LiquidGlass(
+                  shape: const LiquidRoundedSuperellipse(borderRadius: 26),
+                  child: const Padding(
+                    padding: EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Fstool 液态玻璃',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          '边缘应能看到背景被弯折、颜色被拆开',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Clear · 胶囊',
+                style: TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              LiquidGlassLayer(
+                settings: LiquidGlassSettings.ios27Clear(tintAmount: _tint),
+                child: LiquidGlass(
+                  shape: const LiquidRoundedSuperellipse(borderRadius: 30),
+                  child: const SizedBox(width: 200, height: 60),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'tintAmount: ${_tint.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              Slider(
+                value: _tint,
+                onChanged: (double v) => setState(() => _tint = v),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 粒子
+// ---------------------------------------------------------------------------
+
 class _ParticleOverlay extends StatefulWidget {
   const _ParticleOverlay({this.count = 26});
 
@@ -269,10 +380,10 @@ class _ParticlePainter extends CustomPainter {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 关掉 Android 的拉伸回弹（避免 BackdropFilter 采样错位）
+// ---------------------------------------------------------------------------
 
-
-/// 关掉 Android 12+ 的拉伸回弹：它会在列表拉到尽头时整体缩放内容，
-/// 导致 BackdropFilter 采样错位，玻璃看起来"掉模糊"。
 class TideScrollBehavior extends MaterialScrollBehavior {
   const TideScrollBehavior();
 
