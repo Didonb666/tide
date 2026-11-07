@@ -7,15 +7,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <!--
-      仅兼容 Android 12 及以下的旧系统文件选择。
-      Android 13+ 使用系统 Photo Picker（image_picker 自动处理），无需任何权限。
-    -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
-        <queries>
+    <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -23,14 +19,11 @@
     </queries>
 
     <application
-                <meta-data
-        android:name="io.flutter.embedding.android.EnableFlutterGPU"
-        android:value="true" />
         android:label="Fstool"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
-        
+        android:enableOnBackInvokedCallback="true"
+        android:usesCleartextTraffic="true">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -50,6 +43,15 @@
             </intent-filter>
         </activity>
 
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- 打开 Flutter GPU：液态玻璃的真折射需要它 -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableFlutterGPU"
+            android:value="true" />
+
         <service
             android:name=".TunnelService"
             android:exported="false"
@@ -64,9 +66,5 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="vpn" />
         </service>
-
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
     </application>
 </manifest>
