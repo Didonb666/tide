@@ -17,6 +17,7 @@ class _GlassLabPageState extends State<GlassLabPage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(title: const Text('液态玻璃实验室')),
       body: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -25,86 +26,85 @@ class _GlassLabPageState extends State<GlassLabPage> {
               fit: BoxFit.cover,
             ),
           ),
-          SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 90, 20, 140),
-              children: <Widget>[
-                _caption('Regular · 圆角 26'),
-                LiquidGlassLayer(
-                  settings: LiquidGlassSettings.ios27Regular(
-                    brightness: b,
-                    tintAmount: _tint,
-                  ),
-                  defaultAppearance:
-                      LiquidGlassAppearance.ios27Regular(brightness: b),
-                  child: LiquidGlass(
-                    shape: const LiquidRoundedSuperellipse(borderRadius: 26),
-                    child: const Padding(
-                      padding: EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            'Fstool 液态玻璃',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            '边缘应该能看到背景被弯折、颜色被拆开',
-                            style: TextStyle(color: Colors.white70, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+          ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 60),
+            children: <Widget>[
+              _caption('Regular · 圆角 26'),
+              LiquidGlassLayer(
+                settings: LiquidGlassSettings.ios27Regular(
+                  brightness: b,
+                  tintAmount: _tint,
                 ),
-                const SizedBox(height: 26),
-                _caption('Clear · 胶囊'),
-                LiquidGlassLayer(
-                  settings: LiquidGlassSettings.ios27Clear(tintAmount: _tint),
-                  child: LiquidGlass(
-                    shape: const LiquidRoundedSuperellipse(borderRadius: 30),
-                    child: const SizedBox(width: 200, height: 60),
-                  ),
-                ),
-                const SizedBox(height: 26),
-                _caption('BlendGroup · 融合'),
-                LiquidGlassLayer(
-                  settings:
-                      LiquidGlassSettings.ios27Regular(brightness: b),
-                  child: LiquidGlassBlendGroup(
-                    blend: 22,
-                    child: Row(
-                      children: const <Widget>[
-                        LiquidGlass.grouped(
-                          shape: LiquidOval(),
-                          child: SizedBox.square(dimension: 56),
+                defaultAppearance:
+                    LiquidGlassAppearance.ios27Regular(brightness: b),
+                child: LiquidGlass(
+                  shape: const LiquidRoundedSuperellipse(borderRadius: 26),
+                  child: const Padding(
+                    padding: EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Fstool 液态玻璃',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                        SizedBox(width: 10),
-                        LiquidGlass.grouped(
-                          shape: LiquidRoundedSuperellipse(borderRadius: 28),
-                          child: SizedBox(width: 150, height: 56),
+                        SizedBox(height: 6),
+                        Text(
+                          '边缘应该能看到背景被弯折、颜色被拆开',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
-                Text(
-                  'tintAmount（iOS 设置里的 Liquid Glass 滑杆）：'
-                  '${_tint.toStringAsFixed(2)}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              const SizedBox(height: 26),
+              _caption('Clear · 胶囊'),
+              LiquidGlassLayer(
+                settings: LiquidGlassSettings.ios27Clear(tintAmount: _tint),
+                child: LiquidGlass(
+                  shape: const LiquidRoundedSuperellipse(borderRadius: 30),
+                  child: const SizedBox(width: 200, height: 60),
                 ),
-                Slider(
-                  value: _tint,
-                  onChanged: (double v) => setState(() => _tint = v),
+              ),
+              const SizedBox(height: 26),
+              _caption('BlendGroup · 两滴融合'),
+              LiquidGlassLayer(
+                settings: LiquidGlassSettings.ios27Regular(brightness: b),
+                child: LiquidGlassBlendGroup(
+                  blend: 22,
+                  child: Row(
+                    children: const <Widget>[
+                      LiquidGlass.grouped(
+                        shape: LiquidOval(),
+                        child: SizedBox.square(dimension: 56),
+                      ),
+                      SizedBox(width: 10),
+                      LiquidGlass.grouped(
+                        shape: LiquidRoundedSuperellipse(borderRadius: 28),
+                        child: SizedBox(width: 150, height: 56),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 30),
+              Text(
+                'tintAmount：${_tint.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+              Slider(
+                value: _tint,
+                onChanged: (double v) => setState(() => _tint = v),
+              ),
+            ],
           ),
         ],
       ),
