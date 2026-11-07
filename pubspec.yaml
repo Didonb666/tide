@@ -17,6 +17,7 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   mobile_scanner: ^5.2.3
   webview_flutter: ^4.10.0
+  liquid_glass_renderer: ^1.0.0-dev.2
 
 dev_dependencies:
   flutter_test:
@@ -36,4 +37,3 @@ flutter_launcher_icons:
   min_sdk_android: 26
   adaptive_icon_background: "#000000"
   adaptive_icon_foreground: "assets/icon/app_icon.png"
-    liquid_glass_renderer: ^1.0.0-dev.2
