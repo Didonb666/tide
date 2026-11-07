@@ -16,6 +16,7 @@ import 'widgets/aurora_background.dart';
 import 'widgets/liquid_nav_bar.dart';
 import 'widgets/snow_overlay.dart';
 import 'widgets/folia_button.dart';
+import 'features/experimental/glass_lab_page.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
