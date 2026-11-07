@@ -16,8 +16,6 @@ class TideGlassPanel extends StatelessWidget {
   final double radius;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry? margin;
-
-  /// 不传就用 iOS 27 Regular 预设（可按亮度自动适配）。
   final LiquidGlassSettings? settings;
 
   @override
