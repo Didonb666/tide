@@ -54,8 +54,10 @@ class LicenseApi {
   Future<Map<String, dynamic>> post(
     String path, [
     Map<String, dynamic>? body,
-  ]) {
-    return _send('POST', path, body: body);
+  ], {
+    String? token,
+  }) {
+    return _send('POST', path, body: body, token: token);
   }
 
   Future<Map<String, dynamic>> get(String path, {String? token}) {

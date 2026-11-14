@@ -9,7 +9,7 @@ import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
 import '../settings/settings_page.dart';
-import 'redeem_page.dart';
+import '../auth/redeem_page.dart';
 
 /// 「我的」：头像 / 昵称 / 简介 / 剩余时长 / 兑换 / 设置入口。
 class ProfilePage extends StatefulWidget {

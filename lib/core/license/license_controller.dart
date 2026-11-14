@@ -155,6 +155,7 @@ class LicenseController extends ChangeNotifier {
     return _submit(() => _api.post(
           '/api/redeem',
           <String, dynamic>{'key': key.trim()},
+          token: _token,
         ));
   }
 
