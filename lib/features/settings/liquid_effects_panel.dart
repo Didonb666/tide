@@ -59,8 +59,8 @@ class LiquidEffectsPanel extends StatelessWidget {
 
     return Column(
       children: <Widget>[
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
           child: Row(
             children: <Widget>[
               Expanded(child: Text(tr('玻璃与雪花'))),

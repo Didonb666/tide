@@ -245,3 +245,6 @@ class AppText {
     return entry[lang] ?? entry['zh'] ?? key;
   }
 }
+
+/// 顶层快捷入口，任何地方都能直接用：tr('连接状态')
+String tr(String zh) => AppText.tr(zh);
