@@ -165,7 +165,7 @@ class _PresenceDotState extends State<PresenceDot>
                       shape: BoxShape.circle,
                       boxShadow: <BoxShadow>[
                         BoxShadow(
-                          color: dot.withOpacity(0.55),
+                          color: dot.withValues(alpha: 0.55),
                           blurRadius: 8,
                           spreadRadius: 1,
                         ),
@@ -204,7 +204,7 @@ class StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: colors.surfaceMuted.withOpacity(0.8),
+        color: colors.surfaceMuted.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(TideRadii.full),
         border: Border.all(color: colors.hairline),
       ),
@@ -272,8 +272,8 @@ class ProfileAvatar extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: <Color>[
-                  colors.accent.withOpacity(0.95),
-                  colors.accent.withOpacity(0.55),
+                  colors.accent.withValues(alpha: 0.95),
+                  colors.accent.withValues(alpha: 0.55),
                 ],
               ),
             ),
@@ -305,9 +305,9 @@ class TideBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: fg.withOpacity(0.14),
+        color: fg.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(TideRadii.xs),
-        border: Border.all(color: fg.withOpacity(0.25)),
+        border: Border.all(color: fg.withValues(alpha: 0.25)),
       ),
       child: Text(
         text,
@@ -428,9 +428,9 @@ class GlassNavBar extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: TideBlur.nav, sigmaY: TideBlur.nav),
         child: Container(
           decoration: BoxDecoration(
-            color: colors.surface.withOpacity(0.72),
+            color: colors.surface.withValues(alpha: 0.72),
             border: Border(
-              top: BorderSide(color: colors.hairline.withOpacity(0.65)),
+              top: BorderSide(color: colors.hairline.withValues(alpha: 0.65)),
             ),
           ),
           child: SafeArea(
@@ -485,7 +485,7 @@ class _NavButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             decoration: BoxDecoration(
               color:
-                  selected ? colors.accent.withOpacity(0.14) : Colors.transparent,
+                  selected ? colors.accent.withValues(alpha: 0.14) : Colors.transparent,
               borderRadius: BorderRadius.circular(TideRadii.full),
             ),
             child: Icon(
@@ -711,9 +711,9 @@ class _TiltCardState extends State<TiltCard> {
                                 begin: Alignment(-_pointer.dx, -_pointer.dy),
                                 end: Alignment(_pointer.dx, _pointer.dy),
                                 colors: <Color>[
-                                  Colors.white.withOpacity(0.12),
+                                  Colors.white.withValues(alpha: 0.12),
                                   Colors.transparent,
-                                  Colors.black.withOpacity(0.05),
+                                  Colors.black.withValues(alpha: 0.05),
                                 ],
                               ),
                       ),
@@ -779,14 +779,14 @@ class ProfileStreamTile extends StatelessWidget {
                 colors: <Color>[
                   colors.surface,
                   Color.alphaBlend(
-                    colors.accent.withOpacity(0.04),
+                    colors.accent.withValues(alpha: 0.04),
                     colors.surface,
                   ),
                 ],
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withOpacity(dark ? 0.42 : 0.06),
+                  color: Colors.black.withValues(alpha: dark ? 0.42 : 0.06),
                   blurRadius: 22,
                   spreadRadius: -10,
                   offset: const Offset(0, 12),
@@ -977,7 +977,7 @@ class _ConnectButtonState extends State<ConnectButton>
           gradient = LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: <Color>[colors.accent, colors.accent.withOpacity(0.82)],
+            colors: <Color>[colors.accent, colors.accent.withValues(alpha: 0.82)],
           );
           glowColor = colors.accent;
           glowOpacity = 0.18 + 0.16 * breath;
@@ -1006,7 +1006,7 @@ class _ConnectButtonState extends State<ConnectButton>
                 gradient: gradient,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: glowColor.withOpacity(
+                    color: glowColor.withValues(alpha: 
                       dark ? glowOpacity : glowOpacity * 0.75,
                     ),
                     blurRadius: glowBlur,
@@ -1037,7 +1037,7 @@ class _ConnectButtonState extends State<ConnectButton>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.65),
+                                      color: Colors.white.withValues(alpha: 0.65),
                                       width: 2,
                                     ),
                                   ),

@@ -433,10 +433,10 @@ class _ModeChip extends StatelessWidget {
         height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? colors.accent.withOpacity(0.16) : colors.surfaceMuted,
+          color: selected ? colors.accent.withValues(alpha: 0.16) : colors.surfaceMuted,
           borderRadius: BorderRadius.circular(TideRadii.md),
           border: Border.all(
-            color: selected ? colors.accent.withOpacity(0.55) : colors.hairline,
+            color: selected ? colors.accent.withValues(alpha: 0.55) : colors.hairline,
           ),
         ),
         child: Text(
@@ -480,7 +480,7 @@ class _AccentDot extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: <Color>[base, base.withOpacity(0.62)],
+                colors: <Color>[base, base.withValues(alpha: 0.62)],
               ),
               border: Border.all(
                 color: selected ? colors.ink : Colors.transparent,
@@ -488,7 +488,7 @@ class _AccentDot extends StatelessWidget {
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: base.withOpacity(selected ? 0.55 : 0.28),
+                  color: base.withValues(alpha: selected ? 0.55 : 0.28),
                   blurRadius: selected ? 16 : 10,
                   spreadRadius: selected ? 2 : 0,
                 ),
@@ -532,7 +532,7 @@ class _ActionButton extends StatelessWidget {
       label: Text(label),
       style: OutlinedButton.styleFrom(
         foregroundColor: colors.accent,
-        side: BorderSide(color: colors.accent.withOpacity(0.5)),
+        side: BorderSide(color: colors.accent.withValues(alpha: 0.5)),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(TideRadii.md),
         ),
@@ -581,7 +581,7 @@ class _CustomAccentTile extends StatelessWidget {
 
     final Color? picked = await showDialog<Color>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       builder: (BuildContext dialogContext) {
         return _ColorPickerDialog(initial: settings.accentColor);
       },
@@ -614,7 +614,7 @@ class _CustomAccentTile extends StatelessWidget {
               border: Border.all(color: colors.hairline),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: settings.accentColor.withOpacity(0.45),
+                  color: settings.accentColor.withValues(alpha: 0.45),
                   blurRadius: 10,
                   spreadRadius: 1,
                 ),
@@ -662,7 +662,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
           child: Container(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
             decoration: BoxDecoration(
-              color: colors.surface.withOpacity(0.93),
+              color: colors.surface.withValues(alpha: 0.93),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(color: colors.hairline),
             ),

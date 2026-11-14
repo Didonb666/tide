@@ -38,6 +38,41 @@ Announcement kFstoolAnnouncement = Announcement(
 );
 
 /// 公告免打扰状态：记录“静音到什么时候”。
+/// 公告正文的多语言版本（zh 用原文）。
+String _announcementBody(String lang) {
+  if (lang == 'en') {
+    return 'Welcome to Fstool.\n\n'
+        'What\'s new:\n'
+        '· Home redesigned with a "current node" card, one tap to switch;\n'
+        '· Liquid glass look and snow effect, adjustable in Settings;\n'
+        '· Core mihomo v1.19.33 — VMess / VLESS / Trojan / Shadowsocks.\n\n'
+        'Tips:\n'
+        '· Import your Clash.Meta subscription in Profiles, then connect;\n'
+        '· The first connection requires VPN permission.';
+  }
+  if (lang == 'it') {
+    return 'Benvenuto in Fstool.\n\n'
+        'Novità:\n'
+        '· Home ridisegnata con la card "nodo attuale", un tocco per cambiare;\n'
+        '· Effetto vetro liquido e neve, regolabili nelle Impostazioni;\n'
+        '· Core mihomo v1.19.33 — VMess / VLESS / Trojan / Shadowsocks.\n\n'
+        'Suggerimenti:\n'
+        '· Importa l\'abbonamento Clash.Meta in Profili, poi connetti;\n'
+        '· La prima connessione richiede il permesso VPN.';
+  }
+  if (lang == 'ru') {
+    return 'Добро пожаловать в Fstool.\n\n'
+        'Что нового:\n'
+        '· Главная переработана, добавлена карточка «текущий узел»;\n'
+        '· Жидкое стекло и снег, настраиваются в Настройках;\n'
+        '· Ядро mihomo v1.19.33 — VMess / VLESS / Trojan / Shadowsocks.\n\n'
+        'Подсказки:\n'
+        '· Импортируйте подписку Clash.Meta в «Профили», затем подключайтесь;\n'
+        '· При первом подключении нужно разрешение VPN.';
+  }
+  return kFstoolAnnouncement.body;
+}
+
 class AnnouncementStore {
   static const String _key = 'announcement.mutedUntil';
   static const Duration _quiet = Duration(hours: 2);
@@ -66,7 +101,7 @@ class AnnouncementStore {
 Future<void> showAnnouncementDialog(BuildContext context) {
   return showDialog<void>(
     context: context,
-    barrierColor: Colors.black.withOpacity(0.55),
+    barrierColor: Colors.black.withValues(alpha: 0.55),
     builder: (BuildContext dialogContext) => const AnnouncementDialog(),
   );
 }
@@ -119,9 +154,9 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                       height: 40,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: colors.accent.withOpacity(0.14),
+                        color: colors.accent.withValues(alpha: 0.14),
                         border: Border.all(
-                          color: colors.accent.withOpacity(0.25),
+                          color: colors.accent.withValues(alpha: 0.25),
                         ),
                       ),
                       child: Icon(
@@ -161,7 +196,7 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                   constraints: const BoxConstraints(maxHeight: 340),
                   child: SingleChildScrollView(
                     child: Text(
-                      kFstoolAnnouncement.body,
+                      _announcementBody(AppText.lang),
                       style: text.bodyMedium?.copyWith(height: 1.6),
                     ),
                   ),

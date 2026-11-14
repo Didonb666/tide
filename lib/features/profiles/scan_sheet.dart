@@ -17,7 +17,7 @@ Future<Profile?> showScanSheet(BuildContext context, AppController controller) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withOpacity(0.5),
+    barrierColor: Colors.black.withValues(alpha: 0.5),
     builder: (BuildContext sheetContext) =>
         ScanSheet(controller: controller),
   );
@@ -325,7 +325,7 @@ class _ScanSheetState extends State<ScanSheet> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: colors.accent.withOpacity(0.75),
+                                color: colors.accent.withValues(alpha: 0.75),
                                 width: 2,
                               ),
                             ),

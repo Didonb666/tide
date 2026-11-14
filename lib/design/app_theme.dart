@@ -117,23 +117,27 @@ abstract final class AppTheme {
     final TideColors colors = baseColors.copyWith(
       accent: accent,
       accentSoft: Color.alphaBlend(
-        accent.withOpacity(isDark ? 0.18 : 0.14),
+        accent.withValues(alpha: isDark ? 0.18 : 0.14),
         baseColors.surface,
       ),
-      surface: baseColors.surface.withOpacity(
+      surface: baseColors.surface.withValues(alpha: 
         isDark ? darkSurfaceAlpha : lightSurfaceAlpha,
       ),
-      surfaceMuted: baseColors.surfaceMuted.withOpacity(
+      surfaceMuted: baseColors.surfaceMuted.withValues(alpha: 
         isDark ? darkMutedAlpha : lightMutedAlpha,
       ),
     );
 
-    final Color sheetColor = baseColors.surface.withOpacity(
+    final Color sheetColor = baseColors.surface.withValues(alpha: 
       isDark ? darkSheetAlpha : lightSheetAlpha,
     );
 
     return base.copyWith(
       scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: Colors.transparent,
+      splashColor: colors.accent.withValues(alpha: 0.10),
+      highlightColor: Colors.transparent,
+      splashFactory: InkRipple.splashFactory,
       extensions: <ThemeExtension<dynamic>>[colors],
       colorScheme: base.colorScheme.copyWith(
         primary: colors.accent,

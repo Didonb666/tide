@@ -113,9 +113,9 @@ class _LiquidConnectButtonState extends State<LiquidConnectButton>
           glowBlur = 8;
         } else if (widget.connected) {
           fill = <Color>[
-            colors.accent.withOpacity(0.72),
-            colors.info.withOpacity(0.48),
-            colors.accent.withOpacity(0.72),
+            colors.accent.withValues(alpha: 0.72),
+            colors.info.withValues(alpha: 0.48),
+            colors.accent.withValues(alpha: 0.72),
           ];
           glow = colors.accent;
           glowOpacity = 0.42;
@@ -148,7 +148,7 @@ class _LiquidConnectButtonState extends State<LiquidConnectButton>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: glow.withOpacity(glowOpacity),
+                    color: glow.withValues(alpha: glowOpacity),
                     blurRadius: glowBlur,
                     spreadRadius: widget.connected ? 1.5 : 0,
                     offset: const Offset(0, 10),
@@ -206,7 +206,7 @@ class _LiquidConnectButtonState extends State<LiquidConnectButton>
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: Colors.white
-                                                .withOpacity(0.6),
+                                                .withValues(alpha: 0.6),
                                             width: 2,
                                           ),
                                         ),

@@ -73,8 +73,8 @@ class _LiquidGlassContainerState extends State<LiquidGlassContainer>
   List<Color> _fillColors(bool dark) {
     if (widget.tint != null) {
       return <Color>[
-        widget.tint!.withOpacity(dark ? 0.46 : 0.55),
-        widget.tint!.withOpacity(dark ? 0.28 : 0.38),
+        widget.tint!.withValues(alpha: dark ? 0.46 : 0.55),
+        widget.tint!.withValues(alpha: dark ? 0.28 : 0.38),
       ];
     }
     return dark
@@ -257,7 +257,7 @@ class _LiquidEdgePainter extends CustomPainter {
 
     canvas.drawShadow(
       path,
-      Colors.black.withOpacity(dark ? 0.48 : 0.18),
+      Colors.black.withValues(alpha: dark ? 0.48 : 0.18),
       24,
       true,
     );
@@ -266,12 +266,12 @@ class _LiquidEdgePainter extends CustomPainter {
       final Paint red = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.8
-        ..color = const Color(0xFFFF3B30).withOpacity(0.18 * h)
+        ..color = const Color(0xFFFF3B30).withValues(alpha: 0.18 * h)
         ..blendMode = BlendMode.plus;
       final Paint blue = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.8
-        ..color = const Color(0xFF2B7FFF).withOpacity(0.18 * h)
+        ..color = const Color(0xFF2B7FFF).withValues(alpha: 0.18 * h)
         ..blendMode = BlendMode.plus;
 
       canvas.drawPath(path.shift(const Offset(-1.4, -0.4)), red);

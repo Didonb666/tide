@@ -289,9 +289,9 @@ class _ImportSheetState extends State<ImportSheet> {
           width: double.infinity,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: colors.danger.withOpacity(0.10),
+            color: colors.danger.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(TideRadii.sm),
-            border: Border.all(color: colors.danger.withOpacity(0.28)),
+            border: Border.all(color: colors.danger.withValues(alpha: 0.28)),
           ),
           child: Text(
             _error!,
@@ -359,7 +359,7 @@ class _OptionTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(TideSpace.x4),
         decoration: BoxDecoration(
-          color: colors.surfaceMuted.withOpacity(0.6),
+          color: colors.surfaceMuted.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(TideRadii.lg),
           border: Border.all(color: colors.hairline),
         ),
@@ -369,7 +369,7 @@ class _OptionTile extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: colors.accent.withOpacity(0.14),
+                color: colors.accent.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(TideRadii.md),
               ),
               child: Icon(icon, size: 22, color: colors.accent),

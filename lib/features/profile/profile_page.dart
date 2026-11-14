@@ -125,7 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 68,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colors.surface.withOpacity(0.45),
+                              color: colors.surface.withValues(alpha: 0.45),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: _avatarPath != null

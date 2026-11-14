@@ -99,7 +99,7 @@ class ConnectPage extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.45),
+      barrierColor: Colors.black.withValues(alpha: 0.45),
       builder: (BuildContext sheetContext) {
         final TideColors colors = sheetContext.colors;
         final TextTheme text = Theme.of(sheetContext).textTheme;
@@ -118,7 +118,7 @@ class ConnectPage extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: colors.inkTertiary.withOpacity(0.5),
+                      color: colors.inkTertiary.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -213,9 +213,9 @@ class _KernelBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color: colors.success.withOpacity(0.16),
+              color: colors.success.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: colors.success.withOpacity(0.35)),
+              border: Border.all(color: colors.success.withValues(alpha: 0.35)),
             ),
             child: Text(tr('已是最新'),
               style: text.labelSmall?.copyWith(
@@ -299,8 +299,8 @@ class _AnnouncementCardState extends State<_AnnouncementCard> {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: colors.accent.withOpacity(0.14),
-                    border: Border.all(color: colors.accent.withOpacity(0.25)),
+                    color: colors.accent.withValues(alpha: 0.14),
+                    border: Border.all(color: colors.accent.withValues(alpha: 0.25)),
                   ),
                   child: Icon(
                     Icons.campaign_rounded,
@@ -641,10 +641,10 @@ class _VpnButton extends StatelessWidget {
         ? <Color>[colors.surfaceMuted, colors.surfaceMuted]
         : connected
             ? <Color>[
-                colors.danger.withOpacity(0.85),
-                colors.danger.withOpacity(0.62),
+                colors.danger.withValues(alpha: 0.85),
+                colors.danger.withValues(alpha: 0.62),
               ]
-            : <Color>[colors.accent, colors.accent.withOpacity(0.72)];
+            : <Color>[colors.accent, colors.accent.withValues(alpha: 0.72)];
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -662,7 +662,7 @@ class _VpnButton extends StatelessWidget {
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: (connected ? colors.danger : colors.accent)
-                  .withOpacity(busy ? 0.08 : 0.34),
+                  .withValues(alpha: busy ? 0.08 : 0.34),
               blurRadius: 18,
               offset: const Offset(0, 8),
             ),

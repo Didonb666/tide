@@ -201,11 +201,11 @@ class _Segment extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color:
-                  active ? colors.accent.withOpacity(0.18) : Colors.transparent,
+                  active ? colors.accent.withValues(alpha: 0.18) : Colors.transparent,
               borderRadius: BorderRadius.circular(TideRadii.md),
               border: Border.all(
                 color:
-                    active ? colors.accent.withOpacity(0.55) : colors.hairline,
+                    active ? colors.accent.withValues(alpha: 0.55) : colors.hairline,
               ),
             ),
             child: Text(
@@ -263,12 +263,12 @@ class _Field extends StatelessWidget {
         hintText: hint,
         prefixIcon: Icon(icon, size: 18, color: colors.inkTertiary),
         filled: true,
-        fillColor: colors.surface.withOpacity(0.45),
+        fillColor: colors.surface.withValues(alpha: 0.45),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         border: border(colors.hairline),
         enabledBorder: border(colors.hairline),
-        focusedBorder: border(colors.accent.withOpacity(0.7)),
+        focusedBorder: border(colors.accent.withValues(alpha: 0.7)),
       ),
     );
   }

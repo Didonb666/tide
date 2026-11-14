@@ -123,9 +123,9 @@ class _TiltCardState extends State<TiltCard> {
                                 begin: Alignment(-_pointer.dx, -_pointer.dy),
                                 end: Alignment(_pointer.dx, _pointer.dy),
                                 colors: <Color>[
-                                  Colors.white.withOpacity(0.12),
+                                  Colors.white.withValues(alpha: 0.12),
                                   Colors.transparent,
-                                  Colors.black.withOpacity(0.05),
+                                  Colors.black.withValues(alpha: 0.05),
                                 ],
                               ),
                       ),
@@ -265,7 +265,7 @@ class _ConnectButtonFxState extends State<ConnectButtonFx>
           gradient = LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: <Color>[colors.accent, colors.accent.withOpacity(0.82)],
+            colors: <Color>[colors.accent, colors.accent.withValues(alpha: 0.82)],
           );
           glowColor = colors.accent;
           glowOpacity = 0.18 + 0.16 * breath;
@@ -294,7 +294,7 @@ class _ConnectButtonFxState extends State<ConnectButtonFx>
                 gradient: gradient,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: glowColor.withOpacity(
+                    color: glowColor.withValues(alpha: 
                       dark ? glowOpacity : glowOpacity * 0.75,
                     ),
                     blurRadius: glowBlur,
@@ -324,7 +324,7 @@ class _ConnectButtonFxState extends State<ConnectButtonFx>
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.65),
+                                      color: Colors.white.withValues(alpha: 0.65),
                                       width: 2,
                                     ),
                                   ),
@@ -456,14 +456,14 @@ class ProfileCard extends StatelessWidget {
                 colors: <Color>[
                   colors.surface,
                   Color.alphaBlend(
-                    colors.accent.withOpacity(0.04),
+                    colors.accent.withValues(alpha: 0.04),
                     colors.surface,
                   ),
                 ],
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withOpacity(dark ? 0.42 : 0.06),
+                  color: Colors.black.withValues(alpha: dark ? 0.42 : 0.06),
                   blurRadius: 22,
                   spreadRadius: -10,
                   offset: const Offset(0, 12),

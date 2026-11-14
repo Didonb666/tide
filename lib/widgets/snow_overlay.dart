@@ -192,12 +192,12 @@ class _SnowPainter extends CustomPainter {
           image!.width.toDouble(),
           image!.height.toDouble(),
         );
-        paint.color = Colors.white.withOpacity(0.15 + 0.45 * fade);
+        paint.color = Colors.white.withValues(alpha: 0.15 + 0.45 * fade);
         canvas.drawImageRect(image!, src, dst, paint);
         canvas.restore();
       } else {
         paint.color =
-            Color.lerp(dim, color, 0.45)!.withOpacity(0.10 + 0.16 * fade);
+            Color.lerp(dim, color, 0.45)!.withValues(alpha: 0.10 + 0.16 * fade);
         canvas.drawCircle(Offset(x, y), r, paint);
       }
     }

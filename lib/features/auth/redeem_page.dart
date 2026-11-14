@@ -94,7 +94,7 @@ class _RedeemPageState extends State<RedeemPage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: colors.surface.withOpacity(0.35),
+                            color: colors.surface.withValues(alpha: 0.35),
                             borderRadius:
                                 BorderRadius.circular(TideRadii.md),
                             border: Border.all(color: colors.hairline),
@@ -146,7 +146,7 @@ class _RedeemPageState extends State<RedeemPage> {
                               color: colors.inkTertiary,
                             ),
                             filled: true,
-                            fillColor: colors.surface.withOpacity(0.45),
+                            fillColor: colors.surface.withValues(alpha: 0.45),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(TideRadii.md),
                               borderSide: BorderSide(color: colors.hairline),
@@ -158,7 +158,7 @@ class _RedeemPageState extends State<RedeemPage> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(TideRadii.md),
                               borderSide: BorderSide(
-                                color: colors.accent.withOpacity(0.7),
+                                color: colors.accent.withValues(alpha: 0.7),
                               ),
                             ),
                           ),

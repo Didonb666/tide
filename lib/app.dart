@@ -200,7 +200,7 @@ class _NoTimeBanner extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Material(
-          color: colors.accent.withOpacity(0.16),
+          color: colors.accent.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(TideRadii.md),
           child: InkWell(
             borderRadius: BorderRadius.circular(TideRadii.md),
@@ -350,7 +350,7 @@ class _ParticlePainter extends CustomPainter {
       final double fade = math.sin(progress * math.pi).clamp(0.0, 1.0);
 
       paint.color =
-          Color.lerp(dim, color, 0.45)!.withOpacity(0.10 + 0.16 * fade);
+          Color.lerp(dim, color, 0.45)!.withValues(alpha: 0.10 + 0.16 * fade);
       canvas.drawCircle(Offset(x, y), p.size, paint);
     }
   }

@@ -9,6 +9,7 @@ class JellyPageRoute<T> extends PageRouteBuilder<T> {
     super.settings,
     this.axisAlign = Alignment.center,
   }) : super(
+          barrierColor: Colors.transparent,
           transitionDuration: const Duration(milliseconds: 560),
           reverseTransitionDuration: const Duration(milliseconds: 320),
           pageBuilder: (BuildContext context, Animation<double> animation,

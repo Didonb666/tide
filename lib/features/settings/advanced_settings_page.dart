@@ -202,7 +202,7 @@ class _Panel extends StatelessWidget {
         color: colors.surface,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withOpacity(context.isDark ? 0.35 : 0.05),
+            color: Colors.black.withValues(alpha: context.isDark ? 0.35 : 0.05),
             blurRadius: 22,
             spreadRadius: -12,
             offset: const Offset(0, 12),
@@ -244,7 +244,7 @@ class _PresetDot extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: <Color>[base, base.withOpacity(0.6)],
+                colors: <Color>[base, base.withValues(alpha: 0.6)],
               ),
               border: Border.all(
                 color: selected ? colors.ink : Colors.transparent,
@@ -252,7 +252,7 @@ class _PresetDot extends StatelessWidget {
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: base.withOpacity(selected ? 0.55 : 0.25),
+                  color: base.withValues(alpha: selected ? 0.55 : 0.25),
                   blurRadius: selected ? 16 : 8,
                   spreadRadius: selected ? 2 : 0,
                 ),
