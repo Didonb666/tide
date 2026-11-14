@@ -1,0 +1,4 @@
+data.json
+data.json.tmp
+*.log
+node_modules/
