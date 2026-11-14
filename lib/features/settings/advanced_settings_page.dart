@@ -114,7 +114,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                       onPressed: () => _applyHex(settings),
                       style: FilledButton.styleFrom(
                         backgroundColor: colors.accent,
-                        foregroundColor: Colors.white,
+                        foregroundColor: onAccent(colors.accent),
                       ),
                       child: const Text('应用'),
                     ),
@@ -259,7 +259,7 @@ class _PresetDot extends StatelessWidget {
               ],
             ),
             child: selected
-                ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
+                ? const Icon(Icons.check_rounded, size: 20, color: Colors.black87)
                 : const SizedBox.shrink(),
           ),
           const SizedBox(height: 6),

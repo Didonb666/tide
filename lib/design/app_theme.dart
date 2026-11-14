@@ -38,6 +38,13 @@ enum TideAccent {
     Color(0xFFFF7BA8),
     Color(0xFFFFE8EF),
     Color(0xFF3A0F1D),
+  ),
+  white(
+    '纯白',
+    Color(0xFFFFFFFF),
+    Color(0xFFFFFFFF),
+    Color(0xFFFFFFFF),
+    Color(0xFFFFFFFF),
   );
 
   const TideAccent(
@@ -78,10 +85,19 @@ abstract final class AppTheme {
   static ThemeData dark(Color seed) =>
       _apply(TideTheme.dark(), seed, Brightness.dark);
 
-  /// 深色模式下把用户给的颜色提亮，保证在暗背景上够醒目。
+  /// 深色模式提亮、浅色模式压暗（纯白等极浅色需要特殊处理）。
   static Color resolveAccent(Color seed, Brightness brightness) {
-    if (brightness == Brightness.light) return seed;
     final HSLColor hsl = HSLColor.fromColor(seed);
+
+    if (brightness == Brightness.light) {
+      // 纯白/近白在浅色背景上不可见，换成深灰
+      if (hsl.lightness >= 0.9) return const Color(0xFF1F2933);
+      return seed;
+    }
+
+    // 已经是亮色（如纯白），不要再提亮
+    if (hsl.lightness >= 0.85) return seed;
+
     return hsl
         .withLightness((hsl.lightness + 0.16).clamp(0.0, 0.92))
         .withSaturation((hsl.saturation * 0.98).clamp(0.0, 1.0))

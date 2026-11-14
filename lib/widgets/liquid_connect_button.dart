@@ -250,14 +250,14 @@ class _LiquidConnectButtonState extends State<LiquidConnectButton>
                                             ? Icons.power_settings_new_rounded
                                             : Icons.bolt_rounded,
                                         size: 20,
-                                        color: Colors.white,
+                                        color: onAccent(colors.accent),
                                         shadows: glassTextShadow,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
                                         widget.label,
                                         style: TideType.headline.copyWith(
-                                          color: Colors.white,
+                                          color: onAccent(colors.accent),
                                           letterSpacing: 0.3,
                                           shadows: glassTextShadow,
                                         ),

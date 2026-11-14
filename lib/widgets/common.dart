@@ -279,7 +279,7 @@ class ProfileAvatar extends StatelessWidget {
             child: Text(
               name.isEmpty ? '?' : name.substring(0, 1),
               style: TextStyle(
-                color: Colors.white,
+                color: onAccent(colors.accent),
                 fontSize: size * 0.38,
                 fontWeight: FontWeight.w600,
               ),
@@ -1079,13 +1079,13 @@ class _ConnectButtonState extends State<ConnectButton>
                                       ? Icons.power_settings_new_rounded
                                       : Icons.bolt_rounded,
                                   size: 20,
-                                  color: Colors.white,
+                                  color: onAccent(colors.accent),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   widget.label,
                                   style: TideType.headline.copyWith(
-                                    color: Colors.white,
+                                    color: onAccent(colors.accent),
                                     letterSpacing: 0.3,
                                   ),
                                 ),

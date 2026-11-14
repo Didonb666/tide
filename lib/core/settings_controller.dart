@@ -6,8 +6,9 @@ import 'display_mode_service.dart';
 
 class SettingsController extends ChangeNotifier {
   static const String _kTheme = 'settings.themeMode';
-  static const String _kAccent = 'settings.accentColor';
-  static const String _kPreset = 'settings.accentPreset';
+  // v2：默认主色改成纯白，换 key 让旧存档失效、立即生效
+  static const String _kAccent = 'settings.accentColor.v2';
+  static const String _kPreset = 'settings.accentPreset.v2';
   static const String _kFps = 'settings.refreshRate';
   static const String _kAutoConnect = 'settings.autoConnect';
   static const String _kVerbose = 'settings.verboseLogs';
@@ -17,12 +18,13 @@ class SettingsController extends ChangeNotifier {
   static const String _kNavInset = 'settings.navInset';
   static const String _kSnowImage = 'settings.snowImage';
   static const String _kSnowCount = 'settings.snowCount';
-  static const String _kSnowSize = 'settings.snowSize';
+  // v2：雪花默认大小改成 35
+  static const String _kSnowSize = 'settings.snowSize.v2';
   static const String _kSnowSpeed = 'settings.snowSpeed';
 
   ThemeMode _themeMode = ThemeMode.system;
-  Color _accentColor = TideAccent.green.seed;
-  TideAccent _preset = TideAccent.green;
+  Color _accentColor = TideAccent.white.seed;
+  TideAccent _preset = TideAccent.white;
   int _refreshRate = 60;
   bool _autoConnect = false;
   bool _verboseLogs = false;
@@ -33,7 +35,7 @@ class SettingsController extends ChangeNotifier {
   double _navInset = 20;
   String? _snowImage;
   int _snowCount = 26;
-  double _snowSize = 10;
+  double _snowSize = 35;
   double _snowSpeed = 1.0;
 
   bool _loaded = false;
@@ -66,7 +68,7 @@ class SettingsController extends ChangeNotifier {
       _themeMode = ThemeMode
           .values[(prefs.getInt(_kTheme) ?? 0).clamp(0, ThemeMode.values.length - 1)];
       _preset = TideAccent
-          .values[(prefs.getInt(_kPreset) ?? 0).clamp(0, TideAccent.values.length - 1)];
+          .values[(prefs.getInt(_kPreset) ?? TideAccent.white.index).clamp(0, TideAccent.values.length - 1)];
       _accentColor = Color(prefs.getInt(_kAccent) ?? _preset.seed.value);
       _refreshRate = prefs.getInt(_kFps) ?? 60;
       _autoConnect = prefs.getBool(_kAutoConnect) ?? false;
@@ -78,7 +80,7 @@ class SettingsController extends ChangeNotifier {
       _navInset = (prefs.getDouble(_kNavInset) ?? 20).clamp(8.0, 40.0);
       _snowImage = prefs.getString(_kSnowImage);
       _snowCount = (prefs.getInt(_kSnowCount) ?? 26).clamp(5, 100);
-      _snowSize = (prefs.getDouble(_kSnowSize) ?? 10).clamp(4.0, 60.0);
+      _snowSize = (prefs.getDouble(_kSnowSize) ?? 35).clamp(4.0, 60.0);
       _snowSpeed = (prefs.getDouble(_kSnowSpeed) ?? 1.0).clamp(0.2, 3.0);
 
       notifyListeners();

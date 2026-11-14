@@ -659,13 +659,13 @@ class _VpnButton extends StatelessWidget {
                       ? Icons.stop_circle_outlined
                       : Icons.play_circle_fill_rounded,
                   size: 19,
-                  color: Colors.white,
+                  color: onAccent(colors.accent),
                 ),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: TideType.headline.copyWith(
-                  color: Colors.white,
+                  color: onAccent(colors.accent),
                   letterSpacing: 0.3,
                   shadows: glassTextShadow,
                 ),

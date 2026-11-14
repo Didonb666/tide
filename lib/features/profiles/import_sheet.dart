@@ -311,7 +311,7 @@ class _ImportSheetState extends State<ImportSheet> {
                   : () => _submit(_yamlCtrl.text)),
           style: FilledButton.styleFrom(
             backgroundColor: colors.accent,
-            foregroundColor: Colors.white,
+            foregroundColor: onAccent(colors.accent),
             shape: const RoundedRectangleBorder(borderRadius: TideRadii.rMd),
           ),
           child: _busy

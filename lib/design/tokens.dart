@@ -359,3 +359,7 @@ abstract final class TideTheme {
     );
   }
 }
+
+/// 在 accent 底色上应该使用的前景色（纯白主题时自动转深色，避免白字白底）。
+Color onAccent(Color accent) =>
+    accent.computeLuminance() > 0.6 ? const Color(0xFF0B0F14) : Colors.white;

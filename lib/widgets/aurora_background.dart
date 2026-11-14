@@ -83,11 +83,14 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
 
         _syncVideo(isVideo ? path : null);
 
-        // 没有任何自定义背景：用内置默认图（原样显示，不加透明度/模糊）。
+        // 没有任何自定义背景：按方向使用内置默认图（原样显示，不加透明度/模糊）。
         if (path == null) {
+          final String asset = orientation == Orientation.portrait
+              ? 'assets/images/default_background_portrait.jpg'
+              : 'assets/images/default_background.webp';
           return Positioned.fill(
             child: Image.asset(
-              'assets/images/default_background.webp',
+              asset,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,

@@ -196,7 +196,7 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                         onPressed: () => Navigator.of(context).pop(),
                         style: FilledButton.styleFrom(
                           backgroundColor: colors.accent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: onAccent(colors.accent),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
