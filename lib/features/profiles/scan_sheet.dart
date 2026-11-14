@@ -63,7 +63,7 @@ class _ScanSheetState extends State<ScanSheet> {
     try {
       final String text = raw.trim();
       String yaml;
-      String name = '扫码导入';
+      String name = tr('扫码导入');
 
       if (text.startsWith('vless://')) {
         final Map<String, String> parsed = _parseVless(text);
@@ -71,7 +71,7 @@ class _ScanSheetState extends State<ScanSheet> {
         yaml = parsed['yaml']!;
       } else if (text.startsWith('http://') || text.startsWith('https://')) {
         yaml = await _download(text);
-        name = '订阅 ${DateTime.now().month}-${DateTime.now().day}';
+        name = tr('订阅 ${DateTime.now().month}-${DateTime.now().day}');
       } else {
         yaml = text;
       }
@@ -79,7 +79,7 @@ class _ScanSheetState extends State<ScanSheet> {
       if (!yaml.contains('proxies:') &&
           !yaml.contains('proxy-groups:') &&
           !yaml.contains('rules:')) {
-        throw const FormatException('二维码内容不是 Clash / VLESS 配置');
+        throw FormatException(tr('二维码内容不是 Clash / VLESS 配置'));
       }
 
       final Profile profile =
@@ -127,7 +127,7 @@ class _ScanSheetState extends State<ScanSheet> {
         if (!mounted) return;
         setState(() {
           _busy = false;
-          _error = '图片里没识别到二维码';
+          _error = tr('图片里没识别到二维码');
         });
         return;
       }
@@ -137,7 +137,7 @@ class _ScanSheetState extends State<ScanSheet> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = '识别失败：$error';
+        _error = tr('识别失败：$error');
       });
     }
   }
@@ -154,7 +154,7 @@ class _ScanSheetState extends State<ScanSheet> {
       await for (final List<int> chunk in response) {
         size += chunk.length;
         if (size > 5 * 1024 * 1024) {
-          throw const FormatException('文件超过 5MB，已中止');
+          throw FormatException(tr('文件超过 5MB，已中止'));
         }
         buffer.write(utf8.decode(chunk, allowMalformed: true));
       }
@@ -168,7 +168,7 @@ class _ScanSheetState extends State<ScanSheet> {
     final Uri u = Uri.parse(uri);
     final Map<String, String> q = u.queryParameters;
     final String name =
-        u.fragment.isEmpty ? '扫码节点' : Uri.decodeComponent(u.fragment);
+        u.fragment.isEmpty ? tr('扫码节点') : Uri.decodeComponent(u.fragment);
     final String flow = q['flow'] ?? '';
     final String sni = q['sni'] ?? '';
     final String fp = q['fp'] ?? 'chrome';
@@ -279,7 +279,7 @@ class _ScanSheetState extends State<ScanSheet> {
                             return Container(
                               color: Colors.black,
                               alignment: Alignment.center,
-                              padding: const EdgeInsets.all(18),
+                              padding: EdgeInsets.all(18),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
@@ -288,16 +288,16 @@ class _ScanSheetState extends State<ScanSheet> {
                                     size: 32,
                                     color: Colors.white38,
                                   ),
-                                  const SizedBox(height: 10),
+                                  SizedBox(height: 10),
                                   Text(tr('相机不可用：${error.errorCode.name}\n'
                                     '${error.errorDetails?.message ?? ''}'),
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8),
                                   Text(tr('系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；'
                                     '若刚允许过，杀掉应用重开一次。'),
                                     textAlign: TextAlign.center,

@@ -38,10 +38,10 @@ String formatBytes(int bytes) {
 
 String relativeTime(DateTime time) {
   final Duration delta = DateTime.now().difference(time);
-  if (delta.inSeconds < 60) return '刚刚';
-  if (delta.inMinutes < 60) return '${delta.inMinutes} 分钟前';
-  if (delta.inHours < 24) return '${delta.inHours} 小时前';
-  return '${delta.inDays} 天前';
+  if (delta.inSeconds < 60) return tr('刚刚');
+  if (delta.inMinutes < 60) return tr('${delta.inMinutes} 分钟前');
+  if (delta.inHours < 24) return tr('${delta.inHours} 小时前');
+  return tr('${delta.inDays} 天前');
 }
 
 // ---------------------------------------------------------------------------
@@ -228,15 +228,15 @@ class StatusPill extends StatelessWidget {
   String get _label {
     switch (phase) {
       case TunnelPhase.idle:
-        return '未连接';
+        return tr('未连接');
       case TunnelPhase.connecting:
-        return '连接中';
+        return tr('连接中');
       case TunnelPhase.connected:
-        return '已连接';
+        return tr('已连接');
       case TunnelPhase.disconnecting:
-        return '断开中';
+        return tr('断开中');
       case TunnelPhase.failed:
-        return '失败';
+        return tr('失败');
     }
   }
 }
@@ -817,11 +817,11 @@ class ProfileStreamTile extends StatelessWidget {
                           ),
                           if (active) ...<Widget>[
                             const SizedBox(width: 6),
-                            const TideBadge(text: '当前'),
+                            TideBadge(text: tr('当前')),
                           ],
                           if (!profile.valid) ...<Widget>[
                             const SizedBox(width: 6),
-                            TideBadge(text: '校验失败', color: colors.danger),
+                            TideBadge(text: tr('校验失败'), color: colors.danger),
                           ],
                         ],
                       ),

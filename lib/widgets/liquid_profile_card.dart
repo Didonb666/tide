@@ -99,11 +99,11 @@ class LiquidProfileCard extends StatelessWidget {
                           ),
                           if (active) ...<Widget>[
                             const SizedBox(width: 6),
-                            const TideBadge(text: '当前'),
+                            TideBadge(text: tr('当前')),
                           ],
                           if (!profile.valid) ...<Widget>[
                             const SizedBox(width: 6),
-                            TideBadge(text: '校验失败', color: colors.danger),
+                            TideBadge(text: tr('校验失败'), color: colors.danger),
                           ],
                         ],
                       ),

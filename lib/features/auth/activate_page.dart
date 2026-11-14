@@ -95,14 +95,14 @@ class _ActivatePageState extends State<ActivatePage> {
                     _Field(
                       controller: _name,
                       label: AppText.t(context, 'auth.nickname'),
-                      hint: _register ? '例如 Asuna' : '已注册的昵称',
+                      hint: _register ? tr('例如 Asuna') : tr('已注册的昵称'),
                       icon: Icons.person_outline_rounded,
                     ),
                     const SizedBox(height: 12),
                     _Field(
                       controller: _pass,
                       label: AppText.t(context, 'auth.password'),
-                      hint: _register ? '至少 6 位' : '••••••',
+                      hint: _register ? tr('至少 6 位') : '••••••',
                       icon: Icons.lock_outline_rounded,
                       obscure: true,
                     ),

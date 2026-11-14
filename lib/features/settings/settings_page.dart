@@ -38,16 +38,16 @@ class _SettingsPageState extends State<SettingsPage> {
   String _modeLabel(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        return '跟随系统';
+        return tr('跟随系统');
       case ThemeMode.light:
-        return '浅色';
+        return tr('浅色');
       case ThemeMode.dark:
-        return '深色';
+        return tr('深色');
     }
   }
 
   String _shortPath(String? path) {
-    if (path == null || path.isEmpty) return '默认极光';
+    if (path == null || path.isEmpty) return tr('默认极光');
     final List<String> parts = path.split(RegExp(r'[/\\]'));
     return parts.isEmpty ? path : parts.last;
   }
@@ -55,11 +55,11 @@ class _SettingsPageState extends State<SettingsPage> {
   String _slotLabel(BackgroundSlot slot) {
     switch (slot) {
       case BackgroundSlot.shared:
-        return '统一背景';
+        return tr('统一背景');
       case BackgroundSlot.portrait:
-        return '竖屏背景';
+        return tr('竖屏背景');
       case BackgroundSlot.landscape:
-        return '横屏背景';
+        return tr('横屏背景');
     }
   }
 
@@ -70,9 +70,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
       await bg.pickImage(slot: slot);
-      if (context.mounted) _toast(context, '${_slotLabel(slot)}已更新');
+      if (context.mounted) _toast(context, tr('${_slotLabel(slot)}已更新'));
     } catch (error) {
-      if (context.mounted) _toast(context, '选择图片失败：$error');
+      if (context.mounted) _toast(context, tr('选择图片失败：$error'));
     }
   }
 
@@ -83,9 +83,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
       await bg.pickVideo(slot: slot);
-      if (context.mounted) _toast(context, '${_slotLabel(slot)}已更新');
+      if (context.mounted) _toast(context, tr('${_slotLabel(slot)}已更新'));
     } catch (error) {
-      if (context.mounted) _toast(context, '选择视频失败：$error');
+      if (context.mounted) _toast(context, tr('选择视频失败：$error'));
     }
   }
 
@@ -233,8 +233,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   builder: (BuildContext context, double fps, Widget? child) {
                     return Text(
                       fps <= 0
-                          ? '实测帧率：采集中…'
-                          : '实测帧率：${fps.toStringAsFixed(1)} fps',
+                          ? tr('实测帧率：采集中…')
+                          : tr('实测帧率：${fps.toStringAsFixed(1)} fps'),
                       style: TideType.mono.copyWith(color: colors.accent),
                     );
                   },
@@ -761,7 +761,7 @@ class _BackgroundSlotRow extends StatelessWidget {
   bool get _has => path != null && path!.isNotEmpty;
 
   String get _fileName {
-    if (!_has) return '未设置';
+    if (!_has) return tr('未设置');
     final List<String> parts = path!.split(RegExp(r'[/\\]'));
     return parts.isEmpty ? path! : parts.last;
   }

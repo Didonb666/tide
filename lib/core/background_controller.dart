@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_text.dart';
 
 /// 背景槽位：统一（横竖屏共用）/ 竖屏专用 / 横屏专用。
 enum BackgroundSlot { shared, portrait, landscape }
@@ -219,7 +220,7 @@ class BackgroundController extends ChangeNotifier {
 }
 
 class BackgroundScope extends InheritedNotifier<BackgroundController> {
-  const BackgroundScope({
+  BackgroundScope({
     super.key,
     required BackgroundController controller,
     required super.child,
@@ -228,7 +229,7 @@ class BackgroundScope extends InheritedNotifier<BackgroundController> {
   static BackgroundController of(BuildContext context) {
     final BackgroundScope? scope =
         context.dependOnInheritedWidgetOfExactType<BackgroundScope>();
-    assert(scope != null, '找不到 BackgroundScope');
+    assert(scope != null, tr('找不到 BackgroundScope'));
     return scope!.notifier!;
   }
 }

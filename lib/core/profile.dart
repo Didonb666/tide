@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'app_text.dart';
 
 enum ProfileSource { paste, file, url }
 
@@ -36,7 +37,7 @@ class ProviderInfo {
 
 @immutable
 class Profile {
-  const Profile({
+  Profile({
     required this.id,
     required this.name,
     required this.source,
@@ -70,11 +71,11 @@ class Profile {
   String get sourceLabel {
     switch (source) {
       case ProfileSource.paste:
-        return '粘贴';
+        return tr('粘贴');
       case ProfileSource.file:
-        return '文件';
+        return tr('文件');
       case ProfileSource.url:
-        return '订阅';
+        return tr('订阅');
     }
   }
 
@@ -200,7 +201,7 @@ List<Profile> buildMockProfiles() {
   return <Profile>[
     Profile(
       id: 'p-builtin',
-      name: '内置专线',
+      name: tr('内置专线'),
       source: ProfileSource.paste,
       rawYaml: kBuiltinVlessConfig,
       ruleCount: 1,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import '../app_text.dart';
 
 /// 授权服务地址。
 ///
@@ -70,7 +71,7 @@ class LicenseApi {
     String? token,
   }) async {
     final HttpClient client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 12);
+      ..connectionTimeout = Duration(seconds: 12);
 
     if (kLicenseRelaxedTls) {
       // 只对授权服务自己的域名放宽链校验（TLS 加密仍然生效）。
@@ -107,7 +108,7 @@ class LicenseApi {
       if (response.statusCode >= 400) {
         throw LicenseApiException(
           data['error']?.toString() ?? 'http_${response.statusCode}',
-          data['message']?.toString() ?? '请求失败（${response.statusCode}）',
+          data['message']?.toString() ?? tr('请求失败（${response.statusCode}）'),
           statusCode: response.statusCode,
         );
       }
@@ -117,15 +118,15 @@ class LicenseApi {
     } on HandshakeException catch (error) {
       throw LicenseApiException(
         'tls',
-        'TLS 握手失败（$baseUrl）：${error.message}',
+        tr('TLS 握手失败（$baseUrl）：${error.message}'),
       );
     } on SocketException catch (error) {
       throw LicenseApiException(
         'network',
-        '连不上授权服务器（$baseUrl）：${error.message}',
+        tr('连不上授权服务器（$baseUrl）：${error.message}'),
       );
     } on HttpException catch (error) {
-      throw LicenseApiException('network', '网络异常：${error.message}');
+      throw LicenseApiException('network', tr('网络异常：${error.message}'));
     } finally {
       client.close(force: true);
     }

@@ -18,7 +18,7 @@ class LogsPage extends StatefulWidget {
 class _LogsPageState extends State<LogsPage> {
   int _filter = 0;
 
-  static const List<String> _filters = <String>['全部', '已代理', '直连', '已拒绝'];
+  static List<String> _filters = <String>[tr('全部'), tr('已代理'), tr('直连'), tr('已拒绝')];
 
   bool _matches(LogEntry entry) {
     switch (_filter) {
@@ -55,7 +55,7 @@ class _LogsPageState extends State<LogsPage> {
               children: <Widget>[
                 Expanded(child: Text(tr('日志'), style: text.displaySmall)),
                 if (c.usingSimulator)
-                  TideBadge(text: '演示数据', color: colors.warning),
+                  TideBadge(text: tr('演示数据'), color: colors.warning),
               ],
             ),
           ),
@@ -98,7 +98,7 @@ class _LogsPageState extends State<LogsPage> {
             child: items.isEmpty
                 ? Center(
                     child: Text(
-                      c.tunnelState.isConnected ? '还没有匹配的日志' : '连接后会在这里看到实时连接',
+                      c.tunnelState.isConnected ? tr('还没有匹配的日志') : tr('连接后会在这里看到实时连接'),
                       style: text.bodySmall,
                     ),
                   )

@@ -12,6 +12,7 @@ import 'tunnel/simulated_tunnel.dart';
 import 'tunnel/tunnel_factory.dart';
 import 'tunnel/tunnel_platform.dart';
 import 'tunnel/tunnel_state.dart';
+import 'app_text.dart';
 
 class AppController extends ChangeNotifier {
   AppController({TunnelPlatform? platform})
@@ -27,7 +28,7 @@ class AppController extends ChangeNotifier {
   final List<Profile> profiles;
   final List<LogEntry> logs = <LogEntry>[];
 
-  TunnelState tunnelState = const TunnelState();
+  TunnelState tunnelState = TunnelState();
   String? activeProfileId;
 
   Profile? get activeProfile {
@@ -93,11 +94,11 @@ class AppController extends ChangeNotifier {
 
     final Profile? profile = activeProfile;
     if (profile == null) {
-      _fail('还没有选择配置');
+      _fail(tr('还没有选择配置'));
       return;
     }
     if (profile.rawYaml.trim().isEmpty) {
-      _fail('「${profile.name}」没有可用的 YAML，请先导入真实配置。');
+      _fail(tr('「${profile.name}」没有可用的 YAML，请先导入真实配置。'));
       return;
     }
 
@@ -114,7 +115,7 @@ class AppController extends ChangeNotifier {
       );
       _startLogs();
     } catch (error) {
-      _fail('操作失败：$error');
+      _fail(tr('操作失败：$error'));
     }
   }
 
@@ -140,7 +141,7 @@ class AppController extends ChangeNotifier {
   Profile importProfile(String yaml, {String? name}) {
     final int rules = estimateRuleCount(yaml);
     final String title = (name == null || name.trim().isEmpty)
-        ? '粘贴配置 ${profiles.length + 1}'
+        ? tr('粘贴配置 ${profiles.length + 1}')
         : name.trim();
 
     final Profile profile = Profile(
@@ -150,7 +151,7 @@ class AppController extends ChangeNotifier {
       rawYaml: yaml,
       ruleCount: rules,
       updatedAt: DateTime.now(),
-      groupSummary: rules == 0 ? '未发现 rules 段' : '已保存原文，连接时交给内核解析',
+      groupSummary: rules == 0 ? tr('未发现 rules 段') : tr('已保存原文，连接时交给内核解析'),
       groups: const <GroupInfo>[],
       rules: const <String>[],
       providers: const <ProviderInfo>[],

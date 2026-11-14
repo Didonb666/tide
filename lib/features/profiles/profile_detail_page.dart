@@ -8,7 +8,7 @@ import '../../widgets/common.dart';
 import '../../core/app_text.dart';
 
 class ProfileDetailPage extends StatelessWidget {
-  const ProfileDetailPage({
+  ProfileDetailPage({
     super.key,
     required this.profile,
     this.heroTag,
@@ -29,7 +29,7 @@ class ProfileDetailPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(tr('配置详情')),
@@ -45,10 +45,10 @@ class ProfileDetailPage extends StatelessWidget {
                 indicatorColor: colors.accent,
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: colors.hairline,
-                tabs: const <Widget>[
-                  Tab(text: '策略组'),
-                  Tab(text: '规则'),
-                  Tab(text: '规则集'),
+                tabs: <Widget>[
+                  Tab(text: tr('策略组')),
+                  Tab(text: tr('规则')),
+                  Tab(text: tr('规则集')),
                 ],
               ),
             ),

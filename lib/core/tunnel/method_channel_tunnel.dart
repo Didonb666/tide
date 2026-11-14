@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 
 import 'tunnel_platform.dart';
 import 'tunnel_state.dart';
+import '../app_text.dart';
 
 /// Android 原生实现。
 ///
@@ -17,7 +18,7 @@ import 'tunnel_state.dart';
 /// 这里全部捕获并降级，保证同一套 Dart 代码在桌面端不会崩。
 class MethodChannelTunnelPlatform implements TunnelPlatform {
   static const MethodChannel _methods = MethodChannel('tide/tunnel');
-  static const EventChannel _events = EventChannel('tide/tunnel/events');
+  static EventChannel _events = EventChannel('tide/tunnel/events');
 
   Stream<TunnelState>? _states;
 
@@ -38,12 +39,12 @@ class MethodChannelTunnelPlatform implements TunnelPlatform {
     try {
       final Map<Object?, Object?>? map =
           await _methods.invokeMapMethod<Object?, Object?>('getState');
-      if (map == null) return const TunnelState();
+      if (map == null) return TunnelState();
       return TunnelState.fromMap(map);
     } on MissingPluginException {
-      return const TunnelState();
+      return TunnelState();
     } on PlatformException {
-      return const TunnelState();
+      return TunnelState();
     }
   }
 
@@ -68,7 +69,7 @@ class MethodChannelTunnelPlatform implements TunnelPlatform {
       );
     } on MissingPluginException {
       // 桌面端没有原生实现：交给上层降级处理。
-      throw StateError('当前平台没有原生隧道实现');
+      throw StateError(tr('当前平台没有原生隧道实现'));
     }
   }
 
@@ -77,7 +78,7 @@ class MethodChannelTunnelPlatform implements TunnelPlatform {
     try {
       await _methods.invokeMethod<void>('disconnect');
     } on MissingPluginException {
-      throw StateError('当前平台没有原生隧道实现');
+      throw StateError(tr('当前平台没有原生隧道实现'));
     }
   }
 

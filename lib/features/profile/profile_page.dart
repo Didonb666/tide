@@ -271,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(AppText.t(context, 'profile.remaining'), style: text.labelMedium),
                     const Spacer(),
                     Text(
-                      hasTime ? '${license.remainingDays} 天' : '未兑换',
+                      hasTime ? tr('${license.remainingDays} 天') : tr('未兑换'),
                       style: text.titleMedium?.copyWith(
                         color: hasTime ? colors.accent : colors.danger,
                       ),

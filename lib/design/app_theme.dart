@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'tokens.dart';
+import '../core/app_text.dart';
 
 /// 预设主色。seed 用于任意颜色计算，*Accent 用于预设圆点展示。
 enum TideAccent {

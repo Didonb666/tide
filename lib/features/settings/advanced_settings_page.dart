@@ -35,7 +35,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
   void _applyHex(SettingsController settings) {
     final String raw = _hexCtrl.text.trim().replaceAll('#', '');
     if (!RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(raw)) {
-      setState(() => _error = '请输入 6 位 Hex，例如 #FF5722');
+      setState(() => _error = tr('请输入 6 位 Hex，例如 #FF5722'));
       return;
     }
     setState(() => _error = null);
@@ -151,8 +151,8 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   builder: (BuildContext context, double fps, Widget? child) {
                     return Text(
                       fps <= 0
-                          ? '实测帧率：采集中…'
-                          : '实测帧率：${fps.toStringAsFixed(1)} fps',
+                          ? tr('实测帧率：采集中…')
+                          : tr('实测帧率：${fps.toStringAsFixed(1)} fps'),
                       style: TideType.mono.copyWith(color: colors.accent),
                     );
                   },

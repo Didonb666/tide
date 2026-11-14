@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'license_api.dart';
+import '../app_text.dart';
 
 /// unknown  = 启动中
 /// active   = 已登录且有剩余时长
@@ -70,11 +71,11 @@ class LicenseController extends ChangeNotifier {
 
   String get expiryText {
     final DateTime? exp = _expiresAt;
-    if (exp == null) return '未兑换';
+    if (exp == null) return tr('未兑换');
     final String y = exp.year.toString();
     final String m = exp.month.toString().padLeft(2, '0');
     final String d = exp.day.toString().padLeft(2, '0');
-    return '$y-$m-$d 到期';
+    return tr('$y-$m-$d 到期');
   }
 
   bool get hasToken => _token != null && _token!.isNotEmpty;
@@ -158,7 +159,7 @@ class LicenseController extends ChangeNotifier {
   /// 兑换时长（登录后使用）。
   Future<bool> redeem(String key) async {
     if (!hasToken) {
-      _message = '请先注册或登录';
+      _message = tr('请先注册或登录');
       notifyListeners();
       return false;
     }
@@ -281,7 +282,7 @@ class LicenseController extends ChangeNotifier {
       return false;
     } catch (error) {
       _busy = false;
-      _message = '请求失败：$error';
+      _message = tr('请求失败：$error');
       notifyListeners();
       return false;
     }
@@ -295,7 +296,7 @@ class LicenseController extends ChangeNotifier {
       return await call();
     } on LicenseApiException catch (error) {
       if (error.code != 'network' && error.code != 'tls') rethrow;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+      await Future<void>.delayed(Duration(milliseconds: 500));
       return await call();
     }
   }
@@ -331,10 +332,10 @@ class LicenseController extends ChangeNotifier {
 
     if (notExpired && withinGrace) {
       _status = LicenseStatus.active;
-      _message = '当前离线，已使用本地授权（$remainingDays 天）';
+      _message = tr('当前离线，已使用本地授权（$remainingDays 天）');
     } else if (notExpired) {
       _status = LicenseStatus.noTime;
-      _message = '需要联网校验授权，请检查网络';
+      _message = tr('需要联网校验授权，请检查网络');
     } else {
       _status = LicenseStatus.noTime;
       _message = null;

@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
+import '../app_text.dart';
 
 /// 隧道生命周期。与原生侧（Android Kotlin）的状态字符串一一对应。
 enum TunnelPhase { idle, connecting, connected, disconnecting, failed }
 
 @immutable
 class TunnelState {
-  const TunnelState({
+  TunnelState({
     this.phase = TunnelPhase.idle,
     this.profileId,
     this.message,
@@ -37,15 +38,15 @@ class TunnelState {
   String get label {
     switch (phase) {
       case TunnelPhase.idle:
-        return '未连接';
+        return tr('未连接');
       case TunnelPhase.connecting:
-        return '连接中';
+        return tr('连接中');
       case TunnelPhase.connected:
-        return '已连接';
+        return tr('已连接');
       case TunnelPhase.disconnecting:
-        return '正在断开';
+        return tr('正在断开');
       case TunnelPhase.failed:
-        return '连接失败';
+        return tr('连接失败');
     }
   }
 

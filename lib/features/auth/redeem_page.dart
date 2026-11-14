@@ -106,7 +106,7 @@ class _RedeemPageState extends State<RedeemPage> {
                                 icon: Icons.person_outline_rounded,
                                 label: AppText.t(context, 'profile.account'),
                                 value: license.nickname.isEmpty
-                                    ? '未注册'
+                                    ? tr('未注册')
                                     : license.nickname,
                               ),
                               const SizedBox(height: 6),
@@ -120,8 +120,8 @@ class _RedeemPageState extends State<RedeemPage> {
                                 icon: Icons.hourglass_bottom_rounded,
                                 label: AppText.t(context, 'profile.remaining'),
                                 value: license.expiresAt == null
-                                    ? '未兑换'
-                                    : '${license.remainingDays} 天 · ${license.expiryText}',
+                                    ? tr('未兑换')
+                                    : tr('${license.remainingDays} 天 · ${license.expiryText}'),
                               ),
                             ],
                           ),

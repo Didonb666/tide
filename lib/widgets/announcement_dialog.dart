@@ -7,7 +7,7 @@ import '../core/app_text.dart';
 
 /// 公告内容：改文案只改这里。
 class Announcement {
-  const Announcement({
+  Announcement({
     required this.title,
     required this.version,
     required this.date,
@@ -26,7 +26,7 @@ Announcement kFstoolAnnouncement = Announcement(
   title: tr('公告'),
   version: 'v0.1.0',
   date: '2026-11-06',
-  summary: '欢迎使用 Fstool，本次更新重构首页并支持节点一键切换。',
+  summary: tr('欢迎使用 Fstool，本次更新重构首页并支持节点一键切换。'),
   body: '欢迎使用 Fstool。\n\n'
       '本次更新：\n'
       '· 首页布局重构，新增「当前节点」卡片，点击即可切换；\n'
@@ -179,7 +179,7 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: Text(_muting ? '处理中…' : '2 小时内不再提醒'),
+                        child: Text(_muting ? tr('处理中…') : tr('2 小时内不再提醒')),
                       ),
                     ),
                     const SizedBox(width: 12),

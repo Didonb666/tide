@@ -388,7 +388,7 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             label: tr('配置'),
             value: Text(
-              p?.name ?? '未选择',
+              p?.name ?? tr('未选择'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: text.bodyMedium,
@@ -576,7 +576,7 @@ class _NodeQuickCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        p?.name ?? '未选择节点',
+                        p?.name ?? tr('未选择节点'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: text.titleMedium,
@@ -630,7 +630,7 @@ class _VpnButton extends StatelessWidget {
     if (state.phase == TunnelPhase.connecting) {
       label = AppText.t(context, 'connect.connecting');
     } else if (state.phase == TunnelPhase.disconnecting) {
-      label = '断开中…';
+      label = tr('断开中…');
     } else if (connected) {
       label = AppText.t(context, 'connect.stop');
     } else {

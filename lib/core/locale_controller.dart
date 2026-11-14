@@ -23,7 +23,7 @@ extension AppLanguageInfo on AppLanguage {
   String get label {
     switch (this) {
       case AppLanguage.zh:
-        return '简体中文';
+        return tr('简体中文');
       case AppLanguage.en:
         return 'English';
       case AppLanguage.it:
@@ -84,7 +84,7 @@ class LocaleScope extends InheritedNotifier<LocaleController> {
 
   static LocaleController of(BuildContext context) {
     final LocaleController? controller = maybeOf(context);
-    assert(controller != null, '找不到 LocaleScope');
+    assert(controller != null, tr('找不到 LocaleScope'));
     return controller!;
   }
 }

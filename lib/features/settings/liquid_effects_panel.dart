@@ -46,7 +46,7 @@ class LiquidEffectsPanel extends StatelessWidget {
   }
 
   String _shortPath(String? path) {
-    if (path == null || path.isEmpty) return '默认 Fs 图标';
+    if (path == null || path.isEmpty) return tr('默认 Fs 图标');
     final List<String> parts = path.split(RegExp(r'[/\\]'));
     return parts.isEmpty ? path : parts.last;
   }

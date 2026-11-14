@@ -59,7 +59,7 @@ class _ImportSheetState extends State<ImportSheet> {
     setState(() {
       _mode = _ImportMode.paste;
       _yamlCtrl.text = text;
-      _error = text.trim().isEmpty ? '剪贴板里没有文本，请先复制 YAML' : null;
+      _error = text.trim().isEmpty ? tr('剪贴板里没有文本，请先复制 YAML') : null;
     });
   }
 
@@ -79,14 +79,14 @@ class _ImportSheetState extends State<ImportSheet> {
       _submit(text, fallbackName: name);
     } catch (error) {
       if (!mounted) return;
-      setState(() => _error = '读取文件失败：$error');
+      setState(() => _error = tr('读取文件失败：$error'));
     }
   }
 
   Future<void> _download() async {
     final String url = _urlCtrl.text.trim();
     if (url.isEmpty) {
-      setState(() => _error = '请输入订阅地址');
+      setState(() => _error = tr('请输入订阅地址'));
       return;
     }
 
@@ -103,7 +103,7 @@ class _ImportSheetState extends State<ImportSheet> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = '下载失败：$error';
+        _error = tr('下载失败：$error');
       });
     }
   }
@@ -127,7 +127,7 @@ class _ImportSheetState extends State<ImportSheet> {
       );
 
       if (bytes.length > 5 * 1024 * 1024) {
-        throw Exception('内容超过 5MB');
+        throw Exception(tr('内容超过 5MB'));
       }
 
       return utf8.decode(bytes, allowMalformed: true);
@@ -138,12 +138,12 @@ class _ImportSheetState extends State<ImportSheet> {
 
   String? _validate(String yaml) {
     final String text = yaml.trim();
-    if (text.isEmpty) return '内容为空';
+    if (text.isEmpty) return tr('内容为空');
     final bool looksLikeClash = text.contains('proxies:') ||
         text.contains('proxy-groups:') ||
         text.contains('rules:');
     if (!looksLikeClash) {
-      return '这不像 Clash.Meta 配置（缺少 proxies / proxy-groups / rules）';
+      return tr('这不像 Clash.Meta 配置（缺少 proxies / proxy-groups / rules）');
     }
     return null;
   }
@@ -160,7 +160,7 @@ class _ImportSheetState extends State<ImportSheet> {
         ? typed
         : (fallbackName != null && fallbackName.trim().isNotEmpty
             ? fallbackName.trim()
-            : '导入配置 ${widget.controller.profiles.length + 1}');
+            : tr('导入配置 ${widget.controller.profiles.length + 1}'));
 
     final Profile profile = widget.controller.importProfile(yaml, name: name);
     Navigator.of(context).pop(profile);
@@ -196,10 +196,10 @@ class _ImportSheetState extends State<ImportSheet> {
                   Expanded(
                     child: Text(
                       _mode == _ImportMode.choose
-                          ? '导入配置'
+                          ? tr('导入配置')
                           : (_mode == _ImportMode.paste
-                              ? '粘贴 / 编辑 YAML'
-                              : '订阅地址'),
+                              ? tr('粘贴 / 编辑 YAML')
+                              : tr('订阅地址')),
                       style: text.headlineSmall,
                     ),
                   ),
@@ -323,7 +323,7 @@ class _ImportSheetState extends State<ImportSheet> {
                     color: Colors.white,
                   ),
                 )
-              : Text(_mode == _ImportMode.url ? '下载并导入' : '导入'),
+              : Text(_mode == _ImportMode.url ? tr('下载并导入') : tr('导入')),
         ),
       ),
       const SizedBox(height: TideSpace.x2),

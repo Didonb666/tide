@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design/app_theme.dart';
 import 'display_mode_service.dart';
+import 'app_text.dart';
 
 class SettingsController extends ChangeNotifier {
   static const String _kTheme = 'settings.themeMode';
@@ -236,7 +237,7 @@ class SettingsController extends ChangeNotifier {
 }
 
 class SettingsScope extends InheritedNotifier<SettingsController> {
-  const SettingsScope({
+  SettingsScope({
     super.key,
     required SettingsController controller,
     required super.child,
@@ -245,7 +246,7 @@ class SettingsScope extends InheritedNotifier<SettingsController> {
   static SettingsController of(BuildContext context) {
     final SettingsScope? scope =
         context.dependOnInheritedWidgetOfExactType<SettingsScope>();
-    assert(scope != null, '找不到 SettingsScope');
+    assert(scope != null, tr('找不到 SettingsScope'));
     return scope!.notifier!;
   }
 
