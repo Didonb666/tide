@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_text.dart';
+
 /// 支持的界面语言。
 enum AppLanguage { zh, en, it, ru }
 
@@ -53,12 +55,14 @@ class LocaleController extends ChangeNotifier {
         }
       }
     } catch (_) {}
+    AppText.setLang(_language.code);
     notifyListeners();
   }
 
   Future<void> setLanguage(AppLanguage language) async {
     if (language == _language) return;
     _language = language;
+    AppText.setLang(language.code);
     notifyListeners();
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

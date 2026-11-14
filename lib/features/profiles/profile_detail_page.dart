@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import '../../core/app_text.dart';
 
 class ProfileDetailPage extends StatelessWidget {
   const ProfileDetailPage({
@@ -215,7 +216,7 @@ class _GroupsTab extends StatelessWidget {
           ),
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('演示模式：接入内核后才能切换「${group.name}」的节点')),
+              SnackBar(content: Text(tr('演示模式：接入内核后才能切换「${group.name}」的节点'))),
             );
           },
         );
@@ -325,7 +326,7 @@ class _ProvidersTab extends StatelessWidget {
               Icon(Icons.refresh, size: 18, color: context.colors.inkTertiary),
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('演示模式：真实更新会调用 PUT /providers/rules/${p.name}')),
+              SnackBar(content: Text(tr('演示模式：真实更新会调用 PUT /providers/rules/${p.name}'))),
             );
           },
         );

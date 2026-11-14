@@ -8,6 +8,7 @@ import '../../core/settings_controller.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
 import '../../widgets/tide_slider.dart';
+import '../../core/app_text.dart';
 
 class LiquidEffectsPanel extends StatelessWidget {
   const LiquidEffectsPanel({super.key});
@@ -39,7 +40,7 @@ class LiquidEffectsPanel extends StatelessWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('选择雪花图片失败：$error')),
+        SnackBar(content: Text(tr('选择雪花图片失败：$error'))),
       );
     }
   }
@@ -62,7 +63,7 @@ class LiquidEffectsPanel extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
           child: Row(
             children: <Widget>[
-              Expanded(child: Text('玻璃与雪花')),
+              Expanded(child: Text(tr('玻璃与雪花'))),
             ],
           ),
         ),

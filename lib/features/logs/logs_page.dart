@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
 import '../../core/profile.dart';
-import '../../core/app_text.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
+import '../../core/app_text.dart';
 
 /// 连接日志：流式列表 + 按结果过滤。
 class LogsPage extends StatefulWidget {
@@ -53,7 +53,7 @@ class _LogsPageState extends State<LogsPage> {
             ),
             child: Row(
               children: <Widget>[
-                Expanded(child: Text('日志', style: text.displaySmall)),
+                Expanded(child: Text(tr('日志'), style: text.displaySmall)),
                 if (c.usingSimulator)
                   TideBadge(text: '演示数据', color: colors.warning),
               ],

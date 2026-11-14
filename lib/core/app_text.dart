@@ -131,6 +131,112 @@ class AppText {
     'settings.restore': {'zh': '恢复默认', 'en': 'Restore defaults', 'it': 'Ripristina', 'ru': 'Сбросить'},
   };
 
+
+  static String _lang = 'zh';
+
+  /// 由 LocaleController 在语言变化时调用。
+  static void setLang(String code) {
+    _lang = code;
+  }
+
+  static String get lang => _lang;
+
+  /// 免 context 的翻译入口：`tr('连接状态')`。
+  /// 没收录的字符串会原样返回中文，不会报错。
+  static String tr(String zh) {
+    if (_lang == 'zh') return zh;
+    final Map<String, String>? item = _byZh[zh];
+    return item?[_lang] ?? zh;
+  }
+
+  /// 中文原文 → 其它语言
+  static const Map<String, Map<String, String>> _byZh =
+      <String, Map<String, String>>{
+    '连接状态': {'en': 'Status', 'it': 'Stato', 'ru': 'Статус'},
+    '协议': {'en': 'Protocol', 'it': 'Protocollo', 'ru': 'Протокол'},
+    '地址': {'en': 'Address', 'it': 'Indirizzo', 'ru': 'Адрес'},
+    '上行': {'en': 'Upload', 'it': 'Caricamento', 'ru': 'Отдача'},
+    '下行': {'en': 'Download', 'it': 'Download', 'ru': 'Загрузка'},
+    '规则': {'en': 'Rules', 'it': 'Regole', 'ru': 'Правила'},
+    '查看': {'en': 'View', 'it': 'Apri', 'ru': 'Открыть'},
+    '当前': {'en': 'Active', 'it': 'Attivo', 'ru': 'Активен'},
+    '取消': {'en': 'Cancel', 'it': 'Annulla', 'ru': 'Отмена'},
+    '确定': {'en': 'OK', 'it': 'OK', 'ru': 'ОК'},
+    '保存': {'en': 'Save', 'it': 'Salva', 'ru': 'Сохранить'},
+    '删除': {'en': 'Delete', 'it': 'Elimina', 'ru': 'Удалить'},
+    '编辑': {'en': 'Edit', 'it': 'Modifica', 'ru': 'Изменить'},
+    '粘贴': {'en': 'Paste', 'it': 'Incolla', 'ru': 'Вставить'},
+    '文件': {'en': 'File', 'it': 'File', 'ru': 'Файл'},
+    '扫码导入': {'en': 'Scan to import', 'it': 'Scansiona', 'ru': 'Сканировать'},
+    '选择节点': {'en': 'Select node', 'it': 'Scegli nodo', 'ru': 'Выбрать узел'},
+    '未选择': {'en': 'Not selected', 'it': 'Non selezionato', 'ru': 'Не выбрано'},
+    '未选择节点': {'en': 'No node selected', 'it': 'Nessun nodo', 'ru': 'Узел не выбран'},
+    '断开': {'en': 'Disconnect', 'it': 'Disconnetti', 'ru': 'Отключить'},
+    '已断开': {'en': 'Disconnected', 'it': 'Disconnesso', 'ru': 'Отключено'},
+    '正在断开': {'en': 'Disconnecting', 'it': 'Disconnessione', 'ru': 'Отключение'},
+    '已连接': {'en': 'Connected', 'it': 'Connesso', 'ru': 'Подключено'},
+    '未连接': {'en': 'Disconnected', 'it': 'Non connesso', 'ru': 'Не подключено'},
+    '连接中': {'en': 'Connecting', 'it': 'Connessione', 'ru': 'Подключение'},
+    '失败': {'en': 'Failed', 'it': 'Errore', 'ru': 'Ошибка'},
+    '全局': {'en': 'Global', 'it': 'Globale', 'ru': 'Глобально'},
+    '直连': {'en': 'Direct', 'it': 'Diretto', 'ru': 'Напрямую'},
+    '已启动': {'en': 'Started', 'it': 'Avviato', 'ru': 'Запущено'},
+    '已拒绝': {'en': 'Rejected', 'it': 'Rifiutato', 'ru': 'Отклонено'},
+    '日志': {'en': 'Logs', 'it': 'Log', 'ru': 'Журнал'},
+    '搜索日志': {'en': 'Search logs', 'it': 'Cerca nei log', 'ru': 'Поиск в журнале'},
+    '暂无匹配的日志': {'en': 'No matching logs', 'it': 'Nessun log corrispondente', 'ru': 'Совпадений нет'},
+    '连接后会在这里看到实时日志': {'en': 'Live logs appear after connecting', 'it': 'I log compaiono dopo la connessione', 'ru': 'Журнал появится после подключения'},
+    '全部': {'en': 'All', 'it': 'Tutti', 'ru': 'Все'},
+    '清空': {'en': 'Clear', 'it': 'Pulisci', 'ru': 'Очистить'},
+    '复制': {'en': 'Copy', 'it': 'Copia', 'ru': 'Копировать'},
+    '关闭': {'en': 'Close', 'it': 'Chiudi', 'ru': 'Закрыть'},
+    '知道了': {'en': 'Got it', 'it': 'Ho capito', 'ru': 'Понятно'},
+    '我知道了': {'en': 'Got it', 'it': 'Ho capito', 'ru': 'Понятно'},
+    '2 小时内不再提醒': {'en': 'Mute for 2 hours', 'it': 'Silenzia 2 ore', 'ru': 'Не напоминать 2 часа'},
+    '主题': {'en': 'Theme', 'it': 'Tema', 'ru': 'Тема'},
+    '主色调': {'en': 'Accent color', 'it': 'Colore', 'ru': 'Акцент'},
+    '刷新率': {'en': 'Refresh rate', 'it': 'Frequenza', 'ru': 'Частота'},
+    '启动时自动连接': {'en': 'Auto connect on launch', 'it': 'Connessione automatica', 'ru': 'Автоподключение'},
+    '详细日志': {'en': 'Verbose logs', 'it': 'Log dettagliati', 'ru': 'Подробный журнал'},
+    '恢复默认': {'en': 'Restore defaults', 'it': 'Ripristina', 'ru': 'Сбросить'},
+    '全部恢复默认': {'en': 'Restore all defaults', 'it': 'Ripristina tutto', 'ru': 'Сбросить всё'},
+    '统一背景': {'en': 'Shared background', 'it': 'Sfondo comune', 'ru': 'Общий фон'},
+    '竖屏背景': {'en': 'Portrait background', 'it': 'Sfondo verticale', 'ru': 'Портретный фон'},
+    '横屏背景': {'en': 'Landscape background', 'it': 'Sfondo orizzontale', 'ru': 'Ландшафтный фон'},
+    '背景透明度': {'en': 'Background opacity', 'it': 'Opacità sfondo', 'ru': 'Прозрачность фона'},
+    '背景模糊度': {'en': 'Background blur', 'it': 'Sfocatura sfondo', 'ru': 'Размытие фона'},
+    '雪花数量': {'en': 'Snow amount', 'it': 'Quantità neve', 'ru': 'Количество снега'},
+    '雪花大小': {'en': 'Snow size', 'it': 'Dimensione neve', 'ru': 'Размер снега'},
+    '雪花速度': {'en': 'Snow speed', 'it': 'Velocità neve', 'ru': 'Скорость снега'},
+    '公告': {'en': 'Announcement', 'it': 'Avvisi', 'ru': 'Объявления'},
+    '官方公告': {'en': 'Announcement', 'it': 'Avvisi', 'ru': 'Объявления'},
+    '关于': {'en': 'About', 'it': 'Informazioni', 'ru': 'О программе'},
+    '版本': {'en': 'Version', 'it': 'Versione', 'ru': 'Версия'},
+    '外观': {'en': 'Appearance', 'it': 'Aspetto', 'ru': 'Внешний вид'},
+    '性能': {'en': 'Performance', 'it': 'Prestazioni', 'ru': 'Производительность'},
+    '背景设置': {'en': 'Background', 'it': 'Sfondo', 'ru': 'Фон'},
+    '行为': {'en': 'Behaviour', 'it': 'Comportamento', 'ru': 'Поведение'},
+    '语言': {'en': 'Language', 'it': 'Lingua', 'ru': 'Язык'},
+    '通用': {'en': 'General', 'it': 'Generale', 'ru': 'Общие'},
+    '账号': {'en': 'Account', 'it': 'Account', 'ru': 'Аккаунт'},
+    '机器码': {'en': 'Device ID', 'it': 'ID dispositivo', 'ru': 'ID устройства'},
+    '剩余': {'en': 'Remaining', 'it': 'Rimanente', 'ru': 'Осталось'},
+    '未兑换': {'en': 'Not redeemed', 'it': 'Non riscattato', 'ru': 'Не активировано'},
+    '未注册': {'en': 'Not registered', 'it': 'Non registrato', 'ru': 'Не зарегистрирован'},
+    '昵称': {'en': 'Nickname', 'it': 'Nickname', 'ru': 'Никнейм'},
+    '密码': {'en': 'Password', 'it': 'Password', 'ru': 'Пароль'},
+    '注册': {'en': 'Sign up', 'it': 'Registrati', 'ru': 'Регистрация'},
+    '登录': {'en': 'Sign in', 'it': 'Accedi', 'ru': 'Вход'},
+    '退出登录': {'en': 'Sign out', 'it': 'Esci', 'ru': 'Выйти'},
+    '兑换': {'en': 'Redeem', 'it': 'Riscatta', 'ru': 'Активировать'},
+    '兑换时长': {'en': 'Redeem time', 'it': 'Riscatta tempo', 'ru': 'Активировать время'},
+    '卡密': {'en': 'Key', 'it': 'Chiave', 'ru': 'Ключ'},
+    '设置': {'en': 'Settings', 'it': 'Impostazioni', 'ru': 'Настройки'},
+    '连接': {'en': 'Connect', 'it': 'Connetti', 'ru': 'Подключить'},
+    '配置': {'en': 'Profiles', 'it': 'Profili', 'ru': 'Профили'},
+    '我的': {'en': 'Me', 'it': 'Io', 'ru': 'Профиль'},
+  };
+
   static String t(BuildContext context, String key) {
     final LocaleController? controller = LocaleScope.maybeOf(context);
     final String lang = controller?.code ?? 'zh';

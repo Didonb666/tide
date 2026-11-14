@@ -4,6 +4,7 @@ import '../../core/display_mode_service.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
+import '../../core/app_text.dart';
 
 class AdvancedSettingsPage extends StatefulWidget {
   const AdvancedSettingsPage({super.key});
@@ -82,7 +83,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   ],
                 ),
                 const SizedBox(height: 18),
-                Text('自定义 Hex', style: text.titleSmall),
+                Text(tr('自定义 Hex'), style: text.titleSmall),
                 const SizedBox(height: 8),
                 Row(
                   children: <Widget>[

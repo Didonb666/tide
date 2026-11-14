@@ -5,7 +5,6 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../core/background_controller.dart';
 import '../../core/display_mode_service.dart';
-import '../../core/app_text.dart';
 import '../../core/locale_controller.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
@@ -14,6 +13,7 @@ import '../../widgets/common.dart';
 import '../../widgets/liquid_glass_container.dart';
 import 'liquid_effects_panel.dart';
 import '../../widgets/tide_slider.dart';
+import '../../core/app_text.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -114,7 +114,7 @@ class _SettingsPageState extends State<SettingsPage> {
               TideSpace.page,
               TideSpace.x1,
             ),
-            child: Text('设置', style: text.displaySmall),
+            child: Text(tr('设置'), style: text.displaySmall),
           ),
 
           // ---------------------------------------------------------------- 外观
@@ -164,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('主题模式', style: text.titleSmall),
+                Text(tr('主题模式'), style: text.titleSmall),
                 const SizedBox(height: TideSpace.x2),
                 Row(
                   children: <Widget>[
@@ -182,7 +182,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
                 const SizedBox(height: TideSpace.x5),
-                Text('快捷预设', style: text.titleSmall),
+                Text(tr('快捷预设'), style: text.titleSmall),
                 const SizedBox(height: TideSpace.x3),
                 Row(
                   children: <Widget>[
@@ -377,7 +377,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: TideSpace.x6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
-            child: Text('Fstool · 内核：mihomo', style: text.labelSmall),
+            child: Text(tr('Fstool · 内核：mihomo'), style: text.labelSmall),
           ),
         ],
       ),
@@ -603,7 +603,7 @@ class _CustomAccentTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: const Text('自定义主色调'),
-      subtitle: Text('HSV 调色板 / Hue 滑条 / Hex 输入', style: text.labelSmall),
+      subtitle: Text(tr('HSV 调色板 / Hue 滑条 / Hex 输入'), style: text.labelSmall),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -674,7 +674,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text('自定义主色调', style: text.titleMedium),
+                      child: Text(tr('自定义主色调'), style: text.titleMedium),
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),

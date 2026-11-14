@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../../core/app_text.dart';
 import '../../core/license/license_scope.dart';
 
 import '../../core/app_controller.dart';
@@ -14,6 +13,7 @@ import '../../widgets/announcement_dialog.dart';
 import '../../widgets/common.dart' hide AnimatedNumber;
 import '../../widgets/fx.dart' show AnimatedNumber;
 import '../../widgets/liquid_glass_container.dart';
+import '../../core/app_text.dart';
 
 class ConnectPage extends StatelessWidget {
   const ConnectPage({super.key});
@@ -123,9 +123,9 @@ class ConnectPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text('选择节点', style: text.titleMedium),
+                  Text(tr('选择节点'), style: text.titleMedium),
                   const SizedBox(height: 4),
-                  Text('切换后立即使用新节点连接', style: text.labelSmall),
+                  Text(tr('切换后立即使用新节点连接'), style: text.labelSmall),
                   const SizedBox(height: 8),
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 380),
@@ -209,7 +209,7 @@ class _KernelBanner extends StatelessWidget {
             color: colors.accent,
           ),
           const SizedBox(width: 8),
-          Text('内核 mihomo v1.19.33', style: text.labelSmall),
+          Text(tr('内核 mihomo v1.19.33'), style: text.labelSmall),
           const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),

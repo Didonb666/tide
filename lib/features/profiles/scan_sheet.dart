@@ -10,6 +10,7 @@ import '../../core/app_controller.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
+import '../../core/app_text.dart';
 
 Future<Profile?> showScanSheet(BuildContext context, AppController controller) {
   return showModalBottomSheet<Profile>(
@@ -244,7 +245,7 @@ class _ScanSheetState extends State<ScanSheet> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Expanded(child: Text('扫码导入', style: text.titleMedium)),
+                  Expanded(child: Text(tr('扫码导入'), style: text.titleMedium)),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded),

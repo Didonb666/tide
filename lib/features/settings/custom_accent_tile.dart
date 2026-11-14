@@ -5,6 +5,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../core/settings_controller.dart';
 import '../../design/tokens.dart';
+import '../../core/app_text.dart';
 
 /// 「设置 → 外观」里的自定义主色调入口：右侧色块 + HSV 调色弹窗。
 class CustomAccentTile extends StatelessWidget {
@@ -109,7 +110,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: Text('自定义主色调', style: text.titleMedium),
+                      child: Text(tr('自定义主色调'), style: text.titleMedium),
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),

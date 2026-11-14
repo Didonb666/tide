@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../core/app_text.dart';
 import '../../core/license/license_controller.dart';
 import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
+import '../../core/app_text.dart';
 
 /// 兑换时长：注册后没时长时进入，也可从「我的」里再次进入。
 class RedeemPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _RedeemPageState extends State<RedeemPage> {
     if (ok) {
       _key.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('兑换成功，剩余 ${license.remainingDays} 天')),
+        SnackBar(content: Text(tr('兑换成功，剩余 ${license.remainingDays} 天'))),
       );
       if (widget.canPop) Navigator.of(context).pop();
     }

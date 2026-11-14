@@ -10,6 +10,7 @@ import '../../widgets/liquid_profile_card.dart';
 import 'import_sheet.dart';
 import 'profile_detail_page.dart';
 import 'scan_sheet.dart';
+import '../../core/app_text.dart';
 
 class ProfilesPage extends StatelessWidget {
   const ProfilesPage({super.key});
@@ -30,7 +31,7 @@ class ProfilesPage extends StatelessWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('更换头像失败：$error')),
+        SnackBar(content: Text(tr('更换头像失败：$error'))),
       );
     }
   }
@@ -54,13 +55,13 @@ class ProfilesPage extends StatelessWidget {
               ),
               child: Row(
                 children: <Widget>[
-                  Expanded(child: Text('配置', style: text.displaySmall)),
+                  Expanded(child: Text(tr('配置'), style: text.displaySmall)),
                                     IconButton(
                     onPressed: () async {
                       final Profile? scanned = await showScanSheet(context, c);
                       if (scanned == null || !context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('已导入：${scanned.name}')),
+                        SnackBar(content: Text(tr('已导入：${scanned.name}'))),
                       );
                     },
                     icon: const Icon(Icons.qr_code_scanner_rounded),
@@ -94,7 +95,7 @@ class ProfilesPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Center(
-                  child: Text('还没有配置，点右上角 + 导入', style: text.bodySmall),
+                  child: Text(tr('还没有配置，点右上角 + 导入'), style: text.bodySmall),
                 ),
               ),
             )
@@ -112,7 +113,7 @@ class ProfilesPage extends StatelessWidget {
                   onLongPress: () {
                     c.selectProfile(p.id);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('已设为当前配置：${p.name}')),
+                      SnackBar(content: Text(tr('已设为当前配置：${p.name}'))),
                     );
                   },
                   onTap: () {
@@ -139,7 +140,7 @@ class ProfilesPage extends StatelessWidget {
     if (created == null || !context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已导入：${created.name}')),
+      SnackBar(content: Text(tr('已导入：${created.name}'))),
     );
   }
 }
