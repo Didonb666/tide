@@ -32,15 +32,14 @@ class _SnowOverlayState extends State<SnowOverlay> {
   @override
   void initState() {
     super.initState();
-    final bool reduce = WidgetsBinding
-        .instance.platformDispatcher.accessibilityFeatures.disableAnimations;
-    if (!reduce) {
-      _stopwatch = Stopwatch()..start();
-      _timer = Timer.periodic(const Duration(milliseconds: 16), (Timer timer) {
-        if (!mounted) return;
-        _phase.value = (_stopwatch!.elapsedMicroseconds / 22000000.0) % 1.0;
-      });
-    }
+    // 注意：不要用 accessibilityFeatures.disableAnimations 做开关。
+    // 很多国产 ROM（MIUI/HyperOS/OriginOS 等）在"省电模式"或"移除动画"下会把这个
+    // 标志置为 true，导致雪花完全静止。这里始终启动动画，是否显示由设置页控制。
+    _stopwatch = Stopwatch()..start();
+    _timer = Timer.periodic(const Duration(milliseconds: 16), (Timer timer) {
+      if (!mounted) return;
+      _phase.value = (_stopwatch!.elapsedMicroseconds / 22000000.0) % 1.0;
+    });
   }
 
   @override

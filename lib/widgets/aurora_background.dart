@@ -83,30 +83,27 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
 
         _syncVideo(isVideo ? path : null);
 
-        // 没有任何自定义背景：按方向使用内置默认图（原样显示，不加透明度/模糊）。
+        // 背景源：自定义优先，其次按方向使用内置默认图。
+        // 三者统一受「透明度 / 模糊度」控制（默认图也要能调）。
+        final Widget media;
         if (path == null) {
           final String asset = orientation == Orientation.portrait
               ? 'assets/images/default_background_portrait.jpg'
               : 'assets/images/default_background.webp';
-          return Positioned.fill(
-            child: Image.asset(
-              asset,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              errorBuilder: (
-                BuildContext context,
-                Object error,
-                StackTrace? stackTrace,
-              ) {
-                return const ColoredBox(color: Color(0xFF070A10));
-              },
-            ),
+          media = Image.asset(
+            asset,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (
+              BuildContext context,
+              Object error,
+              StackTrace? stackTrace,
+            ) {
+              return const ColoredBox(color: Color(0xFF070A10));
+            },
           );
-        }
-
-        final Widget media;
-        if (isVideo) {
+        } else if (isVideo) {
           final VideoPlayerController? video = _video;
           if (video != null && video.value.isInitialized) {
             media = SizedBox.expand(
@@ -124,7 +121,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
           }
         } else {
           media = Image.file(
-            File(path),
+            File(path!),
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
