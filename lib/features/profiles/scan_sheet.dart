@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
+import '../../widgets/liquid_glass_container.dart';
 
 Future<Profile?> showScanSheet(BuildContext context, AppController controller) {
   return showModalBottomSheet<Profile>(
@@ -91,6 +93,50 @@ class _ScanSheetState extends State<ScanSheet> {
       try {
         await _scanner.start();
       } catch (_) {}
+    }
+  }
+
+  /// 相机不可用时的兜底：从相册选一张二维码截图来识别。
+  Future<void> _scanFromGallery() async {
+    try {
+      final XFile? file = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (file == null) return;
+
+      setState(() {
+        _busy = true;
+        _error = null;
+      });
+
+      final BarcodeCapture? capture = await _scanner.analyzeImage(file.path);
+      String? value;
+      if (capture != null) {
+        for (final Barcode barcode in capture.barcodes) {
+          final String? raw = barcode.rawValue;
+          if (raw != null && raw.trim().isNotEmpty) {
+            value = raw;
+            break;
+          }
+        }
+      }
+
+      if (value == null) {
+        if (!mounted) return;
+        setState(() {
+          _busy = false;
+          _error = '图片里没识别到二维码';
+        });
+        return;
+      }
+
+      await _handle(value);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = '识别失败：$error';
+      });
     }
   }
 
@@ -189,13 +235,9 @@ class _ScanSheetState extends State<ScanSheet> {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Container(
+        child: LiquidGlassContainer(
+          radius: 28,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xF2101418),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
-          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -246,7 +288,8 @@ class _ScanSheetState extends State<ScanSheet> {
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
-                                    '相机不可用：${error.errorCode.name}',
+                                    '相机不可用：${error.errorCode.name}\n'
+                                    '${error.errorDetails?.message ?? ''}',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       color: Colors.white70,
@@ -300,6 +343,12 @@ class _ScanSheetState extends State<ScanSheet> {
                     ),
                   ),
                 ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: _busy ? null : _scanFromGallery,
+                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                label: const Text('从相册选二维码图片识别'),
+              ),
               const SizedBox(height: 10),
               Text(
                 '支持：vless:// 链接、订阅 URL、Clash YAML 文本',

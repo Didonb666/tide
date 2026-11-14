@@ -1,9 +1,8 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design/tokens.dart';
+import 'liquid_glass_container.dart';
 
 /// 公告内容：改文案只改这里。
 class Announcement {
@@ -105,18 +104,10 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
-          child: Container(
-            decoration: BoxDecoration(
-              color: colors.surface.withOpacity(0.94),
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: colors.hairline),
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-            child: Column(
+      child: LiquidGlassContainer(
+        radius: 28,
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -208,8 +199,6 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                 ),
               ],
             ),
-          ),
-        ),
       ),
     );
   }
