@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/profile.dart';
 import '../design/tokens.dart';
 import 'common.dart';
+import '../core/app_text.dart';
 
 class AnimatedNumber extends StatelessWidget {
   const AnimatedNumber({

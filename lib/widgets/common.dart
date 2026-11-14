@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/profile.dart';
 import '../core/tunnel/tunnel_state.dart';
 import '../design/tokens.dart';
+import '../core/app_text.dart';
 
 // ---------------------------------------------------------------------------
 // 格式化

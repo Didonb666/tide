@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../core/app_controller.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
+import '../../core/app_text.dart';
 
 enum _ImportMode { choose, paste, url }
 

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../design/tokens.dart';
 import 'liquid_glass_container.dart';
+import '../core/app_text.dart';
 
 /// 公告内容：改文案只改这里。
 class Announcement {

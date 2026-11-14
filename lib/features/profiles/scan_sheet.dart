@@ -289,8 +289,8 @@ class _ScanSheetState extends State<ScanSheet> {
                                     color: Colors.white38,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(tr('相机不可用：${error.errorCode.name}\n')
-                                    '${error.errorDetails?.message ?? ''}',
+                                  Text(tr('相机不可用：${error.errorCode.name}\n'
+                                    '${error.errorDetails?.message ?? ''}'),
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       color: Colors.white70,
@@ -298,8 +298,8 @@ class _ScanSheetState extends State<ScanSheet> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(tr('系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；')
-                                    '若刚允许过，杀掉应用重开一次。',
+                                  Text(tr('系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；'
+                                    '若刚允许过，杀掉应用重开一次。'),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white38,

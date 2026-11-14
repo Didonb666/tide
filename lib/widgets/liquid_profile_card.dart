@@ -6,6 +6,7 @@ import '../core/profile.dart';
 import '../design/tokens.dart';
 import 'common.dart';
 import 'liquid_glass_container.dart';
+import '../core/app_text.dart';
 
 class LiquidProfileCard extends StatelessWidget {
   const LiquidProfileCard({
