@@ -13,8 +13,8 @@ import 'design/tokens.dart';
 import 'features/auth/license_gate.dart';
 import 'features/connect/connect_page.dart';
 import 'features/logs/logs_page.dart';
+import 'features/profile/profile_page.dart';
 import 'features/profiles/profiles_page.dart';
-import 'features/settings/settings_page.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/liquid_nav_bar.dart';
 import 'widgets/snow_overlay.dart';
@@ -87,7 +87,7 @@ class _HomeShellState extends State<HomeShell> {
     ConnectPage(),
     ProfilesPage(),
     LogsPage(),
-    SettingsPage(),
+    ProfilePage(),
   ];
 
   static const List<LiquidNavItem> _navItems = <LiquidNavItem>[
@@ -107,9 +107,9 @@ class _HomeShellState extends State<HomeShell> {
       label: '日志',
     ),
     LiquidNavItem(
-      icon: Icons.settings_outlined,
-      activeIcon: Icons.settings_rounded,
-      label: '设置',
+      icon: Icons.person_outline_rounded,
+      activeIcon: Icons.person_rounded,
+      label: '我的',
     ),
   ];
 

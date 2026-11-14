@@ -194,14 +194,39 @@ function resolveLicense(payload) {
     if (user.deviceId && user.deviceId !== payload.dev) {
       return { valid: false, reason: 'device_mismatch' };
     }
-    if (!user.expiresAt || Date.now() > user.expiresAt) {
-      return { valid: false, reason: 'expired' };
+    // 已注册但没兑换时长
+    if (!user.expiresAt) {
+      return {
+        valid: false,
+        reason: 'no_license',
+        plan: user.plan || 'free',
+        expiresAt: null,
+        remainingDays: 0,
+        username: user.username,
+        nickname: user.nickname || user.username,
+        bio: user.bio || '',
+      };
+    }
+    if (Date.now() > user.expiresAt) {
+      return {
+        valid: false,
+        reason: 'expired',
+        plan: user.plan || 'standard',
+        expiresAt: user.expiresAt,
+        remainingDays: 0,
+        username: user.username,
+        nickname: user.nickname || user.username,
+        bio: user.bio || '',
+      };
     }
     return {
       valid: true,
       plan: user.plan || 'standard',
       expiresAt: user.expiresAt,
       remainingDays: remainingDays(user.expiresAt),
+      username: user.username,
+      nickname: user.nickname || user.username,
+      bio: user.bio || '',
     };
   }
 
@@ -437,6 +462,16 @@ async function route(req, res) {
     if (!payload) return send(res, 401, { ok: false, error: 'bad_token', message: '登录状态失效，请重新激活' });
     const state = resolveLicense(payload);
     if (!state.valid) {
+      // no_license 不是错误：用户已注册，只是还没兑换时长
+      if (state.reason === 'no_license') {
+        return send(res, 200, {
+          ok: true,
+          valid: false,
+          ...state,
+          message: reasonText(state.reason),
+          serverTime: Date.now(),
+        });
+      }
       return send(res, 403, {
         ok: false,
         valid: false,
@@ -445,6 +480,111 @@ async function route(req, res) {
       });
     }
     return send(res, 200, { ok: true, ...state, serverTime: Date.now() });
+  }
+
+  // ------------------------------------------------ 账号（注册 / 兑换 / 资料）
+  if (req.method === 'POST' && p === '/api/quick-register') {
+    const body = await readBody(req);
+    const device = String(body.device || '').trim();
+    if (!device) {
+      return send(res, 400, { ok: false, error: 'device_required', message: '缺少设备标识' });
+    }
+    const nickname = String(body.nickname || '').trim().slice(0, 24);
+
+    let user = Object.values(db.users).find((item) => item.deviceId === device);
+    if (!user) {
+      const salt = crypto.randomBytes(16).toString('hex');
+      const username = `u${crypto.randomBytes(4).toString('hex')}`;
+      const password = crypto.randomBytes(16).toString('hex');
+      user = {
+        username,
+        salt,
+        hash: hashPassword(password, salt),
+        createdAt: Date.now(),
+        expiresAt: null,
+        plan: 'free',
+        deviceId: device,
+        deviceName: String(body.deviceName || '').slice(0, 64),
+        nickname: nickname || username,
+        bio: '',
+        banned: false,
+      };
+      db.users[username] = user;
+    } else if (nickname && user.nickname !== nickname) {
+      user.nickname = nickname;
+    }
+    saveDb();
+
+    return send(res, 200, {
+      ok: true,
+      token: issueToken('user', user.username, device),
+      plan: user.plan,
+      expiresAt: user.expiresAt,
+      remainingDays: remainingDays(user.expiresAt),
+      username: user.username,
+      nickname: user.nickname || user.username,
+      bio: user.bio || '',
+    });
+  }
+
+  if (req.method === 'POST' && p === '/api/redeem') {
+    const payload = verifyToken(bearer(req));
+    const user = payload && payload.t === 'user' ? db.users[payload.sub] : null;
+    if (!user) {
+      return send(res, 401, { ok: false, error: 'bad_token', message: '请先注册或登录' });
+    }
+    if (user.banned) {
+      return send(res, 403, { ok: false, error: 'banned', message: '账号已被封禁' });
+    }
+
+    const body = await readBody(req);
+    const rec = findKeyRecord(body.key);
+    if (!rec) return send(res, 404, { ok: false, error: 'key_not_found', message: '卡密不存在' });
+    if (rec.revoked) return send(res, 403, { ok: false, error: 'revoked', message: '该卡密已被封禁' });
+    if (rec.activatedAt || rec.user) {
+      if (rec.user !== user.username) {
+        return send(res, 409, { ok: false, error: 'key_used', message: '该卡密已被其他账号使用' });
+      }
+    }
+
+    const now = Date.now();
+    const base = user.expiresAt && user.expiresAt > now ? user.expiresAt : now;
+    user.expiresAt = base + rec.days * DAY;
+    user.plan = rec.plan || user.plan;
+    rec.activatedAt = rec.activatedAt || now;
+    rec.expiresAt = user.expiresAt;
+    rec.deviceId = user.deviceId;
+    rec.deviceName = user.deviceName;
+    rec.user = user.username;
+    saveDb();
+
+    return send(res, 200, {
+      ok: true,
+      plan: user.plan,
+      expiresAt: user.expiresAt,
+      remainingDays: remainingDays(user.expiresAt),
+    });
+  }
+
+  if (req.method === 'POST' && p === '/api/profile') {
+    const payload = verifyToken(bearer(req));
+    const user = payload && payload.t === 'user' ? db.users[payload.sub] : null;
+    if (!user) {
+      return send(res, 401, { ok: false, error: 'bad_token', message: '请先注册或登录' });
+    }
+    const body = await readBody(req);
+    if (typeof body.nickname === 'string') {
+      user.nickname = body.nickname.trim().slice(0, 24) || user.username;
+    }
+    if (typeof body.bio === 'string') {
+      user.bio = body.bio.trim().slice(0, 120);
+    }
+    saveDb();
+    return send(res, 200, {
+      ok: true,
+      nickname: user.nickname || user.username,
+      bio: user.bio || '',
+    });
   }
 
   // ------------------------------------------------ 管理端

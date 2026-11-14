@@ -4,6 +4,7 @@ import '../../core/license/license_api.dart';
 import '../../core/license/license_controller.dart';
 import '../../core/license/license_scope.dart';
 import 'activate_page.dart';
+import 'redeem_page.dart';
 
 /// 授权门禁：未激活时挡住主界面，只显示激活页。
 ///
@@ -28,6 +29,8 @@ class LicenseGate extends StatelessWidget {
         );
       case LicenseStatus.active:
         return child;
+      case LicenseStatus.noTime:
+        return const RedeemPage();
       case LicenseStatus.inactive:
       case LicenseStatus.expired:
         return const ActivatePage();

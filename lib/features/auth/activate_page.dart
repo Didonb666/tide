@@ -5,7 +5,7 @@ import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
 
-enum _Mode { key, account }
+enum _Mode { quick, key, account }
 
 /// 授权激活页：卡密激活 / 账号登录 / 用卡密注册。
 class ActivatePage extends StatefulWidget {
@@ -19,6 +19,7 @@ class _ActivatePageState extends State<ActivatePage> {
   final TextEditingController _key = TextEditingController();
   final TextEditingController _user = TextEditingController();
   final TextEditingController _pass = TextEditingController();
+  final TextEditingController _nickname = TextEditingController();
 
   _Mode _mode = _Mode.key;
   bool _register = false;
@@ -28,6 +29,7 @@ class _ActivatePageState extends State<ActivatePage> {
     _key.dispose();
     _user.dispose();
     _pass.dispose();
+    _nickname.dispose();
     super.dispose();
   }
 
@@ -36,7 +38,9 @@ class _ActivatePageState extends State<ActivatePage> {
     if (license.busy) return;
     FocusScope.of(context).unfocus();
 
-    if (_mode == _Mode.key) {
+    if (_mode == _Mode.quick) {
+      await license.quickRegister(_nickname.text);
+    } else if (_mode == _Mode.key) {
       await license.activate(_key.text);
     } else if (_register) {
       await license.register(_key.text, _user.text, _pass.text);
@@ -52,7 +56,9 @@ class _ActivatePageState extends State<ActivatePage> {
     final TextTheme text = Theme.of(context).textTheme;
 
     final String subtitle;
-    if (_mode == _Mode.key) {
+    if (_mode == _Mode.quick) {
+      subtitle = '用机器码一键注册，随后兑换时长即可使用';
+    } else if (_mode == _Mode.key) {
       subtitle = '输入卡密即可激活，自动绑定当前设备';
     } else if (_register) {
       subtitle = '用一张未使用的卡密开通新账号';
@@ -99,6 +105,15 @@ class _ActivatePageState extends State<ActivatePage> {
                       onChanged: (_Mode mode) => setState(() => _mode = mode),
                     ),
                     const SizedBox(height: 16),
+                    if (_mode == _Mode.quick) ...<Widget>[
+                      _Field(
+                        controller: _nickname,
+                        label: '昵称',
+                        hint: '给自己起个名字',
+                        icon: Icons.badge_outlined,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     if (_mode == _Mode.key || _register) ...<Widget>[
                       _Field(
                         controller: _key,
@@ -165,9 +180,11 @@ class _ActivatePageState extends State<ActivatePage> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(_mode == _Mode.key
-                                ? '激活'
-                                : (_register ? '注册并激活' : '登录')),
+                            : Text(_mode == _Mode.quick
+                                ? '注册并进入'
+                                : (_mode == _Mode.key
+                                    ? '激活'
+                                    : (_register ? '注册并激活' : '登录'))),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -249,8 +266,10 @@ class _ModeSwitch extends StatelessWidget {
 
     return Row(
       children: <Widget>[
+        item('一键注册', _Mode.quick),
+        const SizedBox(width: 8),
         item('卡密激活', _Mode.key),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         item('账号登录', _Mode.account),
       ],
     );
