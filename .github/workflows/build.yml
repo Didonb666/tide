@@ -225,7 +225,9 @@ jobs:
           flutter build apk --release \
             --target-platform android-arm64 \
             --obfuscate \
-            --split-debug-info=build/symbols 2>&1 | tee android-build.log
+            --split-debug-info=build/symbols \
+            --dart-define=LICENSE_API=${{ vars.LICENSE_API || 'https://license.example.com' }} \
+            --dart-define=LICENSE_ENFORCE=${{ vars.LICENSE_ENFORCE || 'false' }} 2>&1 | tee android-build.log
 
       - name: 9b. 失败时提取 Dart / Kotlin 错误
         if: failure()
@@ -285,7 +287,7 @@ jobs:
       - name: 6. 编译 Release EXE
         shell: pwsh
         run: |
-          flutter build windows --release 2>&1 | Tee-Object -FilePath windows-build.log
+          flutter build windows --release --dart-define=LICENSE_API="${{ vars.LICENSE_API || 'https://license.example.com' }}" --dart-define=LICENSE_ENFORCE="${{ vars.LICENSE_ENFORCE || 'false' }}" 2>&1 | Tee-Object -FilePath windows-build.log
           $code = $LASTEXITCODE
           if ($code -ne 0) {
             Write-Host ""

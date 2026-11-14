@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'core/app_controller.dart';
 import 'core/app_scope.dart';
 import 'core/background_controller.dart';
+import 'core/license/license_controller.dart';
+import 'core/license/license_scope.dart';
 import 'core/settings_controller.dart';
 import 'design/app_theme.dart';
 import 'design/tokens.dart';
+import 'features/auth/license_gate.dart';
 import 'features/connect/connect_page.dart';
 import 'features/logs/logs_page.dart';
 import 'features/profiles/profiles_page.dart';
@@ -22,11 +25,13 @@ class TideApp extends StatelessWidget {
     required this.controller,
     required this.settings,
     required this.background,
+    required this.license,
   });
 
   final AppController controller;
   final SettingsController settings;
   final BackgroundController background;
+  final LicenseController license;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +60,10 @@ class TideApp extends StatelessWidget {
                     ],
                   );
                 },
-                home: const HomeShell(),
+                home: LicenseScope(
+                  controller: license,
+                  child: const LicenseGate(child: HomeShell()),
+                ),
               );
             },
           ),
