@@ -49,44 +49,47 @@ class TideApp extends StatelessWidget {
           controller: background,
           child: LocaleScope(
             controller: locale,
-            child: AnimatedBuilder(
-              animation: Listenable.merge(<Listenable>[settings, locale]),
-              builder: (BuildContext context, Widget? child) {
-                return MaterialApp(
-                  title: 'Fstool',
-                  debugShowCheckedModeBanner: false,
-                  theme: AppTheme.light(settings.accentColor),
-                  darkTheme: AppTheme.dark(settings.accentColor),
-                  themeMode: settings.themeMode,
-                  locale: locale.locale,
-                  supportedLocales: const <Locale>[
-                    Locale('zh'),
-                    Locale('en'),
-                    Locale('it'),
-                    Locale('ru'),
-                  ],
-                  localizationsDelegates:
-                      const <LocalizationsDelegate<dynamic>>[
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                    GlobalCupertinoLocalizations.delegate,
-                  ],
-                  scrollBehavior: const TideScrollBehavior(),
-                  builder: (BuildContext context, Widget? child) {
-                    return Stack(
-                      children: <Widget>[
-                        const AppBackgroundHost(),
-                        if (child != null) child,
-                        const SnowOverlay(),
-                      ],
-                    );
-                  },
-                  home: LicenseScope(
-                    controller: license,
-                    child: const LicenseGate(child: HomeShell()),
-                  ),
-                );
-              },
+            // LicenseScope 放在 MaterialApp 外层：
+            // 这样 push 出来的新路由（兑换页等）也能读到授权状态，
+            // 否则会 assert 失败 → 白屏。
+            child: LicenseScope(
+              controller: license,
+              child: AnimatedBuilder(
+                animation: Listenable.merge(<Listenable>[settings, locale]),
+                builder: (BuildContext context, Widget? child) {
+                  return MaterialApp(
+                    title: 'Fstool',
+                    debugShowCheckedModeBanner: false,
+                    theme: AppTheme.light(settings.accentColor),
+                    darkTheme: AppTheme.dark(settings.accentColor),
+                    themeMode: settings.themeMode,
+                    locale: locale.locale,
+                    supportedLocales: const <Locale>[
+                      Locale('zh'),
+                      Locale('en'),
+                      Locale('it'),
+                      Locale('ru'),
+                    ],
+                    localizationsDelegates:
+                        const <LocalizationsDelegate<dynamic>>[
+                      GlobalMaterialLocalizations.delegate,
+                      GlobalWidgetsLocalizations.delegate,
+                      GlobalCupertinoLocalizations.delegate,
+                    ],
+                    scrollBehavior: const TideScrollBehavior(),
+                    builder: (BuildContext context, Widget? child) {
+                      return Stack(
+                        children: <Widget>[
+                          const AppBackgroundHost(),
+                          if (child != null) child,
+                          const SnowOverlay(),
+                        ],
+                      );
+                    },
+                    home: const LicenseGate(child: HomeShell()),
+                  );
+                },
+              ),
             ),
           ),
         ),

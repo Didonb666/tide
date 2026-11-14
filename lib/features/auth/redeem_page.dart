@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/app_text.dart';
 import '../../core/license/license_controller.dart';
 import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
@@ -80,12 +81,12 @@ class _RedeemPageState extends State<RedeemPage> {
                               color: colors.accent,
                             ),
                             const SizedBox(width: 8),
-                            Text('兑换时长', style: text.titleLarge),
+                            Text(AppText.t(context, 'redeem.title'), style: text.titleLarge),
                           ],
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '输入卡密即可增加时长，同一张卡只能用一次',
+                          AppText.t(context, 'redeem.subtitle'),
                           style: text.bodySmall
                               ?.copyWith(color: colors.inkSecondary),
                         ),
@@ -103,7 +104,7 @@ class _RedeemPageState extends State<RedeemPage> {
                             children: <Widget>[
                               _InfoRow(
                                 icon: Icons.person_outline_rounded,
-                                label: '账号',
+                                label: AppText.t(context, 'profile.account'),
                                 value: license.nickname.isEmpty
                                     ? '未注册'
                                     : license.nickname,
@@ -111,13 +112,13 @@ class _RedeemPageState extends State<RedeemPage> {
                               const SizedBox(height: 6),
                               _InfoRow(
                                 icon: Icons.fingerprint_rounded,
-                                label: '机器码',
+                                label: AppText.t(context, 'profile.machineCode'),
                                 value: license.deviceShort,
                               ),
                               const SizedBox(height: 6),
                               _InfoRow(
                                 icon: Icons.hourglass_bottom_rounded,
-                                label: '剩余',
+                                label: AppText.t(context, 'profile.remaining'),
                                 value: license.expiresAt == null
                                     ? '未兑换'
                                     : '${license.remainingDays} 天 · ${license.expiryText}',
@@ -137,7 +138,7 @@ class _RedeemPageState extends State<RedeemPage> {
                             ),
                           ],
                           decoration: InputDecoration(
-                            labelText: '卡密',
+                            labelText: AppText.t(context, 'redeem.key'),
                             hintText: 'FST-XXXX-XXXX-XXXX',
                             prefixIcon: Icon(
                               Icons.vpn_key_rounded,
@@ -192,14 +193,14 @@ class _RedeemPageState extends State<RedeemPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('兑换'),
+                                : Text(AppText.t(context, 'redeem.action')),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Center(
                           child: TextButton(
                             onPressed: license.signOut,
-                            child: const Text('退出登录'),
+                            child: Text(AppText.t(context, 'profile.signOut')),
                           ),
                         ),
                       ],

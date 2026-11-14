@@ -23,16 +23,30 @@ class ConnectPage extends StatelessWidget {
     final AppController c = AppScope.of(context);
     final bool wide = MediaQuery.sizeOf(context).width >= 760;
 
-    final Widget mainColumn = Column(
+    final Widget headColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _TitleRow(state: c.tunnelState),
         const SizedBox(height: 14),
         _AnnouncementCard(controller: c),
-        const SizedBox(height: 18),
+      ],
+    );
+
+    final Widget statusSection = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
         const _SectionLabel(text: '连接状态'),
         const SizedBox(height: 8),
         _InfoCard(controller: c),
+      ],
+    );
+
+    final Widget mainColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        headColumn,
+        const SizedBox(height: 18),
+        statusSection,
       ],
     );
 
@@ -66,9 +80,11 @@ class ConnectPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    mainColumn,
+                    headColumn,
                     const SizedBox(height: 12),
                     nodeCard,
+                    const SizedBox(height: 18),
+                    statusSection,
                   ],
                 ),
             ],

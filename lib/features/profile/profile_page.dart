@@ -106,122 +106,128 @@ class _ProfilePageState extends State<ProfilePage> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 140),
         children: <Widget>[
-          // ---------------------------------------------------------- 头像卡
+          // ---------------------------------------------------------- 头像 + 简介
           LiquidGlassContainer(
             radius: 24,
             padding: const EdgeInsets.all(18),
-            child: Row(
-              children: <Widget>[
-                GestureDetector(
-                  onTap: _pickAvatar,
-                  child: Stack(
-                    children: <Widget>[
-                      Container(
-                        width: 68,
-                        height: 68,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.surface.withOpacity(0.45),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: _avatarPath != null
-                            ? Image.file(
-                                File(_avatarPath!),
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Icon(
-                                  Icons.person_rounded,
-                                  color: colors.inkTertiary,
-                                  size: 32,
-                                ),
-                              )
-                            : Icon(
-                                Icons.person_rounded,
-                                color: colors.inkTertiary,
-                                size: 32,
-                              ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colors.accent,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            size: 11,
-                            color: onAccent(colors.accent),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: () => _editText(
-                          title: '修改昵称',
-                          initial: license.nickname,
-                          maxLength: 24,
-                          onSave: (String value) =>
-                              license.updateProfile(nickname: value),
-                        ),
-                        child: Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                license.nickname.isEmpty
-                                    ? '未注册'
-                                    : license.nickname,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: text.titleMedium,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.edit_rounded,
-                              size: 13,
-                              color: colors.inkTertiary,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '机器码 ${license.deviceShort}',
-                        style: text.labelSmall
-                            ?.copyWith(color: colors.inkTertiary),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // ---------------------------------------------------------- 简介
-          LiquidGlassContainer(
-            radius: 20,
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    if (license.bio.isEmpty)
-                      Text(
-                        AppText.t(context, 'profile.bio'),
-                        style: text.labelMedium,
+                    GestureDetector(
+                      onTap: _pickAvatar,
+                      child: Stack(
+                        children: <Widget>[
+                          Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.surface.withOpacity(0.45),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: _avatarPath != null
+                                ? Image.file(
+                                    File(_avatarPath!),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Icon(
+                                      Icons.person_rounded,
+                                      color: colors.inkTertiary,
+                                      size: 32,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.person_rounded,
+                                    color: colors.inkTertiary,
+                                    size: 32,
+                                  ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colors.accent,
+                              ),
+                              child: Icon(
+                                Icons.camera_alt_rounded,
+                                size: 11,
+                                color: onAccent(colors.accent),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    const Spacer(),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () => _editText(
+                              title: AppText.t(context, 'auth.nickname'),
+                              initial: license.nickname,
+                              maxLength: 24,
+                              onSave: (String value) =>
+                                  license.updateProfile(nickname: value),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Flexible(
+                                  child: Text(
+                                    license.nickname.isEmpty
+                                        ? AppText.t(context, 'profile.account')
+                                        : license.nickname,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: text.titleMedium,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.edit_rounded,
+                                  size: 13,
+                                  color: colors.inkTertiary,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${AppText.t(context, 'profile.machineCode')} ${license.deviceShort}",
+                            style: text.labelSmall
+                                ?.copyWith(color: colors.inkTertiary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Divider(height: 1, color: colors.hairline),
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: license.bio.isEmpty
+                          ? Text(
+                              AppText.t(context, 'profile.bioEmpty'),
+                              style: text.bodySmall
+                                  ?.copyWith(color: colors.inkTertiary),
+                            )
+                          : Text(
+                              license.bio,
+                              style: text.titleMedium?.copyWith(
+                                height: 1.55,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                    ),
                     TextButton(
                       onPressed: () => _editText(
                         title: AppText.t(context, 'profile.bio'),
@@ -236,26 +242,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: Text(
                         AppText.t(context, 'profile.edit'),
-                        style: text.labelMedium?.copyWith(
-                          color: colors.accent,
-                        ),
+                        style:
+                            text.labelMedium?.copyWith(color: colors.accent),
                       ),
                     ),
                   ],
                 ),
-                if (license.bio.isEmpty)
-                  Text(
-                    AppText.t(context, 'profile.bioEmpty'),
-                    style: text.bodySmall?.copyWith(color: colors.inkTertiary),
-                  )
-                else
-                  Text(
-                    license.bio,
-                    style: text.titleMedium?.copyWith(
-                      height: 1.55,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
               ],
             ),
           ),
