@@ -22,8 +22,8 @@ class Announcement {
   final String body;
 }
 
-const Announcement kFstoolAnnouncement = Announcement(
-  title: '公告',
+Announcement kFstoolAnnouncement = Announcement(
+  title: tr('公告'),
   version: 'v0.1.0',
   date: '2026-11-06',
   summary: '欢迎使用 Fstool，本次更新重构首页并支持节点一键切换。',

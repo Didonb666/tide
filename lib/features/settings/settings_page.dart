@@ -213,8 +213,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 const LiquidEffectsPanel(),
                 DropdownButtonFormField<int>(
                   value: s.refreshRate,
-                  decoration: const InputDecoration(
-                    labelText: '屏幕刷新率',
+                  decoration: InputDecoration(
+                    labelText: tr('屏幕刷新率'),
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -254,8 +254,8 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 _BackgroundSlotRow(
-                  title: '统一背景',
-                  subtitle: '横竖屏通用；方向专用未设置时用它',
+                  title: tr('统一背景'),
+                  subtitle: tr('横竖屏通用；方向专用未设置时用它'),
                   path: bg.pathForSlot(BackgroundSlot.shared),
                   isVideo: bg.isVideoForSlot(BackgroundSlot.shared),
                   onPickImage: () => _pickImage(context),
@@ -264,8 +264,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: TideSpace.x3),
                 _BackgroundSlotRow(
-                  title: '竖屏背景',
-                  subtitle: '手机竖着拿时显示',
+                  title: tr('竖屏背景'),
+                  subtitle: tr('手机竖着拿时显示'),
                   path: bg.pathForSlot(BackgroundSlot.portrait),
                   isVideo: bg.isVideoForSlot(BackgroundSlot.portrait),
                   onPickImage: () =>
@@ -276,8 +276,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: TideSpace.x3),
                 _BackgroundSlotRow(
-                  title: '横屏背景',
-                  subtitle: '平板或横屏时显示',
+                  title: tr('横屏背景'),
+                  subtitle: tr('平板或横屏时显示'),
                   path: bg.pathForSlot(BackgroundSlot.landscape),
                   isVideo: bg.isVideoForSlot(BackgroundSlot.landscape),
                   onPickImage: () =>
@@ -297,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 const SizedBox(height: TideSpace.x4),
                 _SliderRow(
-                  label: '背景透明度',
+                  label: tr('背景透明度'),
                   value: bg.opacity,
                   max: 1,
                   divisions: 20,
@@ -305,7 +305,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (double v) => bg.setOpacity(v),
                 ),
                 _SliderRow(
-                  label: '背景模糊度',
+                  label: tr('背景模糊度'),
                   value: bg.blur,
                   max: 30,
                   divisions: 30,
@@ -818,7 +818,7 @@ class _BackgroundSlotRow extends StatelessWidget {
                   Expanded(
                     child: _ActionButton(
                       icon: Icons.image_outlined,
-                      label: '图片',
+                      label: tr('图片'),
                       onTap: onPickImage,
                     ),
                   ),
@@ -826,7 +826,7 @@ class _BackgroundSlotRow extends StatelessWidget {
                   Expanded(
                     child: _ActionButton(
                       icon: Icons.movie_outlined,
-                      label: '视频',
+                      label: tr('视频'),
                       onTap: onPickVideo,
                     ),
                   ),

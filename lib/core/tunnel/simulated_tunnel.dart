@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'tunnel_platform.dart';
 import 'tunnel_state.dart';
+import '../app_text.dart';
 
 /// 桌面端（以及任何没有原生实现的平台）使用的本地模拟实现。
 ///
@@ -13,7 +14,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
       StreamController<TunnelState>.broadcast();
   final Random _random = Random(7);
 
-  TunnelState _state = const TunnelState(message: '演示模式：未接入内核');
+  TunnelState _state = TunnelState(message: tr('演示模式：未接入内核'));
   Timer? _traffic;
   bool _disposed = false;
 
@@ -45,7 +46,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
     _emit(_state.copyWith(
       phase: TunnelPhase.connecting,
       profileId: profileId,
-      message: '正在建立隧道…',
+      message: tr('正在建立隧道…'),
     ));
 
     await Future<void>.delayed(const Duration(milliseconds: 800));
@@ -53,7 +54,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
 
     _emit(_state.copyWith(
       phase: TunnelPhase.connected,
-      message: '已连接（桌面演示模式，未启动内核）',
+      message: tr('已连接（桌面演示模式，未启动内核）'),
     ));
     _startTraffic();
   }
@@ -63,7 +64,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
     _stopTraffic();
     _emit(_state.copyWith(
       phase: TunnelPhase.disconnecting,
-      message: '正在断开…',
+      message: tr('正在断开…'),
     ));
 
     await Future<void>.delayed(const Duration(milliseconds: 400));
@@ -74,7 +75,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
       downBytesPerSec: 0,
       upBytesPerSec: 0,
       connectionCount: 0,
-      message: '已断开',
+      message: tr('已断开'),
     ));
   }
 

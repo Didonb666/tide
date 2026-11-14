@@ -61,7 +61,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
         padding: const EdgeInsets.only(bottom: 40),
         children: <Widget>[
           const SizedBox(height: 8),
-          const _SectionTitle(title: '主色调'),
+          _SectionTitle(title: tr('主色调')),
           _Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,15 +124,15 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
               ],
             ),
           ),
-          const _SectionTitle(title: '屏幕刷新率'),
+          _SectionTitle(title: tr('屏幕刷新率')),
           _Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 DropdownButtonFormField<int>(
                   value: settings.refreshRate,
-                  decoration: const InputDecoration(
-                    labelText: '目标帧率',
+                  decoration: InputDecoration(
+                    labelText: tr('目标帧率'),
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),

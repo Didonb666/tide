@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
             controller: controller,
             maxLength: maxLength,
             autofocus: true,
-            decoration: InputDecoration(hintText: '最多 $maxLength 个字'),
+            decoration: InputDecoration(hintText: tr('最多 $maxLength 个字')),
           ),
           actions: <Widget>[
             TextButton(

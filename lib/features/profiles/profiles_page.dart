@@ -65,12 +65,12 @@ class ProfilesPage extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.qr_code_scanner_rounded),
-                    tooltip: '扫码导入',
+                    tooltip: tr('扫码导入'),
                   ),
                   IconButton(
                     onPressed: () => _import(context, c),
                     icon: const Icon(Icons.add_rounded),
-                    tooltip: '导入配置',
+                    tooltip: tr('导入配置'),
                   ),
                 ],
               ),

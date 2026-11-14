@@ -176,10 +176,10 @@ class _GroupsTab extends StatelessWidget {
     final TextTheme text = Theme.of(context).textTheme;
 
     if (profile.groups.isEmpty) {
-      return const _EmptyTab(
+      return _EmptyTab(
         icon: Icons.hub_outlined,
-        title: '还没有策略组数据',
-        subtitle: '接入内核后，这里会从 GET /proxies 读取真实的组与当前选中节点。',
+        title: tr('还没有策略组数据'),
+        subtitle: tr('接入内核后，这里会从 GET /proxies 读取真实的组与当前选中节点。'),
       );
     }
 
@@ -232,10 +232,10 @@ class _RulesTab extends StatelessWidget {
     final TextTheme text = Theme.of(context).textTheme;
 
     if (profile.rules.isEmpty) {
-      return const _EmptyTab(
+      return _EmptyTab(
         icon: Icons.rule_folder_outlined,
-        title: '还没有解析出的规则',
-        subtitle: '导入的原文已保存。接入内核后，这里会按 index 展示 GET /rules 的顺序。',
+        title: tr('还没有解析出的规则'),
+        subtitle: tr('导入的原文已保存。接入内核后，这里会按 index 展示 GET /rules 的顺序。'),
       );
     }
 
@@ -298,10 +298,10 @@ class _ProvidersTab extends StatelessWidget {
     final TextTheme text = Theme.of(context).textTheme;
 
     if (profile.providers.isEmpty) {
-      return const _EmptyTab(
+      return _EmptyTab(
         icon: Icons.cloud_download_outlined,
-        title: '还没有规则集',
-        subtitle: '接入内核后，这里会展示每个 rule-provider 的条目数与最后更新时间。',
+        title: tr('还没有规则集'),
+        subtitle: tr('接入内核后，这里会展示每个 rule-provider 的条目数与最后更新时间。'),
       );
     }
 

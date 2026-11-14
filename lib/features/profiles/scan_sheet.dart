@@ -283,7 +283,7 @@ class _ScanSheetState extends State<ScanSheet> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
-                                  const Icon(
+                                  Icon(
                                     Icons.videocam_off_rounded,
                                     size: 32,
                                     color: Colors.white38,

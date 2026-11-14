@@ -386,7 +386,7 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         children: <Widget>[
           _InfoRow(
-            label: '配置',
+            label: tr('配置'),
             value: Text(
               p?.name ?? '未选择',
               maxLines: 1,
@@ -396,12 +396,12 @@ class _InfoCard extends StatelessWidget {
           ),
           const _RowDivider(),
           _InfoRow(
-            label: '协议',
+            label: tr('协议'),
             value: Text(_protocolOf(p), style: text.bodyMedium),
           ),
           const _RowDivider(),
           _InfoRow(
-            label: '地址',
+            label: tr('地址'),
             value: Text(
               _serverOf(p),
               maxLines: 1,
@@ -411,7 +411,7 @@ class _InfoCard extends StatelessWidget {
           ),
           const _RowDivider(),
           _InfoRow(
-            label: '上行',
+            label: tr('上行'),
             value: AnimatedNumber(
               value: state.upBytesPerSec,
               formatter: formatRate,
@@ -420,7 +420,7 @@ class _InfoCard extends StatelessWidget {
           ),
           const _RowDivider(),
           _InfoRow(
-            label: '下行',
+            label: tr('下行'),
             value: AnimatedNumber(
               value: state.downBytesPerSec,
               formatter: formatRate,
@@ -429,7 +429,7 @@ class _InfoCard extends StatelessWidget {
           ),
           const _RowDivider(),
           _InfoRow(
-            label: '规则',
+            label: tr('规则'),
             value: Text(
               '${p?.ruleCount ?? 0}',
               style: TideType.mono.copyWith(color: colors.inkSecondary),

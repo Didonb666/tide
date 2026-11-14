@@ -77,7 +77,7 @@ class LiquidEffectsPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               TideSlider(
-                label: '玻璃模糊',
+                label: tr('玻璃模糊'),
                 value: settings.glassBlur,
                 max: 30,
                 divisions: 30,
@@ -85,7 +85,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: settings.setGlassBlur,
               ),
               TideSlider(
-                label: '玻璃高光',
+                label: tr('玻璃高光'),
                 value: settings.glassHighlight,
                 max: 1,
                 divisions: 20,
@@ -93,7 +93,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: settings.setGlassHighlight,
               ),
               TideSlider(
-                label: '底栏距底部',
+                label: tr('底栏距底部'),
                 value: settings.navBottomOffset,
                 max: 48,
                 divisions: 48,
@@ -101,7 +101,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: settings.setNavBottomOffset,
               ),
               TideSlider(
-                label: '底栏左右缩进',
+                label: tr('底栏左右缩进'),
                 value: settings.navSideInset,
                 max: 40,
                 min: 8,
@@ -133,7 +133,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 ],
               ),
               TideSlider(
-                label: '雪花数量',
+                label: tr('雪花数量'),
                 value: settings.snowCount.toDouble(),
                 max: 100,
                 min: 5,
@@ -142,7 +142,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: (double v) => settings.setSnowCount(v.round()),
               ),
               TideSlider(
-                label: '雪花大小',
+                label: tr('雪花大小'),
                 value: settings.snowSize,
                 max: 60,
                 min: 4,
@@ -151,7 +151,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: settings.setSnowSize,
               ),
               TideSlider(
-                label: '雪花速度',
+                label: tr('雪花速度'),
                 value: settings.snowSpeed,
                 max: 3,
                 min: 0.2,

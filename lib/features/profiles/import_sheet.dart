@@ -65,8 +65,8 @@ class _ImportSheetState extends State<ImportSheet> {
 
   Future<void> _fromFile() async {
     try {
-      const XTypeGroup group = XTypeGroup(
-        label: 'Clash 配置',
+      XTypeGroup group = XTypeGroup(
+        label: tr('Clash 配置'),
         extensions: <String>['yaml', 'yml', 'txt', 'conf'],
       );
       final XFile? file = await openFile(acceptedTypeGroups: <XTypeGroup>[group]);
@@ -221,15 +221,15 @@ class _ImportSheetState extends State<ImportSheet> {
     return <Widget>[
       _OptionTile(
         icon: Icons.content_paste_rounded,
-        title: '从剪贴板粘贴',
-        subtitle: '读取剪贴板里的 Clash.Meta YAML',
+        title: tr('从剪贴板粘贴'),
+        subtitle: tr('读取剪贴板里的 Clash.Meta YAML'),
         onTap: _fromClipboard,
       ),
       const SizedBox(height: 10),
       _OptionTile(
         icon: Icons.link_rounded,
-        title: '订阅地址',
-        subtitle: '输入 URL，下载后导入',
+        title: tr('订阅地址'),
+        subtitle: tr('输入 URL，下载后导入'),
         onTap: () => setState(() {
           _mode = _ImportMode.url;
           _error = null;
@@ -238,8 +238,8 @@ class _ImportSheetState extends State<ImportSheet> {
       const SizedBox(height: 10),
       _OptionTile(
         icon: Icons.folder_open_rounded,
-        title: '本地文件',
-        subtitle: '选择 .yaml / .yml / .txt 文件',
+        title: tr('本地文件'),
+        subtitle: tr('选择 .yaml / .yml / .txt 文件'),
         onTap: _fromFile,
       ),
       const SizedBox(height: TideSpace.x4),
@@ -253,8 +253,8 @@ class _ImportSheetState extends State<ImportSheet> {
     return <Widget>[
       TextField(
         controller: _nameCtrl,
-        decoration: const InputDecoration(
-          labelText: '配置名称（可选）',
+        decoration: InputDecoration(
+          labelText: tr('配置名称（可选）'),
           border: OutlineInputBorder(),
           isDense: true,
         ),
@@ -266,8 +266,8 @@ class _ImportSheetState extends State<ImportSheet> {
           minLines: 8,
           maxLines: 14,
           style: TideType.mono,
-          decoration: const InputDecoration(
-            labelText: 'YAML 内容',
+          decoration: InputDecoration(
+            labelText: tr('YAML 内容'),
             alignLabelWithHint: true,
             border: OutlineInputBorder(),
           ),
@@ -276,8 +276,8 @@ class _ImportSheetState extends State<ImportSheet> {
         TextField(
           controller: _urlCtrl,
           keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
-            labelText: '订阅 URL',
+          decoration: InputDecoration(
+            labelText: tr('订阅 URL'),
             hintText: 'https://example.com/sub.yaml',
             border: OutlineInputBorder(),
             isDense: true,
