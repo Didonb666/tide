@@ -240,8 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 const SizedBox(height: TideSpace.x2),
-                Text(
-                  'Android 会挑选与目标最接近的屏幕模式，桌面端没有该能力时自动忽略。',
+                Text(tr('Android 会挑选与目标最接近的屏幕模式，桌面端没有该能力时自动忽略。'),
                   style: text.labelSmall,
                 ),
               ],
@@ -293,7 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: bg.clearMedia,
-                      child: const Text('全部恢复默认'),
+                      child: Text(tr('全部恢复默认')),
                     ),
                   ),
                 const SizedBox(height: TideSpace.x4),
@@ -314,8 +313,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onChanged: (double v) => bg.setBlur(v),
                 ),
                 const SizedBox(height: TideSpace.x2),
-                Text(
-                  '视频会自动循环、静音播放，切到后台自动暂停；模糊度过高会占用较多 GPU。',
+                Text(tr('视频会自动循环、静音播放，切到后台自动暂停；模糊度过高会占用较多 GPU。'),
                   style: text.labelSmall,
                 ),
               ],
@@ -332,16 +330,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   value: s.autoConnect,
                   onChanged: s.setAutoConnect,
                   activeColor: colors.accent,
-                  title: const Text('启动时自动连接'),
-                  subtitle: const Text('打开 App 后自动连接当前配置（暂未接入内核逻辑）'),
+                  title: Text(tr('启动时自动连接')),
+                  subtitle: Text(tr('打开 App 后自动连接当前配置（暂未接入内核逻辑）')),
                 ),
                 Divider(color: colors.hairline, height: 1),
                 SwitchListTile.adaptive(
                   value: s.verboseLogs,
                   onChanged: s.setVerboseLogs,
                   activeColor: colors.accent,
-                  title: const Text('开启详细日志'),
-                  subtitle: const Text('记录更多内核日志（暂未接入内核逻辑）'),
+                  title: Text(tr('开启详细日志')),
+                  subtitle: Text(tr('记录更多内核日志（暂未接入内核逻辑）')),
                 ),
               ],
             ),
@@ -354,12 +352,12 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               children: <Widget>[
                 ListTile(
-                  title: const Text('版本'),
+                  title: Text(tr('版本')),
                   trailing: Text('0.1.0 (1)', style: TideType.mono),
                 ),
                 Divider(color: colors.hairline, height: 1),
                 ListTile(
-                  title: const Text('开源许可'),
+                  title: Text(tr('开源许可')),
                   trailing: Icon(
                     Icons.chevron_right_rounded,
                     size: 20,
@@ -602,7 +600,7 @@ class _CustomAccentTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('自定义主色调'),
+      title: Text(tr('自定义主色调')),
       subtitle: Text(tr('HSV 调色板 / Hue 滑条 / Hex 输入'), style: text.labelSmall),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -712,7 +710,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: const Text('取消'),
+                        child: Text(tr('取消')),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -726,7 +724,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: const Text('确定'),
+                        child: Text(tr('确定')),
                       ),
                     ),
                   ],
@@ -799,7 +797,7 @@ class _BackgroundSlotRow extends StatelessWidget {
                   minimumSize: const Size(0, 32),
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
-                child: const Text('清除'),
+                child: Text(tr('清除')),
               ),
           ],
         ),

@@ -256,8 +256,7 @@ class _ScanSheetState extends State<ScanSheet> {
               if (!_supported)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 28),
-                  child: Text(
-                    '当前平台不支持摄像头扫码，请用「粘贴」或「URL」导入。',
+                  child: Text(tr('当前平台不支持摄像头扫码，请用「粘贴」或「URL」导入。'),
                     textAlign: TextAlign.center,
                     style: text.bodySmall,
                   ),
@@ -290,8 +289,7 @@ class _ScanSheetState extends State<ScanSheet> {
                                     color: Colors.white38,
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
-                                    '相机不可用：${error.errorCode.name}\n'
+                                  Text(tr('相机不可用：${error.errorCode.name}\n')
                                     '${error.errorDetails?.message ?? ''}',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
@@ -300,8 +298,7 @@ class _ScanSheetState extends State<ScanSheet> {
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  const Text(
-                                    '系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；'
+                                  Text(tr('系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；')
                                     '若刚允许过，杀掉应用重开一次。',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
@@ -350,11 +347,10 @@ class _ScanSheetState extends State<ScanSheet> {
               OutlinedButton.icon(
                 onPressed: _busy ? null : _scanFromGallery,
                 icon: const Icon(Icons.photo_library_outlined, size: 18),
-                label: const Text('从相册选二维码图片识别'),
+                label: Text(tr('从相册选二维码图片识别')),
               ),
               const SizedBox(height: 10),
-              Text(
-                '支持：vless:// 链接、订阅 URL、Clash YAML 文本',
+              Text(tr('支持：vless:// 链接、订阅 URL、Clash YAML 文本'),
                 style: text.labelSmall,
               ),
               if (_busy) ...<Widget>[

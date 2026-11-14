@@ -192,7 +192,7 @@ class _AnnouncementDialogState extends State<AnnouncementDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: const Text('我知道了'),
+                        child: Text(tr('我知道了')),
                       ),
                     ),
                   ],

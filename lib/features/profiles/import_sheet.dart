@@ -242,8 +242,7 @@ class _ImportSheetState extends State<ImportSheet> {
         onTap: _fromFile,
       ),
       const SizedBox(height: TideSpace.x4),
-      Text(
-        '导入后配置会出现在列表里，连接时交给 mihomo 解析。',
+      Text(tr('导入后配置会出现在列表里，连接时交给 mihomo 解析。'),
         style: text.labelSmall,
       ),
     ];
@@ -328,8 +327,7 @@ class _ImportSheetState extends State<ImportSheet> {
       ),
       const SizedBox(height: TideSpace.x2),
       if (_mode == _ImportMode.url)
-        Text(
-          '会用 clash.meta UA 下载，超过 5MB 会被拒绝。',
+        Text(tr('会用 clash.meta UA 下载，超过 5MB 会被拒绝。'),
           style: text.labelSmall,
         ),
     ];

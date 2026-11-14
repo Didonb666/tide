@@ -32,7 +32,7 @@ class ProfileDetailPage extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text('配置详情'),
+          title: Text(tr('配置详情')),
         ),
         body: Column(
           children: <Widget>[
@@ -138,8 +138,7 @@ class _DetailHeader extends StatelessWidget {
                   style: text.headlineSmall,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${profile.sourceLabel} · ${profile.ruleCount} 条规则 · ${relativeTime(profile.updatedAt)}',
+                Text(tr('${profile.sourceLabel} · ${profile.ruleCount} 条规则 · ${relativeTime(profile.updatedAt)}'),
                   style: text.bodySmall,
                 ),
                 if (!profile.valid) ...<Widget>[
@@ -149,8 +148,7 @@ class _DetailHeader extends StatelessWidget {
                       Icon(Icons.error_outline, size: 14, color: colors.danger),
                       const SizedBox(width: 4),
                       Flexible(
-                        child: Text(
-                          '校验未通过：${profile.groupSummary}',
+                        child: Text(tr('校验未通过：${profile.groupSummary}'),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: text.labelSmall?.copyWith(color: colors.danger),
@@ -195,8 +193,7 @@ class _GroupsTab extends StatelessWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
           title: Text(group.name, style: text.titleMedium),
-          subtitle: Text(
-            '${group.kind} · ${group.nodes.length} 个节点',
+          subtitle: Text(tr('${group.kind} · ${group.nodes.length} 个节点'),
             style: text.bodySmall,
           ),
           trailing: Row(
@@ -318,8 +315,7 @@ class _ProvidersTab extends StatelessWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
           title: Text(p.name, style: text.titleMedium),
-          subtitle: Text(
-            '${p.behavior} · ${p.count} 条 · ${relativeTime(p.updatedAt)}更新',
+          subtitle: Text(tr('${p.behavior} · ${p.count} 条 · ${relativeTime(p.updatedAt)}更新'),
             style: text.bodySmall,
           ),
           trailing:

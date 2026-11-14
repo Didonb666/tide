@@ -35,9 +35,8 @@ class CustomAccentTile extends StatelessWidget {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('自定义主色调'),
-      subtitle: Text(
-        'HSV 调色板 / Hex 输入',
+      title: Text(tr('自定义主色调')),
+      subtitle: Text(tr('HSV 调色板 / Hex 输入'),
         style: text.labelSmall,
       ),
       trailing: Row(
@@ -148,7 +147,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: const Text('取消'),
+                        child: Text(tr('取消')),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -162,7 +161,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                             borderRadius: BorderRadius.circular(TideRadii.md),
                           ),
                         ),
-                        child: const Text('确定'),
+                        child: Text(tr('确定')),
                       ),
                     ),
                   ],

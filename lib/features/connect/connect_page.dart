@@ -165,8 +165,7 @@ class ConnectPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    '提示：更多配置可在「配置」页导入或更换头像',
+                  Text(tr('提示：更多配置可在「配置」页导入或更换头像'),
                     style: text.labelSmall,
                   ),
                 ],
@@ -218,8 +217,7 @@ class _KernelBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
               border: Border.all(color: colors.success.withOpacity(0.35)),
             ),
-            child: Text(
-              '已是最新',
+            child: Text(tr('已是最新'),
               style: text.labelSmall?.copyWith(
                 color: colors.success,
                 fontWeight: FontWeight.w600,
@@ -323,8 +321,7 @@ class _AnnouncementCardState extends State<_AnnouncementCard> {
                 ),
                 Row(
                   children: <Widget>[
-                    Text(
-                      '查看',
+                    Text(tr('查看'),
                       style: text.labelMedium?.copyWith(color: colors.accent),
                     ),
                     Icon(

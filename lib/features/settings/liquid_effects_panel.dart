@@ -115,8 +115,7 @@ class LiquidEffectsPanel extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      '雪花图片：${_shortPath(settings.snowImagePath)}',
+                    child: Text(tr('雪花图片：${_shortPath(settings.snowImagePath)}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall,
@@ -124,12 +123,12 @@ class LiquidEffectsPanel extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () => _pickSnow(context),
-                    child: const Text('选择'),
+                    child: Text(tr('选择')),
                   ),
                   if (settings.snowImagePath != null)
                     TextButton(
                       onPressed: () => settings.setSnowImage(null),
-                      child: const Text('重置'),
+                      child: Text(tr('重置')),
                     ),
                 ],
               ),
@@ -161,8 +160,7 @@ class LiquidEffectsPanel extends StatelessWidget {
                 onCommit: settings.setSnowSpeed,
               ),
               const SizedBox(height: 4),
-              Text(
-                '拖动只预览，松手才保存；雪花图片建议用透明 PNG。',
+              Text(tr('拖动只预览，松手才保存；雪花图片建议用透明 PNG。'),
                 style: text.labelSmall,
               ),
             ],

@@ -84,8 +84,7 @@ class ProfilesPage extends StatelessWidget {
                 TideSpace.page,
                 TideSpace.x2,
               ),
-              child: Text(
-                '点击头像换图 · 长按卡片设为当前',
+              child: Text(tr('点击头像换图 · 长按卡片设为当前'),
                 style: text.labelSmall,
               ),
             ),

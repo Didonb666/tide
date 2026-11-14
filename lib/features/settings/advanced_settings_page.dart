@@ -55,7 +55,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('高级设置'),
+        title: Text(tr('高级设置')),
       ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 40),
@@ -117,7 +117,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                         backgroundColor: colors.accent,
                         foregroundColor: onAccent(colors.accent),
                       ),
-                      child: const Text('应用'),
+                      child: Text(tr('应用')),
                     ),
                   ],
                 ),
@@ -158,8 +158,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                   },
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '说明：Android 会挑选与目标最接近的屏幕模式；桌面端没有该能力时自动忽略。',
+                Text(tr('说明：Android 会挑选与目标最接近的屏幕模式；桌面端没有该能力时自动忽略。'),
                   style: text.labelSmall,
                 ),
               ],
