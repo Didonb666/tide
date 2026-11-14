@@ -418,6 +418,225 @@ function bearer(req) {
   return match ? match[1] : null;
 }
 
+// ---------------------------------------------------------------- 网页后台
+const ADMIN_COOKIE = 'fstool_admin';
+let adminFlash = '';
+let lastGenerated = [];
+
+function parseCookies(req) {
+  const out = {};
+  const raw = req.headers.cookie || '';
+  raw.split(';').forEach((part) => {
+    const index = part.indexOf('=');
+    if (index > 0) {
+      out[part.slice(0, index).trim()] = decodeURIComponent(
+        part.slice(index + 1).trim(),
+      );
+    }
+  });
+  return out;
+}
+
+function isAdmin(req) {
+  return parseCookies(req)[ADMIN_COOKIE] === ADMIN_TOKEN;
+}
+
+function readForm(req) {
+  return new Promise((resolve, reject) => {
+    let size = 0;
+    const chunks = [];
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > 64 * 1024) {
+        reject(httpError(413, 'too_large', '请求体过大'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => {
+      const text = Buffer.concat(chunks).toString('utf8');
+      const out = {};
+      text.split('&').forEach((pair) => {
+        if (!pair) return;
+        const index = pair.indexOf('=');
+        const key = decodeURIComponent(
+          (index >= 0 ? pair.slice(0, index) : pair).replace(/\+/g, ' '),
+        );
+        const value =
+          index >= 0
+            ? decodeURIComponent(pair.slice(index + 1).replace(/\+/g, ' '))
+            : '';
+        out[key] = value;
+      });
+      resolve(out);
+    });
+    req.on('error', reject);
+  });
+}
+
+function sendHtml(res, status, html) {
+  res.writeHead(status, {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store',
+  });
+  res.end(html);
+}
+
+function redirect(res, location) {
+  res.writeHead(302, { location });
+  res.end();
+}
+
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+const ADMIN_CSS = `
+*{box-sizing:border-box}
+body{margin:0;background:#0d1117;color:#e6edf3;font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+a{color:#58a6ff;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:20px;margin:0 0 4px}
+h2{font-size:15px;margin:28px 0 10px;color:#9aa7b4;font-weight:600}
+.card{background:#161b22;border:1px solid #232c38;border-radius:14px;padding:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,select{background:#0d1117;border:1px solid #2b3644;border-radius:9px;color:#e6edf3;padding:9px 11px;font-size:14px;outline:none}
+input:focus,select:focus{border-color:#4b93ff}
+button{background:#1f6feb;border:0;border-radius:9px;color:#fff;padding:9px 16px;font-size:14px;cursor:pointer}
+button.ghost{background:#21262d;color:#c9d1d9}
+button.warn{background:#8b2c2c}
+button.small{padding:5px 10px;font-size:12px;border-radius:7px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid #21262d;white-space:nowrap}
+th{color:#8b949e;font-weight:500}
+tr:hover td{background:#12171e}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px}
+.ok{background:#12341f;color:#3fb950}
+.use{background:#12243a;color:#58a6ff}
+.off{background:#3a1d1d;color:#f85149}
+.idle{background:#21262d;color:#8b949e}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.keys{width:100%;height:120px;background:#0d1117;border:1px solid #2b3644;border-radius:10px;color:#7ee787;font-family:ui-monospace,Consolas,monospace;font-size:13px;padding:10px;resize:vertical}
+.flash{background:#12261a;border:1px solid #1f6f3f;color:#3fb950;padding:9px 12px;border-radius:10px;margin:14px 0}
+.err{background:#2a1414;border:1px solid #5a2323;color:#f85149;padding:9px 12px;border-radius:10px;margin:14px 0}
+.muted{color:#8b949e;font-size:12px}
+`;
+
+function adminLoginPage(error) {
+  return `<!doctype html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fstool 授权后台</title><style>${ADMIN_CSS}</style></head><body>
+<div class="wrap" style="max-width:380px;padding-top:80px">
+<h1>Fstool 授权后台</h1>
+<p class="muted">输入管理口令</p>
+${error ? `<div class="err">${esc(error)}</div>` : ''}
+<form method="post" action="/admin/login" class="card">
+  <div class="row">
+    <input type="password" name="token" placeholder="ADMIN_TOKEN" style="flex:1" autofocus>
+    <button type="submit">登录</button>
+  </div>
+</form>
+</div></body></html>`;
+}
+
+function adminPage(keys, users, flash, generated) {
+  const keyRows = keys
+    .map((rec) => {
+      let badge = '<span class="badge idle">未使用</span>';
+      if (rec.revoked) badge = '<span class="badge off">已封禁</span>';
+      else if (rec.activatedAt) {
+        badge =
+          rec.expiresAt && rec.expiresAt < Date.now()
+            ? '<span class="badge off">已过期</span>'
+            : '<span class="badge use">使用中</span>';
+      }
+      const left = rec.expiresAt ? remainingDays(rec.expiresAt) : 0;
+      return `<tr>
+<td class="mono">${esc(rec.key)}</td>
+<td>${badge}</td>
+<td>${esc(rec.plan)}</td>
+<td>${rec.days}</td>
+<td>${rec.activatedAt ? left + ' 天' : '-'}</td>
+<td class="muted">${esc(rec.deviceName || rec.deviceId || '-')}</td>
+<td>
+  <form method="post" action="/admin/action" style="display:inline">
+    <input type="hidden" name="key" value="${esc(rec.key)}">
+    <input type="hidden" name="action" value="${rec.revoked ? 'unrevoke' : 'revoke'}">
+    <button class="small ${rec.revoked ? 'ghost' : 'warn'}">${rec.revoked ? '解封' : '封禁'}</button>
+  </form>
+  <form method="post" action="/admin/action" style="display:inline">
+    <input type="hidden" name="key" value="${esc(rec.key)}">
+    <input type="hidden" name="action" value="unbind">
+    <button class="small ghost">解绑</button>
+  </form>
+  <form method="post" action="/admin/action" style="display:inline">
+    <input type="hidden" name="key" value="${esc(rec.key)}">
+    <input type="hidden" name="action" value="extend">
+    <button class="small ghost">+30天</button>
+  </form>
+</td></tr>`;
+    })
+    .join('');
+
+  const userRows = users
+    .map((user) => `<tr>
+<td class="mono">${esc(user.username)}</td>
+<td>${esc(user.nickname || '-')}</td>
+<td>${user.expiresAt ? remainingDays(user.expiresAt) + ' 天' : '<span class="muted">未兑换</span>'}</td>
+<td class="muted">${esc(user.deviceName || user.deviceId || '-')}</td>
+<td>${user.banned ? '<span class="badge off">封禁</span>' : '<span class="badge ok">正常</span>'}</td>
+</tr>`)
+    .join('');
+
+  return `<!doctype html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fstool 授权后台</title><style>${ADMIN_CSS}</style></head><body>
+<div class="wrap">
+<h1>Fstool 授权后台</h1>
+<p class="muted">卡密 ${keys.length} 条 · 账号 ${users.length} 个</p>
+${flash ? `<div class="flash">${esc(flash)}</div>` : ''}
+
+<h2>生成卡密</h2>
+<form method="post" action="/admin/gen" class="card row">
+  <label class="muted">数量</label>
+  <input type="number" name="count" value="10" min="1" max="200" style="width:90px">
+  <label class="muted">天数</label>
+  <input type="number" name="days" value="30" min="1" max="3650" style="width:90px">
+  <label class="muted">套餐</label>
+  <input name="plan" value="standard" style="width:130px">
+  <button type="submit">生成</button>
+</form>
+
+${generated.length ? `<h2>刚生成的卡密</h2><div class="card">
+  <textarea class="keys" id="gen" readonly>${generated.join('\n')}</textarea>
+  <div class="row" style="margin-top:10px">
+    <button type="button" class="ghost small" onclick="const t=document.getElementById('gen');t.select();document.execCommand('copy')">复制全部</button>
+    <span class="muted">共 ${generated.length} 张，关掉页面后仍可在下方列表查到</span>
+  </div>
+</div>` : ''}
+
+<h2>卡密列表</h2>
+<div class="card" style="overflow:auto">
+<table><thead><tr>
+<th>卡密</th><th>状态</th><th>套餐</th><th>天数</th><th>剩余</th><th>设备</th><th>操作</th>
+</tr></thead><tbody>${keyRows || '<tr><td colspan="7" class="muted">还没有卡密，先在上面生成</td></tr>'}</tbody></table>
+</div>
+
+<h2>账号列表</h2>
+<div class="card" style="overflow-x:auto">
+<table><thead><tr><th>账号</th><th>昵称</th><th>剩余</th><th>设备</th><th>状态</th></tr></thead>
+<tbody>${userRows || '<tr><td colspan="5" class="muted">还没有注册用户</td></tr>'}</tbody></table>
+</div>
+
+<p class="muted" style="margin-top:24px">Fstool License Admin · 请勿把此页面地址和管理口令发给他人</p>
+</div></body></html>`;
+}
+
 async function route(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const p = url.pathname.replace(/\/+$/, '') || '/';
@@ -429,6 +648,87 @@ async function route(req, res) {
       keys: Object.keys(db.keys).length,
       users: Object.keys(db.users).length,
     });
+  }
+
+  // ------------------------------------------------ 网页后台 /admin
+  if (p === '/admin' || p.startsWith('/admin/')) {
+    if (req.method === 'POST' && p === '/admin/login') {
+      const form = await readForm(req);
+      if ((form.token || '') === ADMIN_TOKEN) {
+        res.writeHead(302, {
+          'set-cookie': `${ADMIN_COOKIE}=${encodeURIComponent(ADMIN_TOKEN)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800`,
+          location: '/admin',
+        });
+        return res.end();
+      }
+      return sendHtml(res, 401, adminLoginPage('口令错误'));
+    }
+
+    if (!isAdmin(req)) return sendHtml(res, 200, adminLoginPage(''));
+
+    if (req.method === 'POST' && p === '/admin/gen') {
+      const form = await readForm(req);
+      const count = Math.min(Math.max(Number(form.count) || 10, 1), 200);
+      const days = Math.min(Math.max(Number(form.days) || 30, 1), 3650);
+      const plan = String(form.plan || 'standard').slice(0, 24);
+      const created = [];
+      for (let i = 0; i < count; i += 1) {
+        let key = randomKey();
+        while (db.keys[key]) key = randomKey();
+        db.keys[key] = {
+          key,
+          plan,
+          days,
+          createdAt: Date.now(),
+          activatedAt: null,
+          expiresAt: null,
+          deviceId: null,
+          deviceName: null,
+          revoked: false,
+          user: null,
+        };
+        indexKey(key);
+        created.push(key);
+      }
+      saveDb();
+      lastGenerated = created;
+      adminFlash = `已生成 ${created.length} 张 ${days} 天卡（${plan}）`;
+      return redirect(res, '/admin');
+    }
+
+    if (req.method === 'POST' && p === '/admin/action') {
+      const form = await readForm(req);
+      const rec = findKeyRecord(form.key);
+      const action = String(form.action || '');
+      if (rec) {
+        if (action === 'revoke') {
+          rec.revoked = true;
+          adminFlash = `已封禁 ${rec.key}`;
+        } else if (action === 'unrevoke') {
+          rec.revoked = false;
+          adminFlash = `已解封 ${rec.key}`;
+        } else if (action === 'unbind') {
+          rec.deviceId = null;
+          rec.deviceName = null;
+          adminFlash = `已解绑 ${rec.key}`;
+        } else if (action === 'extend') {
+          const base = rec.expiresAt || Date.now();
+          rec.expiresAt = base + 30 * DAY;
+          adminFlash = `已为 ${rec.key} 续期 30 天`;
+        }
+        saveDb();
+      }
+      return redirect(res, '/admin');
+    }
+
+    const keyList = Object.values(db.keys)
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .slice(0, 300);
+    const userList = Object.values(db.users).slice(0, 200);
+    const html = adminPage(keyList, userList, adminFlash, lastGenerated);
+    adminFlash = '';
+    lastGenerated = [];
+    return sendHtml(res, 200, html);
   }
 
   if (req.method === 'POST' && (p === '/api/activate' || p === '/api/login' || p === '/api/register')) {
