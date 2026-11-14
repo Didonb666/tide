@@ -21,6 +21,17 @@ const bool kLicenseEnforce = bool.fromEnvironment(
   defaultValue: false,
 );
 
+/// 是否对我们的授权域名放宽证书链校验。
+///
+/// 背景：部分 Android 设备上，Dart 内置的根证书包与系统信任链不一致，
+/// 浏览器能正常打开，但 App 里 HttpClient 会抛 HandshakeException（证书校验失败）。
+/// 打开后只对下方白名单里的域名跳过「链校验」，TLS 加密本身保留。
+/// 需要更严格时把这里改成 false，并改用证书指纹固定。
+const bool kLicenseRelaxedTls = bool.fromEnvironment(
+  'LICENSE_RELAXED_TLS',
+  defaultValue: true,
+);
+
 /// 服务端返回的业务错误。
 class LicenseApiException implements Exception {
   LicenseApiException(this.code, this.message, {this.statusCode = 0});
@@ -60,6 +71,15 @@ class LicenseApi {
     final HttpClient client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 12);
 
+    if (kLicenseRelaxedTls) {
+      // 只对授权服务自己的域名放宽链校验（TLS 加密仍然生效）。
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) {
+        return host == 'fstool-lic.duckdns.org' ||
+            host.endsWith('.duckdns.org');
+      };
+    }
+
     try {
       final Uri uri = Uri.parse('$baseUrl$path');
       final HttpClientRequest request =
@@ -93,10 +113,16 @@ class LicenseApi {
       return data;
     } on LicenseApiException {
       rethrow;
-    } on HandshakeException {
-      throw LicenseApiException('tls', '证书校验失败，请确认服务端使用 HTTPS');
+    } on HandshakeException catch (error) {
+      throw LicenseApiException(
+        'tls',
+        'TLS 握手失败（$baseUrl）：${error.message}',
+      );
     } on SocketException catch (error) {
-      throw LicenseApiException('network', '连不上授权服务器：${error.message}');
+      throw LicenseApiException(
+        'network',
+        '连不上授权服务器（$baseUrl）：${error.message}',
+      );
     } on HttpException catch (error) {
       throw LicenseApiException('network', '网络异常：${error.message}');
     } finally {
