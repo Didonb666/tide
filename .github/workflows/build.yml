@@ -219,6 +219,9 @@ jobs:
       - name: 8. 拉取 Dart 依赖
         run: flutter pub get
 
+      - name: 8b. 生成启动图标（assets/icon/app_icon.png）
+        run: dart run flutter_launcher_icons
+
       - name: 9. 编译 Release APK（仅 arm64 + 压缩）
         run: |
           set -o pipefail

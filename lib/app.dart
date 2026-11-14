@@ -22,6 +22,7 @@ import 'features/profiles/profiles_page.dart';
 import 'widgets/aurora_background.dart';
 import 'widgets/liquid_nav_bar.dart';
 import 'widgets/snow_overlay.dart';
+import 'core/jelly_route.dart';
 
 class TideApp extends StatelessWidget {
   const TideApp({
@@ -204,7 +205,7 @@ class _NoTimeBanner extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(TideRadii.md),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
+              JellyPageRoute<void>(
                 builder: (_) => const RedeemPage(canPop: true),
               ),
             ),
