@@ -238,3 +238,44 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
+
+/// 以「悬浮卡片 + 果冻动画」的方式打开兑换窗口。
+Future<void> showRedeemDialog(BuildContext context) {
+  return showGeneralDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: 'redeem',
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    transitionDuration: const Duration(milliseconds: 480),
+    pageBuilder: (BuildContext context, _, __) {
+      return const Material(
+        type: MaterialType.transparency,
+        child: RedeemPage(canPop: true),
+      );
+    },
+    transitionBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondary,
+      Widget child,
+    ) {
+      final Animation<double> jelly = CurvedAnimation(
+        parent: animation,
+        curve: Curves.elasticOut,
+        reverseCurve: Curves.easeInCubic,
+      );
+      final Animation<double> fade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+      );
+      return FadeTransition(
+        opacity: fade,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.80, end: 1.0).animate(jelly),
+          child: child,
+        ),
+      );
+    },
+  );
+}

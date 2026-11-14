@@ -290,11 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      JellyPageRoute<void>(
-                        builder: (_) => const RedeemPage(canPop: true),
-                      ),
-                    ),
+                    onPressed: () => showRedeemDialog(context),
                     icon: const Icon(Icons.add_card_rounded, size: 18),
                     label: Text(AppText.t(context, 'redeem.title')),
                     style: FilledButton.styleFrom(

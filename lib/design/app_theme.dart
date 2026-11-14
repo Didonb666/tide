@@ -137,7 +137,7 @@ abstract final class AppTheme {
       canvasColor: Colors.transparent,
       splashColor: colors.accent.withValues(alpha: 0.10),
       highlightColor: Colors.transparent,
-      splashFactory: InkRipple.splashFactory,
+      splashFactory: NoSplash.splashFactory,
       extensions: <ThemeExtension<dynamic>>[colors],
       colorScheme: base.colorScheme.copyWith(
         primary: colors.accent,

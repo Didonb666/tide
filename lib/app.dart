@@ -204,11 +204,7 @@ class _NoTimeBanner extends StatelessWidget {
           borderRadius: BorderRadius.circular(TideRadii.md),
           child: InkWell(
             borderRadius: BorderRadius.circular(TideRadii.md),
-            onTap: () => Navigator.of(context).push(
-              JellyPageRoute<void>(
-                builder: (_) => const RedeemPage(canPop: true),
-              ),
-            ),
+            onTap: () => showRedeemDialog(context),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               child: Row(
