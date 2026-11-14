@@ -8,7 +8,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/app_controller.dart';
 import '../../core/profile.dart';
 import '../../design/tokens.dart';
-import '../../widgets/liquid_glass_container.dart';
 
 Future<Profile?> showScanSheet(BuildContext context, AppController controller) {
   return showModalBottomSheet<Profile>(
@@ -190,9 +189,13 @@ class _ScanSheetState extends State<ScanSheet> {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: LiquidGlassContainer(
-          radius: 28,
+        child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xF2101418),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: Colors.white.withOpacity(0.10)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -224,6 +227,46 @@ class _ScanSheetState extends State<ScanSheet> {
                       children: <Widget>[
                         MobileScanner(
                           controller: _scanner,
+                          errorBuilder: (
+                            BuildContext context,
+                            MobileScannerException error,
+                            Widget? child,
+                          ) {
+                            return Container(
+                              color: Colors.black,
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(18),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  const Icon(
+                                    Icons.videocam_off_rounded,
+                                    size: 32,
+                                    color: Colors.white38,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    '相机不可用：${error.errorCode.name}',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    '系统设置 → 应用 → Fstool → 权限 → 相机 确认已允许；'
+                                    '若刚允许过，杀掉应用重开一次。',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                           onDetect: (BarcodeCapture capture) {
                             for (final Barcode barcode in capture.barcodes) {
                               final String? value = barcode.rawValue;

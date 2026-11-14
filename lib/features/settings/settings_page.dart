@@ -50,21 +50,38 @@ class _SettingsPageState extends State<SettingsPage> {
     return parts.isEmpty ? path : parts.last;
   }
 
-  Future<void> _pickImage(BuildContext context) async {
+  String _slotLabel(BackgroundSlot slot) {
+    switch (slot) {
+      case BackgroundSlot.shared:
+        return '统一背景';
+      case BackgroundSlot.portrait:
+        return '竖屏背景';
+      case BackgroundSlot.landscape:
+        return '横屏背景';
+    }
+  }
+
+  Future<void> _pickImage(
+    BuildContext context, {
+    BackgroundSlot slot = BackgroundSlot.shared,
+  }) async {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
-      await bg.pickImage();
-      if (context.mounted) _toast(context, '背景已更换');
+      await bg.pickImage(slot: slot);
+      if (context.mounted) _toast(context, '${_slotLabel(slot)}已更新');
     } catch (error) {
       if (context.mounted) _toast(context, '选择图片失败：$error');
     }
   }
 
-  Future<void> _pickVideo(BuildContext context) async {
+  Future<void> _pickVideo(
+    BuildContext context, {
+    BackgroundSlot slot = BackgroundSlot.shared,
+  }) async {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
-      await bg.pickVideo();
-      if (context.mounted) _toast(context, '视频背景已更换');
+      await bg.pickVideo(slot: slot);
+      if (context.mounted) _toast(context, '${_slotLabel(slot)}已更新');
     } catch (error) {
       if (context.mounted) _toast(context, '选择视频失败：$error');
     }
@@ -194,51 +211,48 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Icon(
-                      bg.isVideo ? Icons.movie_rounded : Icons.image_rounded,
-                      size: 16,
-                      color: colors.accent,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        bg.hasCustom
-                            ? '自定义背景：${_shortPath(bg.mediaPath)}'
-                            : '默认极光背景',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: text.bodySmall,
-                      ),
-                    ),
-                    if (bg.hasCustom)
-                      TextButton(
-                        onPressed: bg.clearMedia,
-                        child: const Text('恢复默认'),
-                      ),
-                  ],
+                _BackgroundSlotRow(
+                  title: '统一背景',
+                  subtitle: '横竖屏通用；方向专用未设置时用它',
+                  path: bg.pathForSlot(BackgroundSlot.shared),
+                  isVideo: bg.isVideoForSlot(BackgroundSlot.shared),
+                  onPickImage: () => _pickImage(context),
+                  onPickVideo: () => _pickVideo(context),
+                  onClear: () => bg.clearSlot(BackgroundSlot.shared),
                 ),
                 const SizedBox(height: TideSpace.x3),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.image_outlined,
-                        label: '选择图片',
-                        onTap: () => _pickImage(context),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ActionButton(
-                        icon: Icons.movie_outlined,
-                        label: '选择视频',
-                        onTap: () => _pickVideo(context),
-                      ),
-                    ),
-                  ],
+                _BackgroundSlotRow(
+                  title: '竖屏背景',
+                  subtitle: '手机竖着拿时显示',
+                  path: bg.pathForSlot(BackgroundSlot.portrait),
+                  isVideo: bg.isVideoForSlot(BackgroundSlot.portrait),
+                  onPickImage: () =>
+                      _pickImage(context, slot: BackgroundSlot.portrait),
+                  onPickVideo: () =>
+                      _pickVideo(context, slot: BackgroundSlot.portrait),
+                  onClear: () => bg.clearSlot(BackgroundSlot.portrait),
                 ),
+                const SizedBox(height: TideSpace.x3),
+                _BackgroundSlotRow(
+                  title: '横屏背景',
+                  subtitle: '平板或横屏时显示',
+                  path: bg.pathForSlot(BackgroundSlot.landscape),
+                  isVideo: bg.isVideoForSlot(BackgroundSlot.landscape),
+                  onPickImage: () =>
+                      _pickImage(context, slot: BackgroundSlot.landscape),
+                  onPickVideo: () =>
+                      _pickVideo(context, slot: BackgroundSlot.landscape),
+                  onClear: () => bg.clearSlot(BackgroundSlot.landscape),
+                ),
+                const SizedBox(height: TideSpace.x1),
+                if (bg.hasCustom)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: bg.clearMedia,
+                      child: const Text('全部恢复默认'),
+                    ),
+                  ),
                 const SizedBox(height: TideSpace.x4),
                 _SliderRow(
                   label: '背景透明度',
@@ -679,6 +693,108 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+class _BackgroundSlotRow extends StatelessWidget {
+  const _BackgroundSlotRow({
+    required this.title,
+    required this.subtitle,
+    required this.path,
+    required this.isVideo,
+    required this.onPickImage,
+    required this.onPickVideo,
+    required this.onClear,
+  });
+
+  final String title;
+  final String subtitle;
+  final String? path;
+  final bool isVideo;
+  final VoidCallback onPickImage;
+  final VoidCallback onPickVideo;
+  final VoidCallback onClear;
+
+  bool get _has => path != null && path!.isNotEmpty;
+
+  String get _fileName {
+    if (!_has) return '未设置';
+    final List<String> parts = path!.split(RegExp(r'[/\\]'));
+    return parts.isEmpty ? path! : parts.last;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TideColors colors = context.colors;
+    final TextTheme text = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Icon(
+              isVideo ? Icons.movie_rounded : Icons.image_rounded,
+              size: 15,
+              color: _has ? colors.accent : colors.inkTertiary,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                title,
+                style: text.bodyMedium?.copyWith(
+                  color: _has ? colors.ink : colors.inkSecondary,
+                ),
+              ),
+            ),
+            if (_has)
+              TextButton(
+                onPressed: onClear,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: const Text('清除'),
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 21, top: 2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                _has ? _fileName : subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: text.labelSmall?.copyWith(color: colors.inkTertiary),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.image_outlined,
+                      label: '图片',
+                      onTap: onPickImage,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.movie_outlined,
+                      label: '视频',
+                      onTap: onPickVideo,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

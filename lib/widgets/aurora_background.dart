@@ -6,7 +6,8 @@ import 'package:video_player/video_player.dart';
 
 import '../core/background_controller.dart';
 
-/// 全局背景层：默认静态图；用户选了图片/视频后替换。
+/// 全局背景层：按屏幕方向选择背景（竖屏优先竖屏槽位，横屏优先横屏槽位，
+/// 都没设置时回落到统一背景，最后回落到内置默认图）。
 class AppBackgroundHost extends StatefulWidget {
   const AppBackgroundHost({super.key});
 
@@ -43,9 +44,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
     }
   }
 
-  void _syncVideo(BackgroundController bg) {
-    final String? target =
-        (bg.isVideo && bg.mediaPath != null) ? bg.mediaPath : null;
+  void _syncVideo(String? target) {
     if (target == _videoPath) return;
 
     _videoPath = target;
@@ -74,13 +73,18 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
   @override
   Widget build(BuildContext context) {
     final BackgroundController bg = BackgroundScope.of(context);
-    _syncVideo(bg);
+    final Orientation orientation = MediaQuery.orientationOf(context);
 
     return AnimatedBuilder(
       animation: bg,
       builder: (BuildContext context, Widget? child) {
-        // 默认背景：静态图，不做透明度/模糊，保证画面原样。
-        if (!bg.hasCustom) {
+        final String? path = bg.pathFor(orientation);
+        final bool isVideo = bg.isVideoFor(orientation);
+
+        _syncVideo(isVideo ? path : null);
+
+        // 没有任何自定义背景：用内置默认图（原样显示，不加透明度/模糊）。
+        if (path == null) {
           return Positioned.fill(
             child: Image.asset(
               'assets/images/default_background.webp',
@@ -99,7 +103,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
         }
 
         final Widget media;
-        if (bg.isVideo) {
+        if (isVideo) {
           final VideoPlayerController? video = _video;
           if (video != null && video.value.isInitialized) {
             media = SizedBox.expand(
@@ -117,7 +121,7 @@ class _AppBackgroundHostState extends State<AppBackgroundHost>
           }
         } else {
           media = Image.file(
-            File(bg.mediaPath!),
+            File(path),
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
