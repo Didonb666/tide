@@ -159,7 +159,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: TideSpace.x4),
 
           // ---------------------------------------------------------------- 外观
-          const SectionHeader(title: '外观'),
+          SectionHeader(title: AppText.t(context, 'settings.appearance')),
           _GlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // ---------------------------------------------------------------- 性能
-          const SectionHeader(title: '性能'),
+          SectionHeader(title: AppText.t(context, 'settings.performance')),
           _GlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,7 +249,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // ---------------------------------------------------------------- 背景
-          const SectionHeader(title: '背景设置'),
+          SectionHeader(title: AppText.t(context, 'settings.background')),
           _GlassCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // ---------------------------------------------------------------- 行为
-          const SectionHeader(title: '行为'),
+          SectionHeader(title: AppText.t(context, 'settings.behavior')),
           _GlassCard(
             padding: EdgeInsets.zero,
             child: Column(
@@ -348,7 +348,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           // ---------------------------------------------------------------- 关于
-          const SectionHeader(title: '关于'),
+          SectionHeader(title: AppText.t(context, 'settings.about')),
           _GlassCard(
             padding: EdgeInsets.zero,
             child: Column(

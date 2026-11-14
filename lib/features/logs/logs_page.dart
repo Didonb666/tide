@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
 import '../../core/profile.dart';
+import '../../core/app_text.dart';
 import '../../design/tokens.dart';
 import '../../widgets/common.dart';
 

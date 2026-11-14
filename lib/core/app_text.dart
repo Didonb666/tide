@@ -93,10 +93,48 @@ class AppText {
     'settings.general': {'zh': '通用', 'en': 'General', 'it': 'Generale', 'ru': 'Общие'},
   };
 
+
+  /// 第二批：连接页 / 配置页 / 日志页 / 设置页
+  static const Map<String, Map<String, String>> _more =
+      <String, Map<String, String>>{
+    'connect.status': {'zh': '连接状态', 'en': 'Status', 'it': 'Stato', 'ru': 'Статус'},
+    'connect.protocol': {'zh': '协议', 'en': 'Protocol', 'it': 'Protocollo', 'ru': 'Протокол'},
+    'connect.address': {'zh': '地址', 'en': 'Address', 'it': 'Indirizzo', 'ru': 'Адрес'},
+    'connect.upload': {'zh': '上行', 'en': 'Upload', 'it': 'Caricamento', 'ru': 'Отдача'},
+    'connect.download': {'zh': '下行', 'en': 'Download', 'it': 'Download', 'ru': 'Загрузка'},
+    'connect.rules': {'zh': '规则', 'en': 'Rules', 'it': 'Regole', 'ru': 'Правила'},
+    'connect.start': {'zh': '启动 VPN', 'en': 'Start VPN', 'it': 'Avvia VPN', 'ru': 'Включить VPN'},
+    'connect.stop': {'zh': '停止 VPN', 'en': 'Stop VPN', 'it': 'Ferma VPN', 'ru': 'Выключить VPN'},
+    'connect.connecting': {'zh': '连接中…', 'en': 'Connecting…', 'it': 'Connessione…', 'ru': 'Подключение…'},
+    'connect.currentNode': {'zh': '当前节点 · 点击切换', 'en': 'Current node · tap to switch', 'it': 'Nodo attuale · tocca per cambiare', 'ru': 'Текущий узел · нажмите для смены'},
+    'connect.announcement': {'zh': '官方公告', 'en': 'Announcement', 'it': 'Avvisi', 'ru': 'Объявления'},
+    'connect.view': {'zh': '查看', 'en': 'View', 'it': 'Apri', 'ru': 'Открыть'},
+
+    'profiles.title': {'zh': '配置', 'en': 'Profiles', 'it': 'Profili', 'ru': 'Профили'},
+    'profiles.tip': {'zh': '点击头像换图 · 长按卡片设为当前', 'en': 'Tap avatar to change · long press to select', 'it': 'Tocca avatar per cambiare · tieni premuto per selezionare', 'ru': 'Нажмите аватар · удерживайте карточку для выбора'},
+    'profiles.current': {'zh': '当前', 'en': 'Active', 'it': 'Attivo', 'ru': 'Активен'},
+    'profiles.scan': {'zh': '扫码导入', 'en': 'Scan to import', 'it': 'Scansiona per importare', 'ru': 'Сканировать'},
+
+    'logs.title': {'zh': '日志', 'en': 'Logs', 'it': 'Log', 'ru': 'Журнал'},
+    'logs.empty': {'zh': '暂无日志', 'en': 'No logs yet', 'it': 'Nessun log', 'ru': 'Журнал пуст'},
+
+    'settings.appearance': {'zh': '外观', 'en': 'Appearance', 'it': 'Aspetto', 'ru': 'Внешний вид'},
+    'settings.performance': {'zh': '性能', 'en': 'Performance', 'it': 'Prestazioni', 'ru': 'Производительность'},
+    'settings.background': {'zh': '背景设置', 'en': 'Background', 'it': 'Sfondo', 'ru': 'Фон'},
+    'settings.behavior': {'zh': '行为', 'en': 'Behaviour', 'it': 'Comportamento', 'ru': 'Поведение'},
+    'settings.about': {'zh': '关于', 'en': 'About', 'it': 'Informazioni', 'ru': 'О программе'},
+    'settings.theme': {'zh': '主题', 'en': 'Theme', 'it': 'Tema', 'ru': 'Тема'},
+    'settings.accent': {'zh': '主色调', 'en': 'Accent', 'it': 'Colore', 'ru': 'Акцент'},
+    'settings.refresh': {'zh': '刷新率', 'en': 'Refresh rate', 'it': 'Frequenza', 'ru': 'Частота'},
+    'settings.autoConnect': {'zh': '启动时自动连接', 'en': 'Auto connect on start', 'it': 'Connessione automatica', 'ru': 'Автоподключение'},
+    'settings.verbose': {'zh': '详细日志', 'en': 'Verbose logs', 'it': 'Log dettagliati', 'ru': 'Подробный журнал'},
+    'settings.restore': {'zh': '恢复默认', 'en': 'Restore defaults', 'it': 'Ripristina', 'ru': 'Сбросить'},
+  };
+
   static String t(BuildContext context, String key) {
     final LocaleController? controller = LocaleScope.maybeOf(context);
     final String lang = controller?.code ?? 'zh';
-    final Map<String, String>? entry = _data[key];
+    final Map<String, String>? entry = _data[key] ?? _more[key];
     if (entry == null) return key;
     return entry[lang] ?? entry['zh'] ?? key;
   }

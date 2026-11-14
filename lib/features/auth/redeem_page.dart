@@ -196,13 +196,6 @@ class _RedeemPageState extends State<RedeemPage> {
                                 : Text(AppText.t(context, 'redeem.action')),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: TextButton(
-                            onPressed: license.signOut,
-                            child: Text(AppText.t(context, 'profile.signOut')),
-                          ),
-                        ),
                       ],
                     ),
                   ),

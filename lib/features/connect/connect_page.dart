@@ -35,7 +35,7 @@ class ConnectPage extends StatelessWidget {
     final Widget statusSection = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const _SectionLabel(text: '连接状态'),
+        _SectionLabel(text: AppText.t(context, 'connect.status')),
         const SizedBox(height: 8),
         _InfoCard(controller: c),
       ],
@@ -315,7 +315,7 @@ class _AnnouncementCardState extends State<_AnnouncementCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text('官方公告', style: text.labelSmall),
+                      Text(AppText.t(context, 'connect.announcement'), style: text.labelSmall),
                       const SizedBox(height: 2),
                       Text(kFstoolAnnouncement.title, style: text.titleMedium),
                     ],
@@ -585,7 +585,7 @@ class _NodeQuickCard extends StatelessWidget {
                         style: text.titleMedium,
                       ),
                       const SizedBox(height: 2),
-                      Text('当前节点 · 点击切换', style: text.labelSmall),
+                      Text(AppText.t(context, 'connect.currentNode'), style: text.labelSmall),
                     ],
                   ),
                 ),
@@ -631,13 +631,13 @@ class _VpnButton extends StatelessWidget {
 
     final String label;
     if (state.phase == TunnelPhase.connecting) {
-      label = '连接中…';
+      label = AppText.t(context, 'connect.connecting');
     } else if (state.phase == TunnelPhase.disconnecting) {
       label = '断开中…';
     } else if (connected) {
-      label = '断开 VPN';
+      label = AppText.t(context, 'connect.stop');
     } else {
-      label = '启动 VPN';
+      label = AppText.t(context, 'connect.start');
     }
 
     final List<Color> gradient = busy
