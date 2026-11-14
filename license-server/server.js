@@ -133,8 +133,29 @@ function randomKey() {
   return `FST-${groups.join('-')}`;
 }
 
-function keyRecord(key) {
-  const rec = db.keys[key];
+// 卡密在库里带连字符（FST-XXXX-XXXX-XXXX），用户输入可能有空格/小写，
+// 所以统一用「规范化后的 key」建索引，避免去掉连字符后查不到。
+let keyIndex = null;
+
+function indexKey(rawKey) {
+  if (keyIndex) keyIndex.set(normalizeKey(rawKey), rawKey);
+}
+
+function findKeyRecord(rawKey) {
+  const norm = normalizeKey(rawKey);
+  if (!norm) return null;
+  if (!keyIndex) {
+    keyIndex = new Map();
+    for (const key of Object.keys(db.keys)) {
+      keyIndex.set(normalizeKey(key), key);
+    }
+  }
+  const real = keyIndex.get(norm);
+  return real ? db.keys[real] : null;
+}
+
+function keyRecord(rawKey) {
+  const rec = findKeyRecord(rawKey);
   if (rec && !rec.expiresAt && rec.activatedAt) {
     rec.expiresAt = rec.activatedAt + rec.days * DAY;
   }
@@ -203,7 +224,7 @@ function activateKey(rawKey, device, deviceName) {
   if (!key) throw httpError(400, 'key_required', '请填写卡密');
   if (!device) throw httpError(400, 'device_required', '缺少设备标识');
 
-  const rec = db.keys[key];
+  const rec = findKeyRecord(rawKey);
   if (!rec) throw httpError(404, 'key_not_found', '卡密不存在');
   if (rec.revoked) throw httpError(403, 'revoked', '该卡密已被封禁');
 
@@ -223,7 +244,7 @@ function activateKey(rawKey, device, deviceName) {
 
   saveDb();
   return {
-    token: issueToken('key', key, device),
+    token: issueToken('key', rec.key, device),
     plan: rec.plan || 'standard',
     expiresAt: rec.expiresAt,
     remainingDays: remainingDays(rec.expiresAt),
@@ -240,7 +261,7 @@ function registerUser({ key: rawKey, username, password, device, deviceName }) {
   }
   if (!device) throw httpError(400, 'device_required', '缺少设备标识');
 
-  const rec = db.keys[key];
+  const rec = findKeyRecord(rawKey);
   if (!rec) throw httpError(404, 'key_not_found', '卡密不存在');
   if (rec.revoked) throw httpError(403, 'revoked', '该卡密已被封禁');
   if (rec.activatedAt || rec.user) {
@@ -456,6 +477,7 @@ async function route(req, res) {
           revoked: false,
           user: null,
         };
+        indexKey(key);
         created.push(key);
       }
       saveDb();
@@ -483,23 +505,22 @@ async function route(req, res) {
 
     if (req.method === 'POST' && p === '/api/admin/revoke') {
       const body = await readBody(req);
-      const key = normalizeKey(body.key);
-      const rec = db.keys[key];
+      const rec = findKeyRecord(body.key);
       if (!rec) return send(res, 404, { ok: false, error: 'key_not_found' });
       rec.revoked = Boolean(body.revoked !== false);
       saveDb();
-      return send(res, 200, { ok: true, key, revoked: rec.revoked });
+      return send(res, 200, { ok: true, key: rec.key, revoked: rec.revoked });
     }
 
     if (req.method === 'POST' && p === '/api/admin/unbind') {
       const body = await readBody(req);
       const target = String(body.key || body.username || '');
-      const key = normalizeKey(target);
-      if (db.keys[key]) {
-        db.keys[key].deviceId = null;
-        db.keys[key].deviceName = null;
+      const rec = findKeyRecord(target);
+      if (rec) {
+        rec.deviceId = null;
+        rec.deviceName = null;
         saveDb();
-        return send(res, 200, { ok: true, key, deviceId: null });
+        return send(res, 200, { ok: true, key: rec.key, deviceId: null });
       }
       const user = db.users[target];
       if (user) {
@@ -513,14 +534,13 @@ async function route(req, res) {
 
     if (req.method === 'POST' && p === '/api/admin/extend') {
       const body = await readBody(req);
-      const key = normalizeKey(body.key);
       const days = Math.min(Math.max(Number(body.days) || 30, 1), 3650);
-      const rec = db.keys[key];
+      const rec = findKeyRecord(body.key);
       if (!rec) return send(res, 404, { ok: false, error: 'key_not_found' });
       const base = rec.expiresAt || Date.now();
       rec.expiresAt = base + days * DAY;
       saveDb();
-      return send(res, 200, { ok: true, key, expiresAt: rec.expiresAt });
+      return send(res, 200, { ok: true, key: rec.key, expiresAt: rec.expiresAt });
     }
   }
 
