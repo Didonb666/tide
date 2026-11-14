@@ -108,6 +108,16 @@ class LicenseController extends ChangeNotifier {
     await refresh();
   }
 
+  /// 注册账号（昵称 + 密码），注册后没有时长，需要兑换。
+  Future<bool> signUp(String nickname, String password) {
+    return _submit(() => _api.post('/api/signup', <String, dynamic>{
+          'username': nickname.trim(),
+          'password': password,
+          'device': _deviceId,
+          'deviceName': _deviceName,
+        }));
+  }
+
   /// 机器码一键注册（无需卡密，注册后进入兑换页）。
   Future<bool> quickRegister(String nickname) {
     return _submit(() => _api.post('/api/quick-register', <String, dynamic>{

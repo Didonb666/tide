@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/app_text.dart';
 import '../../core/license/license_controller.dart';
 import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
@@ -77,12 +78,12 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+              child: Text(AppText.t(context, 'profile.cancel')),
             ),
             FilledButton(
               onPressed: () =>
                   Navigator.of(context).pop(controller.text.trim()),
-              child: const Text('保存'),
+              child: Text(AppText.t(context, 'profile.save')),
             ),
           ],
         );
@@ -121,10 +122,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: colors.surface.withOpacity(0.45),
-                          border: Border.all(
-                            color: colors.accent.withOpacity(0.35),
-                            width: 1.5,
-                          ),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: _avatarPath != null
@@ -213,30 +210,52 @@ class _ProfilePageState extends State<ProfilePage> {
           // ---------------------------------------------------------- 简介
           LiquidGlassContainer(
             radius: 20,
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Text('主页简介', style: text.labelMedium),
+                    if (license.bio.isEmpty)
+                      Text(
+                        AppText.t(context, 'profile.bio'),
+                        style: text.labelMedium,
+                      ),
                     const Spacer(),
                     TextButton(
                       onPressed: () => _editText(
-                        title: '修改简介',
+                        title: AppText.t(context, 'profile.bio'),
                         initial: license.bio,
                         maxLength: 120,
                         onSave: (String value) =>
                             license.updateProfile(bio: value),
                       ),
-                      child: const Text('编辑'),
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(0, 32),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                      ),
+                      child: Text(
+                        AppText.t(context, 'profile.edit'),
+                        style: text.labelMedium?.copyWith(
+                          color: colors.accent,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                Text(
-                  license.bio.isEmpty ? '还没有简介，点右上角编辑' : license.bio,
-                  style: text.bodySmall?.copyWith(color: colors.inkSecondary),
-                ),
+                if (license.bio.isEmpty)
+                  Text(
+                    AppText.t(context, 'profile.bioEmpty'),
+                    style: text.bodySmall?.copyWith(color: colors.inkTertiary),
+                  )
+                else
+                  Text(
+                    license.bio,
+                    style: text.titleMedium?.copyWith(
+                      height: 1.55,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -257,7 +276,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: colors.accent,
                     ),
                     const SizedBox(width: 6),
-                    Text('剩余时长', style: text.labelMedium),
+                    Text(AppText.t(context, 'profile.remaining'), style: text.labelMedium),
                     const Spacer(),
                     Text(
                       hasTime ? '${license.remainingDays} 天' : '未兑换',
@@ -270,7 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 6),
                 Text(
                   license.expiresAt == null
-                      ? '兑换卡密后才可使用'
+                      ? AppText.t(context, 'profile.redeemHint')
                       : license.expiryText,
                   style: text.labelSmall?.copyWith(color: colors.inkTertiary),
                 ),
@@ -284,7 +303,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     icon: const Icon(Icons.add_card_rounded, size: 18),
-                    label: const Text('兑换时长'),
+                    label: Text(AppText.t(context, 'redeem.title')),
                     style: FilledButton.styleFrom(
                       backgroundColor: colors.accent,
                       foregroundColor: onAccent(colors.accent),
@@ -308,7 +327,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: <Widget>[
                 ListTile(
                   leading: Icon(Icons.settings_rounded, color: colors.accent),
-                  title: const Text('设置'),
+                  title: Text(AppText.t(context, 'profile.settings')),
                   trailing: Icon(
                     Icons.chevron_right_rounded,
                     color: colors.inkTertiary,
@@ -320,7 +339,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         appBar: AppBar(
                           backgroundColor: Colors.transparent,
                           elevation: 0,
-                          title: const Text('设置'),
+                          title: Text(AppText.t(context, 'profile.settings')),
                         ),
                         body: const SettingsPage(),
                       ),
@@ -333,7 +352,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Icons.logout_rounded,
                     color: colors.inkSecondary,
                   ),
-                  title: const Text('退出登录'),
+                  title: Text(AppText.t(context, 'profile.signOut')),
                   onTap: license.signOut,
                 ),
               ],

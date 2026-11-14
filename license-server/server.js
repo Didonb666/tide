@@ -783,6 +783,53 @@ async function route(req, res) {
   }
 
   // ------------------------------------------------ 账号（注册 / 兑换 / 资料）
+  if (req.method === 'POST' && p === '/api/signup') {
+    const body = await readBody(req);
+    const username = String(body.username || '').trim();
+    const password = String(body.password || '');
+    const device = String(body.device || '').trim();
+
+    if (username.length < 2) {
+      return send(res, 400, { ok: false, error: 'username_short', message: '昵称至少 2 个字符' });
+    }
+    if (password.length < 6) {
+      return send(res, 400, { ok: false, error: 'password_short', message: '密码至少 6 位' });
+    }
+    if (!device) {
+      return send(res, 400, { ok: false, error: 'device_required', message: '缺少设备标识' });
+    }
+    if (db.users[username]) {
+      return send(res, 409, { ok: false, error: 'username_taken', message: '这个昵称已被注册，换一个' });
+    }
+
+    const salt = crypto.randomBytes(16).toString('hex');
+    db.users[username] = {
+      username,
+      salt,
+      hash: hashPassword(password, salt),
+      createdAt: Date.now(),
+      expiresAt: null,
+      plan: 'free',
+      deviceId: device,
+      deviceName: String(body.deviceName || '').slice(0, 64),
+      nickname: username,
+      bio: '',
+      banned: false,
+    };
+    saveDb();
+
+    return send(res, 200, {
+      ok: true,
+      token: issueToken('user', username, device),
+      plan: 'free',
+      expiresAt: null,
+      remainingDays: 0,
+      username,
+      nickname: username,
+      bio: '',
+    });
+  }
+
   if (req.method === 'POST' && p === '/api/quick-register') {
     const body = await readBody(req);
     const device = String(body.device || '').trim();

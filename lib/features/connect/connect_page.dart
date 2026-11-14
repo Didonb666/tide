@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../core/app_text.dart';
+import '../../core/license/license_scope.dart';
+
 import '../../core/app_controller.dart';
 import '../../core/app_scope.dart';
 import '../../core/profile.dart';
@@ -579,7 +582,19 @@ class _NodeQuickCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          _VpnButton(state: state, onTap: controller.toggleConnection),
+          _VpnButton(
+            state: state,
+            onTap: () {
+              final license = LicenseScope.maybeOf(context);
+              if (license != null && !license.hasTime) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppText.t(context, 'connect.blocked'))),
+                );
+                return;
+              }
+              controller.toggleConnection();
+            },
+          ),
         ],
       ),
     );

@@ -5,6 +5,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../core/background_controller.dart';
 import '../../core/display_mode_service.dart';
+import '../../core/app_text.dart';
+import '../../core/locale_controller.dart';
 import '../../core/settings_controller.dart';
 import '../../design/app_theme.dart';
 import '../../design/tokens.dart';
@@ -114,6 +116,47 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             child: Text('设置', style: text.displaySmall),
           ),
+
+          // ---------------------------------------------------------------- 外观
+          // ---------------------------------------------------------------- 语言
+          SectionHeader(title: AppText.t(context, 'settings.general')),
+          _GlassCard(
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.translate_rounded,
+                  size: 16,
+                  color: colors.accent,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  AppText.t(context, 'settings.language'),
+                  style: text.bodyMedium,
+                ),
+                const Spacer(),
+                DropdownButton<AppLanguage>(
+                  value: LocaleScope.of(context).language,
+                  underline: const SizedBox.shrink(),
+                  dropdownColor: colors.surface,
+                  borderRadius: BorderRadius.circular(TideRadii.md),
+                  items: AppLanguage.values
+                      .map<DropdownMenuItem<AppLanguage>>(
+                        (AppLanguage item) => DropdownMenuItem<AppLanguage>(
+                          value: item,
+                          child: Text(item.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (AppLanguage? value) {
+                    if (value != null) {
+                      LocaleScope.of(context).setLanguage(value);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: TideSpace.x4),
 
           // ---------------------------------------------------------------- 外观
           const SectionHeader(title: '外观'),

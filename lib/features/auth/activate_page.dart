@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_text.dart';
 import '../../core/license/license_controller.dart';
 import '../../core/license/license_scope.dart';
 import '../../design/tokens.dart';
 import '../../widgets/liquid_glass_container.dart';
 
-enum _Mode { quick, key, account }
-
-/// 授权激活页：卡密激活 / 账号登录 / 用卡密注册。
+/// 进入 App 的第一步：注册 / 登录（不含卡密，卡密在兑换页用）。
 class ActivatePage extends StatefulWidget {
   const ActivatePage({super.key});
 
@@ -16,20 +15,15 @@ class ActivatePage extends StatefulWidget {
 }
 
 class _ActivatePageState extends State<ActivatePage> {
-  final TextEditingController _key = TextEditingController();
-  final TextEditingController _user = TextEditingController();
+  final TextEditingController _name = TextEditingController();
   final TextEditingController _pass = TextEditingController();
-  final TextEditingController _nickname = TextEditingController();
 
-  _Mode _mode = _Mode.key;
-  bool _register = false;
+  bool _register = true;
 
   @override
   void dispose() {
-    _key.dispose();
-    _user.dispose();
+    _name.dispose();
     _pass.dispose();
-    _nickname.dispose();
     super.dispose();
   }
 
@@ -37,15 +31,10 @@ class _ActivatePageState extends State<ActivatePage> {
     final LicenseController license = LicenseScope.of(context);
     if (license.busy) return;
     FocusScope.of(context).unfocus();
-
-    if (_mode == _Mode.quick) {
-      await license.quickRegister(_nickname.text);
-    } else if (_mode == _Mode.key) {
-      await license.activate(_key.text);
-    } else if (_register) {
-      await license.register(_key.text, _user.text, _pass.text);
+    if (_register) {
+      await license.signUp(_name.text, _pass.text);
     } else {
-      await license.login(_user.text, _pass.text);
+      await license.login(_name.text, _pass.text);
     }
   }
 
@@ -54,17 +43,6 @@ class _ActivatePageState extends State<ActivatePage> {
     final LicenseController license = LicenseScope.of(context);
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
-
-    final String subtitle;
-    if (_mode == _Mode.quick) {
-      subtitle = '用机器码一键注册，随后兑换时长即可使用';
-    } else if (_mode == _Mode.key) {
-      subtitle = '输入卡密即可激活，自动绑定当前设备';
-    } else if (_register) {
-      subtitle = '用一张未使用的卡密开通新账号';
-    } else {
-      subtitle = '使用已注册的账号登录';
-    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -84,82 +62,58 @@ class _ActivatePageState extends State<ActivatePage> {
                     Row(
                       children: <Widget>[
                         Icon(
-                          Icons.verified_user_rounded,
+                          Icons.shield_moon_rounded,
                           size: 22,
                           color: colors.accent,
                         ),
                         const SizedBox(width: 8),
-                        Text('授权 Fstool', style: text.titleLarge),
+                        Text(
+                          AppText.t(context, 'auth.title'),
+                          style: text.titleLarge,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      subtitle,
+                      AppText.t(
+                        context,
+                        _register ? 'auth.registerHint' : 'auth.loginHint',
+                      ),
                       style: text.bodySmall?.copyWith(
                         color: colors.inkSecondary,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _ModeSwitch(
-                      mode: _mode,
-                      onChanged: (_Mode mode) => setState(() => _mode = mode),
+                    _Segment(
+                      left: AppText.t(context, 'auth.register'),
+                      right: AppText.t(context, 'auth.login'),
+                      leftActive: _register,
+                      onLeft: () => setState(() => _register = true),
+                      onRight: () => setState(() => _register = false),
                     ),
                     const SizedBox(height: 16),
-                    if (_mode == _Mode.quick) ...<Widget>[
-                      _Field(
-                        controller: _nickname,
-                        label: '昵称',
-                        hint: '给自己起个名字',
-                        icon: Icons.badge_outlined,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_mode == _Mode.key || _register) ...<Widget>[
-                      _Field(
-                        controller: _key,
-                        label: '卡密',
-                        hint: 'FST-XXXX-XXXX-XXXX',
-                        icon: Icons.vpn_key_rounded,
-                        uppercase: true,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (_mode == _Mode.account) ...<Widget>[
-                      _Field(
-                        controller: _user,
-                        label: '账号',
-                        hint: '用户名',
-                        icon: Icons.person_outline_rounded,
-                      ),
-                      const SizedBox(height: 12),
-                      _Field(
-                        controller: _pass,
-                        label: '密码',
-                        hint: '至少 6 位',
-                        icon: Icons.lock_outline_rounded,
-                        obscure: true,
-                      ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () =>
-                              setState(() => _register = !_register),
-                          child: Text(
-                            _register ? '已有账号？改为登录' : '用卡密注册新账号',
-                          ),
-                        ),
-                      ),
-                    ],
+                    _Field(
+                      controller: _name,
+                      label: AppText.t(context, 'auth.nickname'),
+                      hint: _register ? '例如 Asuna' : '已注册的昵称',
+                      icon: Icons.person_outline_rounded,
+                    ),
+                    const SizedBox(height: 12),
+                    _Field(
+                      controller: _pass,
+                      label: AppText.t(context, 'auth.password'),
+                      hint: _register ? '至少 6 位' : '••••••',
+                      icon: Icons.lock_outline_rounded,
+                      obscure: true,
+                    ),
                     if (license.message != null) ...<Widget>[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
                       Text(
                         license.message!,
-                        style: text.labelSmall?.copyWith(
-                          color: colors.danger,
-                        ),
+                        style: text.labelSmall?.copyWith(color: colors.danger),
                       ),
                     ],
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton(
@@ -176,42 +130,35 @@ class _ActivatePageState extends State<ActivatePage> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : Text(_mode == _Mode.quick
-                                ? '注册并进入'
-                                : (_mode == _Mode.key
-                                    ? '激活'
-                                    : (_register ? '注册并激活' : '登录'))),
+                            : Text(
+                                AppText.t(
+                                  context,
+                                  _register ? 'auth.register' : 'auth.login',
+                                ),
+                              ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.fingerprint_rounded,
-                          size: 14,
+                    const SizedBox(height: 4),
+                    Center(
+                      child: TextButton(
+                        onPressed: () => setState(() => _register = !_register),
+                        child: Text(
+                          AppText.t(
+                            context,
+                            _register ? 'auth.toLogin' : 'auth.toRegister',
+                          ),
+                        ),
+                      ),
+                    ),
+                    Center(
+                      child: Text(
+                        '${AppText.t(context, 'profile.machineCode')} · ${license.deviceShort}',
+                        style: text.labelSmall?.copyWith(
                           color: colors.inkTertiary,
                         ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            '设备标识 ${license.deviceShort}',
-                            style: text.labelSmall?.copyWith(
-                              color: colors.inkTertiary,
-                            ),
-                          ),
-                        ),
-                        if (license.status == LicenseStatus.expired)
-                          Text(
-                            '授权已过期',
-                            style: text.labelSmall?.copyWith(
-                              color: colors.danger,
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -224,33 +171,41 @@ class _ActivatePageState extends State<ActivatePage> {
   }
 }
 
-class _ModeSwitch extends StatelessWidget {
-  const _ModeSwitch({required this.mode, required this.onChanged});
+class _Segment extends StatelessWidget {
+  const _Segment({
+    required this.left,
+    required this.right,
+    required this.leftActive,
+    required this.onLeft,
+    required this.onRight,
+  });
 
-  final _Mode mode;
-  final ValueChanged<_Mode> onChanged;
+  final String left;
+  final String right;
+  final bool leftActive;
+  final VoidCallback onLeft;
+  final VoidCallback onRight;
 
   @override
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
 
-    Widget item(String label, _Mode value) {
-      final bool active = mode == value;
+    Widget item(String label, bool active, VoidCallback onTap) {
       return Expanded(
         child: GestureDetector(
-          onTap: () => onChanged(value),
+          onTap: onTap,
           behavior: HitTestBehavior.opaque,
           child: Container(
-            height: 38,
+            height: 40,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: active ? colors.accent.withOpacity(0.18) : Colors.transparent,
+              color:
+                  active ? colors.accent.withOpacity(0.18) : Colors.transparent,
               borderRadius: BorderRadius.circular(TideRadii.md),
               border: Border.all(
-                color: active
-                    ? colors.accent.withOpacity(0.55)
-                    : colors.hairline,
+                color:
+                    active ? colors.accent.withOpacity(0.55) : colors.hairline,
               ),
             ),
             child: Text(
@@ -266,11 +221,9 @@ class _ModeSwitch extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        item('一键注册', _Mode.quick),
-        const SizedBox(width: 8),
-        item('卡密激活', _Mode.key),
-        const SizedBox(width: 8),
-        item('账号登录', _Mode.account),
+        item(left, leftActive, onLeft),
+        const SizedBox(width: 10),
+        item(right, !leftActive, onRight),
       ],
     );
   }
@@ -283,7 +236,6 @@ class _Field extends StatelessWidget {
     required this.hint,
     required this.icon,
     this.obscure = false,
-    this.uppercase = false,
   });
 
   final TextEditingController controller;
@@ -291,18 +243,20 @@ class _Field extends StatelessWidget {
   final String hint;
   final IconData icon;
   final bool obscure;
-  final bool uppercase;
 
   @override
   Widget build(BuildContext context) {
     final TideColors colors = context.colors;
     final TextTheme text = Theme.of(context).textTheme;
 
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(TideRadii.md),
+          borderSide: BorderSide(color: color),
+        );
+
     return TextField(
       controller: controller,
       obscureText: obscure,
-      textCapitalization:
-          uppercase ? TextCapitalization.characters : TextCapitalization.none,
       style: text.bodyMedium,
       decoration: InputDecoration(
         labelText: label,
@@ -312,18 +266,9 @@ class _Field extends StatelessWidget {
         fillColor: colors.surface.withOpacity(0.45),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TideRadii.md),
-          borderSide: BorderSide(color: colors.hairline),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TideRadii.md),
-          borderSide: BorderSide(color: colors.hairline),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(TideRadii.md),
-          borderSide: BorderSide(color: colors.accent.withOpacity(0.7)),
-        ),
+        border: border(colors.hairline),
+        enabledBorder: border(colors.hairline),
+        focusedBorder: border(colors.accent.withOpacity(0.7)),
       ),
     );
   }

@@ -1,16 +1,20 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/app_controller.dart';
 import 'core/app_scope.dart';
+import 'core/app_text.dart';
 import 'core/background_controller.dart';
 import 'core/license/license_controller.dart';
 import 'core/license/license_scope.dart';
+import 'core/locale_controller.dart';
 import 'core/settings_controller.dart';
 import 'design/app_theme.dart';
 import 'design/tokens.dart';
 import 'features/auth/license_gate.dart';
+import 'features/auth/redeem_page.dart';
 import 'features/connect/connect_page.dart';
 import 'features/logs/logs_page.dart';
 import 'features/profile/profile_page.dart';
@@ -26,12 +30,14 @@ class TideApp extends StatelessWidget {
     required this.settings,
     required this.background,
     required this.license,
+    required this.locale,
   });
 
   final AppController controller;
   final SettingsController settings;
   final BackgroundController background;
   final LicenseController license;
+  final LocaleController locale;
 
   @override
   Widget build(BuildContext context) {
@@ -41,31 +47,47 @@ class TideApp extends StatelessWidget {
         controller: settings,
         child: BackgroundScope(
           controller: background,
-          child: AnimatedBuilder(
-            animation: settings,
-            builder: (BuildContext context, Widget? child) {
-              return MaterialApp(
-                title: 'Fstool',
-                debugShowCheckedModeBanner: false,
-                theme: AppTheme.light(settings.accentColor),
-                darkTheme: AppTheme.dark(settings.accentColor),
-                themeMode: settings.themeMode,
-                            scrollBehavior: const TideScrollBehavior(),
-                builder: (BuildContext context, Widget? child) {
-                  return Stack(
-                    children: <Widget>[
-                      const AppBackgroundHost(),
-                      if (child != null) child,
-                      const SnowOverlay(),
-                    ],
-                  );
-                },
-                home: LicenseScope(
-                  controller: license,
-                  child: const LicenseGate(child: HomeShell()),
-                ),
-              );
-            },
+          child: LocaleScope(
+            controller: locale,
+            child: AnimatedBuilder(
+              animation: Listenable.merge(<Listenable>[settings, locale]),
+              builder: (BuildContext context, Widget? child) {
+                return MaterialApp(
+                  title: 'Fstool',
+                  debugShowCheckedModeBanner: false,
+                  theme: AppTheme.light(settings.accentColor),
+                  darkTheme: AppTheme.dark(settings.accentColor),
+                  themeMode: settings.themeMode,
+                  locale: locale.locale,
+                  supportedLocales: const <Locale>[
+                    Locale('zh'),
+                    Locale('en'),
+                    Locale('it'),
+                    Locale('ru'),
+                  ],
+                  localizationsDelegates:
+                      const <LocalizationsDelegate<dynamic>>[
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  scrollBehavior: const TideScrollBehavior(),
+                  builder: (BuildContext context, Widget? child) {
+                    return Stack(
+                      children: <Widget>[
+                        const AppBackgroundHost(),
+                        if (child != null) child,
+                        const SnowOverlay(),
+                      ],
+                    );
+                  },
+                  home: LicenseScope(
+                    controller: license,
+                    child: const LicenseGate(child: HomeShell()),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -90,61 +112,121 @@ class _HomeShellState extends State<HomeShell> {
     ProfilePage(),
   ];
 
-  static const List<LiquidNavItem> _navItems = <LiquidNavItem>[
-    LiquidNavItem(
-      icon: Icons.power_settings_new_outlined,
-      activeIcon: Icons.power_settings_new_rounded,
-      label: '连接',
-    ),
-    LiquidNavItem(
-      icon: Icons.layers_outlined,
-      activeIcon: Icons.layers_rounded,
-      label: '配置',
-    ),
-    LiquidNavItem(
-      icon: Icons.article_outlined,
-      activeIcon: Icons.article_rounded,
-      label: '日志',
-    ),
-    LiquidNavItem(
-      icon: Icons.person_outline_rounded,
-      activeIcon: Icons.person_rounded,
-      label: '我的',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final Duration duration = context.motion(TideMotion.base);
 
+    final List<LiquidNavItem> navItems = <LiquidNavItem>[
+      LiquidNavItem(
+        icon: Icons.power_settings_new_outlined,
+        activeIcon: Icons.power_settings_new_rounded,
+        label: AppText.t(context, 'nav.connect'),
+      ),
+      LiquidNavItem(
+        icon: Icons.layers_outlined,
+        activeIcon: Icons.layers_rounded,
+        label: AppText.t(context, 'nav.profiles'),
+      ),
+      LiquidNavItem(
+        icon: Icons.article_outlined,
+        activeIcon: Icons.article_rounded,
+        label: AppText.t(context, 'nav.logs'),
+      ),
+      LiquidNavItem(
+        icon: Icons.person_outline_rounded,
+        activeIcon: Icons.person_rounded,
+        label: AppText.t(context, 'nav.mine'),
+      ),
+    ];
+
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: AnimatedSwitcher(
-        duration: duration,
-        switchInCurve: TideMotion.standard,
-        switchOutCurve: TideMotion.standard,
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.02, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
+      body: Column(
+        children: <Widget>[
+          const _NoTimeBanner(),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: duration,
+              switchInCurve: TideMotion.standard,
+              switchOutCurve: TideMotion.standard,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.02, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: IndexedStack(
+                index: _index,
+                children: _pages,
+              ),
             ),
-          );
-        },
-                child: IndexedStack(
-          index: _index,
-          children: _pages,
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: LiquidNavBar(
         index: _index,
         onTap: (int value) => setState(() => _index = value),
-        items: _navItems,
+        items: navItems,
+      ),
+    );
+  }
+}
+
+/// 没有可用时长时顶部的提示条，点一下直接去兑换。
+class _NoTimeBanner extends StatelessWidget {
+  const _NoTimeBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final LicenseController? license = LicenseScope.maybeOf(context);
+    if (license == null || license.hasTime) return const SizedBox.shrink();
+
+    final TideColors colors = context.colors;
+    final TextTheme text = Theme.of(context).textTheme;
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: Material(
+          color: colors.accent.withOpacity(0.16),
+          borderRadius: BorderRadius.circular(TideRadii.md),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(TideRadii.md),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const RedeemPage(canPop: true),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.timer_outlined, size: 16, color: colors.accent),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppText.t(context, 'banner.noTime'),
+                      style: text.labelMedium?.copyWith(color: colors.accent),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: colors.accent,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
