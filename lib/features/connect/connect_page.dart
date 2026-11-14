@@ -27,7 +27,7 @@ class ConnectPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _TitleRow(state: c.tunnelState),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
         _AnnouncementCard(controller: c),
       ],
     );
@@ -45,7 +45,7 @@ class ConnectPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         headColumn,
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         statusSection,
       ],
     );
@@ -64,9 +64,9 @@ class ConnectPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const SizedBox(height: 10),
+              const SizedBox(height: 6),
               const Center(child: _KernelBanner()),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               if (wide)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

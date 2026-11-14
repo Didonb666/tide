@@ -322,7 +322,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     color: colors.inkTertiary,
                   ),
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
+                    JellyPageRoute<void>(
                       builder: (_) => Scaffold(
                         backgroundColor: Colors.transparent,
                         appBar: AppBar(

@@ -10,8 +10,8 @@ class JellyPageRoute<T> extends PageRouteBuilder<T> {
     this.axisAlign = Alignment.center,
   }) : super(
           barrierColor: Colors.transparent,
-          transitionDuration: const Duration(milliseconds: 560),
-          reverseTransitionDuration: const Duration(milliseconds: 320),
+          transitionDuration: const Duration(milliseconds: 360),
+          reverseTransitionDuration: const Duration(milliseconds: 220),
           pageBuilder: (BuildContext context, Animation<double> animation,
               Animation<double> secondary) {
             return builder(context);
@@ -22,7 +22,7 @@ class JellyPageRoute<T> extends PageRouteBuilder<T> {
               Widget child) {
             final Animation<double> jelly = CurvedAnimation(
               parent: animation,
-              curve: Curves.elasticOut,
+              curve: Curves.easeOutBack,
               reverseCurve: Curves.easeInCubic,
             );
             final Animation<double> fade = CurvedAnimation(
@@ -39,10 +39,7 @@ class JellyPageRoute<T> extends PageRouteBuilder<T> {
               child: ScaleTransition(
                 scale: Tween<double>(begin: 0.78, end: 1.0).animate(jelly),
                 alignment: axisAlign,
-                child: RotationTransition(
-                  turns: Tween<double>(begin: 0.012, end: 0).animate(wobble),
-                  child: child,
-                ),
+                child: child,
               ),
             );
           },
