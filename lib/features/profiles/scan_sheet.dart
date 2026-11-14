@@ -32,7 +32,11 @@ class ScanSheet extends StatefulWidget {
 }
 
 class _ScanSheetState extends State<ScanSheet> {
-  final MobileScannerController _scanner = MobileScannerController();
+  // useNewCameraSelector: 走新的相机选择器。老的选择器在部分新机型（Android 14+）
+  // 上会抛 NullPointerException（Object.getClass() on null），换成新选择器可绕开。
+  final MobileScannerController _scanner = MobileScannerController(
+    useNewCameraSelector: true,
+  );
 
   bool _busy = false;
   String? _error;
