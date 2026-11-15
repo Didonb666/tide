@@ -211,22 +211,6 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const LiquidEffectsPanel(),
-                DropdownButtonFormField<int>(
-                  value: s.refreshRate,
-                  decoration: InputDecoration(
-                    labelText: tr('屏幕刷新率'),
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: const <DropdownMenuItem<int>>[
-                    DropdownMenuItem<int>(value: 60, child: Text('60 Hz')),
-                    DropdownMenuItem<int>(value: 90, child: Text('90 Hz')),
-                    DropdownMenuItem<int>(value: 120, child: Text('120 Hz')),
-                  ],
-                  onChanged: (int? value) {
-                    if (value != null) s.setRefreshRate(value);
-                  },
-                ),
                 const SizedBox(height: TideSpace.x3),
                 ValueListenableBuilder<double>(
                   valueListenable: FpsMonitor.instance.fps,

@@ -152,6 +152,9 @@ abstract final class AppTheme {
         modalBackgroundColor: sheetColor,
       ),
       snackBarTheme: base.snackBarTheme.copyWith(
+        backgroundColor: const Color(0xFF141A21),
+        elevation: 6,
+        behavior: SnackBarBehavior.floating,
         contentTextStyle: TideType.body.copyWith(
           color: const Color(0xFFF3F7FB),
           fontWeight: FontWeight.w500,

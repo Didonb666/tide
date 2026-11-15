@@ -85,7 +85,8 @@ class SettingsController extends ChangeNotifier {
       _snowSpeed = (prefs.getDouble(_kSnowSpeed) ?? 1.0).clamp(0.2, 3.0);
 
       notifyListeners();
-      await DisplayModeService.applyRefreshRate(_refreshRate);
+      // 统一使用系统最高刷新率，省电交给系统自适应
+      await DisplayModeService.applyRefreshRate(0);
     } catch (_) {}
   }
 

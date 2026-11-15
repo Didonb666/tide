@@ -184,8 +184,6 @@ class WindowsMihomoTunnelPlatform implements TunnelPlatform {
           '/f',
         ]);
       }
-      // 让系统立即感知代理变化
-      await Process.run('rundll32', <String>['user32.dll,UpdatePerUserSystemSettings']);
     } catch (_) {}
   }
 }
