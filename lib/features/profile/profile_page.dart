@@ -74,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
             controller: controller,
             maxLength: maxLength,
             autofocus: true,
-            decoration: InputDecoration(hintText: tr('最多 $maxLength 个字')),
+            decoration: InputDecoration(hintText: '${tr('最多 ')}${maxLength}${tr(' 个字')}'),
           ),
           actions: <Widget>[
             TextButton(
@@ -272,7 +272,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(AppText.t(context, 'profile.remaining'), style: text.labelMedium),
                     const Spacer(),
                     Text(
-                      hasTime ? tr('${license.remainingDays} 天') : tr('未兑换'),
+                      hasTime ? '${license.remainingDays}${tr(' 天')}' : tr('未兑换'),
                       style: text.titleMedium?.copyWith(
                         color: hasTime ? colors.accent : colors.danger,
                       ),

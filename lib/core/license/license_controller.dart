@@ -75,7 +75,7 @@ class LicenseController extends ChangeNotifier {
     final String y = exp.year.toString();
     final String m = exp.month.toString().padLeft(2, '0');
     final String d = exp.day.toString().padLeft(2, '0');
-    return tr('$y-$m-$d 到期');
+    return '${y}${tr('-')}${m}${tr('-')}${d}${tr(' 到期')}';
   }
 
   bool get hasToken => _token != null && _token!.isNotEmpty;
@@ -282,7 +282,7 @@ class LicenseController extends ChangeNotifier {
       return false;
     } catch (error) {
       _busy = false;
-      _message = tr('请求失败：$error');
+      _message = '${tr('请求失败：')}${error}';
       notifyListeners();
       return false;
     }
@@ -332,7 +332,7 @@ class LicenseController extends ChangeNotifier {
 
     if (notExpired && withinGrace) {
       _status = LicenseStatus.active;
-      _message = tr('当前离线，已使用本地授权（$remainingDays 天）');
+      _message = '${tr('当前离线，已使用本地授权（')}${remainingDays}${tr(' 天）')}';
     } else if (notExpired) {
       _status = LicenseStatus.noTime;
       _message = tr('需要联网校验授权，请检查网络');

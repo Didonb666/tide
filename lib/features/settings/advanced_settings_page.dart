@@ -152,7 +152,7 @@ class _AdvancedSettingsPageState extends State<AdvancedSettingsPage> {
                     return Text(
                       fps <= 0
                           ? tr('实测帧率：采集中…')
-                          : tr('实测帧率：${fps.toStringAsFixed(1)} fps'),
+                          : '${tr('实测帧率：')}${fps.toStringAsFixed(1)}${tr(' fps')}',
                       style: TideType.mono.copyWith(color: colors.accent),
                     );
                   },

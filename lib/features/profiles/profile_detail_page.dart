@@ -138,7 +138,7 @@ class _DetailHeader extends StatelessWidget {
                   style: text.headlineSmall,
                 ),
                 const SizedBox(height: 4),
-                Text(tr('${profile.sourceLabel} · ${profile.ruleCount} 条规则 · ${relativeTime(profile.updatedAt)}'),
+                Text('${profile.sourceLabel}${tr(' · ')}${profile.ruleCount}${tr(' 条规则 · ')}${relativeTime(profile.updatedAt)}',
                   style: text.bodySmall,
                 ),
                 if (!profile.valid) ...<Widget>[
@@ -148,7 +148,7 @@ class _DetailHeader extends StatelessWidget {
                       Icon(Icons.error_outline, size: 14, color: colors.danger),
                       const SizedBox(width: 4),
                       Flexible(
-                        child: Text(tr('校验未通过：${profile.groupSummary}'),
+                        child: Text('${tr('校验未通过：')}${profile.groupSummary}',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: text.labelSmall?.copyWith(color: colors.danger),
@@ -193,7 +193,7 @@ class _GroupsTab extends StatelessWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
           title: Text(group.name, style: text.titleMedium),
-          subtitle: Text(tr('${group.kind} · ${group.nodes.length} 个节点'),
+          subtitle: Text('${group.kind}${tr(' · ')}${group.nodes.length}${tr(' 个节点')}',
             style: text.bodySmall,
           ),
           trailing: Row(
@@ -213,7 +213,7 @@ class _GroupsTab extends StatelessWidget {
           ),
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(tr('演示模式：接入内核后才能切换「${group.name}」的节点'))),
+              SnackBar(content: Text('${tr('演示模式：接入内核后才能切换「')}${group.name}${tr('」的节点')}')),
             );
           },
         );
@@ -315,14 +315,14 @@ class _ProvidersTab extends StatelessWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: TideSpace.page),
           title: Text(p.name, style: text.titleMedium),
-          subtitle: Text(tr('${p.behavior} · ${p.count} 条 · ${relativeTime(p.updatedAt)}更新'),
+          subtitle: Text('${p.behavior}${tr(' · ')}${p.count}${tr(' 条 · ')}${relativeTime(p.updatedAt)}${tr('更新')}',
             style: text.bodySmall,
           ),
           trailing:
               Icon(Icons.refresh, size: 18, color: context.colors.inkTertiary),
           onTap: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(tr('演示模式：真实更新会调用 PUT /providers/rules/${p.name}'))),
+              SnackBar(content: Text('${tr('演示模式：真实更新会调用 PUT /providers/rules/')}${p.name}')),
             );
           },
         );

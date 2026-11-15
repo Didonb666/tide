@@ -40,7 +40,7 @@ class LiquidEffectsPanel extends StatelessWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('选择雪花图片失败：$error'))),
+        SnackBar(content: Text('${tr('选择雪花图片失败：')}${error}')),
       );
     }
   }
@@ -115,7 +115,7 @@ class LiquidEffectsPanel extends StatelessWidget {
               Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(tr('雪花图片：${_shortPath(settings.snowImagePath)}'),
+                    child: Text('${tr('雪花图片：')}${_shortPath(settings.snowImagePath)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: text.bodySmall,

@@ -70,9 +70,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
       await bg.pickImage(slot: slot);
-      if (context.mounted) _toast(context, tr('${_slotLabel(slot)}已更新'));
+      if (context.mounted) _toast(context, '${_slotLabel(slot)}${tr('已更新')}');
     } catch (error) {
-      if (context.mounted) _toast(context, tr('选择图片失败：$error'));
+      if (context.mounted) _toast(context, '${tr('选择图片失败：')}${error}');
     }
   }
 
@@ -83,9 +83,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final BackgroundController bg = BackgroundScope.of(context);
     try {
       await bg.pickVideo(slot: slot);
-      if (context.mounted) _toast(context, tr('${_slotLabel(slot)}已更新'));
+      if (context.mounted) _toast(context, '${_slotLabel(slot)}${tr('已更新')}');
     } catch (error) {
-      if (context.mounted) _toast(context, tr('选择视频失败：$error'));
+      if (context.mounted) _toast(context, '${tr('选择视频失败：')}${error}');
     }
   }
 
@@ -234,7 +234,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     return Text(
                       fps <= 0
                           ? tr('实测帧率：采集中…')
-                          : tr('实测帧率：${fps.toStringAsFixed(1)} fps'),
+                          : '${tr('实测帧率：')}${fps.toStringAsFixed(1)}${tr(' fps')}',
                       style: TideType.mono.copyWith(color: colors.accent),
                     );
                   },

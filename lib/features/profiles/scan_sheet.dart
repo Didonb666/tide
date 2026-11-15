@@ -71,7 +71,7 @@ class _ScanSheetState extends State<ScanSheet> {
         yaml = parsed['yaml']!;
       } else if (text.startsWith('http://') || text.startsWith('https://')) {
         yaml = await _download(text);
-        name = tr('订阅 ${DateTime.now().month}-${DateTime.now().day}');
+        name = '${tr('订阅 ')}${DateTime.now().month}${tr('-')}${DateTime.now().day}';
       } else {
         yaml = text;
       }
@@ -137,7 +137,7 @@ class _ScanSheetState extends State<ScanSheet> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = tr('识别失败：$error');
+        _error = '${tr('识别失败：')}${error}';
       });
     }
   }

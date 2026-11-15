@@ -31,7 +31,7 @@ class ProfilesPage extends StatelessWidget {
     } catch (error) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('更换头像失败：$error'))),
+        SnackBar(content: Text('${tr('更换头像失败：')}${error}')),
       );
     }
   }
@@ -61,7 +61,7 @@ class ProfilesPage extends StatelessWidget {
                       final Profile? scanned = await showScanSheet(context, c);
                       if (scanned == null || !context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(tr('已导入：${scanned.name}'))),
+                        SnackBar(content: Text('${tr('已导入：')}${scanned.name}')),
                       );
                     },
                     icon: const Icon(Icons.qr_code_scanner_rounded),
@@ -112,7 +112,7 @@ class ProfilesPage extends StatelessWidget {
                   onLongPress: () {
                     c.selectProfile(p.id);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(tr('已设为当前配置：${p.name}'))),
+                      SnackBar(content: Text('${tr('已设为当前配置：')}${p.name}')),
                     );
                   },
                   onTap: () {
@@ -139,7 +139,7 @@ class ProfilesPage extends StatelessWidget {
     if (created == null || !context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(tr('已导入：${created.name}'))),
+      SnackBar(content: Text('${tr('已导入：')}${created.name}')),
     );
   }
 }

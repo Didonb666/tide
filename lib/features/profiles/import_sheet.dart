@@ -79,7 +79,7 @@ class _ImportSheetState extends State<ImportSheet> {
       _submit(text, fallbackName: name);
     } catch (error) {
       if (!mounted) return;
-      setState(() => _error = tr('读取文件失败：$error'));
+      setState(() => _error = '${tr('读取文件失败：')}${error}');
     }
   }
 
@@ -103,7 +103,7 @@ class _ImportSheetState extends State<ImportSheet> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _error = tr('下载失败：$error');
+        _error = '${tr('下载失败：')}${error}';
       });
     }
   }
@@ -160,7 +160,7 @@ class _ImportSheetState extends State<ImportSheet> {
         ? typed
         : (fallbackName != null && fallbackName.trim().isNotEmpty
             ? fallbackName.trim()
-            : tr('导入配置 ${widget.controller.profiles.length + 1}'));
+            : '${tr('导入配置 ')}${widget.controller.profiles.length + 1}');
 
     final Profile profile = widget.controller.importProfile(yaml, name: name);
     Navigator.of(context).pop(profile);

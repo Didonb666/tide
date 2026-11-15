@@ -98,7 +98,7 @@ class AppController extends ChangeNotifier {
       return;
     }
     if (profile.rawYaml.trim().isEmpty) {
-      _fail(tr('「${profile.name}」没有可用的 YAML，请先导入真实配置。'));
+      _fail('${tr('「')}${profile.name}${tr('」没有可用的 YAML，请先导入真实配置。')}');
       return;
     }
 
@@ -115,7 +115,7 @@ class AppController extends ChangeNotifier {
       );
       _startLogs();
     } catch (error) {
-      _fail(tr('操作失败：$error'));
+      _fail('${tr('操作失败：')}${error}');
     }
   }
 
@@ -141,7 +141,7 @@ class AppController extends ChangeNotifier {
   Profile importProfile(String yaml, {String? name}) {
     final int rules = estimateRuleCount(yaml);
     final String title = (name == null || name.trim().isEmpty)
-        ? tr('粘贴配置 ${profiles.length + 1}')
+        ? '${tr('粘贴配置 ')}${profiles.length + 1}'
         : name.trim();
 
     final Profile profile = Profile(

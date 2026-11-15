@@ -39,9 +39,9 @@ String formatBytes(int bytes) {
 String relativeTime(DateTime time) {
   final Duration delta = DateTime.now().difference(time);
   if (delta.inSeconds < 60) return tr('刚刚');
-  if (delta.inMinutes < 60) return tr('${delta.inMinutes} 分钟前');
-  if (delta.inHours < 24) return tr('${delta.inHours} 小时前');
-  return tr('${delta.inDays} 天前');
+  if (delta.inMinutes < 60) return '${delta.inMinutes}${tr(' 分钟前')}';
+  if (delta.inHours < 24) return '${delta.inHours}${tr(' 小时前')}';
+  return '${delta.inDays}${tr(' 天前')}';
 }
 
 // ---------------------------------------------------------------------------
@@ -826,7 +826,7 @@ class ProfileStreamTile extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 3),
-                      Text(tr('${relativeTime(profile.updatedAt)} · ${profile.ruleCount} 条规则 · ${profile.groupSummary}'),
+                      Text('${relativeTime(profile.updatedAt)}${tr(' · ')}${profile.ruleCount}${tr(' 条规则 · ')}${profile.groupSummary}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: text.bodySmall,

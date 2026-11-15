@@ -35,7 +35,7 @@ class _RedeemPageState extends State<RedeemPage> {
     if (ok) {
       _key.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('兑换成功，剩余 ${license.remainingDays} 天'))),
+        SnackBar(content: Text('${tr('兑换成功，剩余 ')}${license.remainingDays}${tr(' 天')}')),
       );
       if (widget.canPop) Navigator.of(context).pop();
     }
@@ -121,7 +121,7 @@ class _RedeemPageState extends State<RedeemPage> {
                                 label: AppText.t(context, 'profile.remaining'),
                                 value: license.expiresAt == null
                                     ? tr('未兑换')
-                                    : tr('${license.remainingDays} 天 · ${license.expiryText}'),
+                                    : '${license.remainingDays}${tr(' 天 · ')}${license.expiryText}',
                               ),
                             ],
                           ),

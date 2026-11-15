@@ -318,6 +318,22 @@ class AppText {
     '策略组': {'en': 'Proxy groups', 'it': 'Gruppi proxy', 'ru': 'Группы прокси'},
     '规则集': {'en': 'Rule sets', 'it': 'Set di regole', 'ru': 'Наборы правил'},
     '还没有策略组数据': {'en': 'No proxy groups yet', 'it': 'Nessun gruppo proxy', 'ru': 'Групп пока нет'},
+    '天': {'en': ' days', 'it': ' giorni', 'ru': ' дн.'},
+    '到期': {'en': 'expires', 'it': 'scade', 'ru': 'истекает'},
+    '已导入': {'en': 'Imported: ', 'it': 'Importato: ', 'ru': 'Импортировано: '},
+    '操作失败': {'en': 'Operation failed: ', 'it': 'Operazione fallita: ', 'ru': 'Ошибка операции: '},
+    '请求失败': {'en': 'Request failed: ', 'it': 'Richiesta fallita: ', 'ru': 'Ошибка запроса: '},
+    '读取文件失败': {'en': 'Read failed: ', 'it': 'Lettura fallita: ', 'ru': 'Ошибка чтения: '},
+    '下载失败': {'en': 'Download failed: ', 'it': 'Download fallito: ', 'ru': 'Ошибка загрузки: '},
+    '更换头像失败': {'en': 'Avatar update failed: ', 'it': 'Aggiornamento avatar fallito: ', 'ru': 'Не удалось обновить аватар: '},
+    '选择雪花图片失败': {'en': 'Snow image failed: ', 'it': 'Immagine neve fallita: ', 'ru': 'Не удалось выбрать снежинку: '},
+    '最多': {'en': 'Max ', 'it': 'Max ', 'ru': 'Макс. '},
+    '个字': {'en': ' chars', 'it': ' caratteri', 'ru': ' симв.'},
+    '分钟前': {'en': ' min ago', 'it': ' min fa', 'ru': ' мин назад'},
+    '小时前': {'en': ' h ago', 'it': ' h fa', 'ru': ' ч назад'},
+    '天前': {'en': ' d ago', 'it': ' g fa', 'ru': ' дн. назад'},
+    '已设为当前配置': {'en': 'Set as active: ', 'it': 'Impostato attivo: ', 'ru': 'Активный профиль: '},
+    '已导入：': {'en': 'Imported: ', 'it': 'Importato: ', 'ru': 'Импортировано: '},
   };
 
   static String t(BuildContext context, String key) {
