@@ -17,6 +17,9 @@ import '../app_text.dart';
 /// 注意：**没有**在 Windows 上注册处理器，调用会抛 MissingPluginException。
 /// 这里全部捕获并降级，保证同一套 Dart 代码在桌面端不会崩。
 class MethodChannelTunnelPlatform implements TunnelPlatform {
+  /// 最近一次通道调用失败的原因（用于界面提示）
+  static String? lastError;
+
   static const MethodChannel _methods = MethodChannel('tide/tunnel');
   static EventChannel _events = EventChannel('tide/tunnel/events');
 
@@ -27,9 +30,14 @@ class MethodChannelTunnelPlatform implements TunnelPlatform {
     try {
       final bool? value = await _methods.invokeMethod<bool>('isAvailable');
       return value ?? false;
-    } on MissingPluginException {
+    } on MissingPluginException catch (error) {
+      lastError = 'MissingPluginException: ${error.message}';
       return false;
-    } on PlatformException {
+    } on PlatformException catch (error) {
+      lastError = 'PlatformException: ${error.code} ${error.message}';
+      return false;
+    } catch (error) {
+      lastError = '$error';
       return false;
     }
   }

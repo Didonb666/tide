@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'profile.dart';
+import 'tunnel/method_channel_tunnel.dart';
 import 'tunnel/simulated_tunnel.dart';
 import 'tunnel/tunnel_factory.dart';
 import 'tunnel/tunnel_platform.dart';
@@ -49,6 +51,8 @@ class AppController extends ChangeNotifier {
       if (!available) {
         await _platform.dispose();
         _platform = SimulatedTunnelPlatform();
+      // 把真实原因带给 UI（日志页/连接卡会显示）
+      debugPrint('fallback to simulated: ${MethodChannelTunnelPlatform.lastError}');
       }
     } catch (_) {
       _platform = SimulatedTunnelPlatform();
@@ -83,6 +87,22 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+
+  /// 若之前降级成了模拟实现，连接前尝试升级回原生内核。
+  Future<void> _ensureRealPlatform() async {
+    if (_platform is! SimulatedTunnelPlatform) return;
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      final MethodChannelTunnelPlatform real = MethodChannelTunnelPlatform();
+      if (await real.isAvailable()) {
+        await _platform.dispose();
+        _platform = real;
+        _subscription?.cancel();
+        _subscription = _platform.states.listen(_onState);
+      }
+    } catch (_) {}
+  }
+
   Future<void> toggleConnection() async {
     if (tunnelState.isBusy) return;
 
@@ -106,7 +126,8 @@ class AppController extends ChangeNotifier {
     final int port = 20000 + Random.secure().nextInt(20000);
 
     try {
-      await _platform.connect(
+      await _ensureRealPlatform();
+    await _platform.connect(
         profile.id,
         profile.rawYaml,
         secret: secret,
