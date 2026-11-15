@@ -579,6 +579,11 @@ function adminPage(keys, users, flash, generated) {
     <input type="hidden" name="action" value="extend">
     <button class="small ghost">+30天</button>
   </form>
+  <form method="post" action="/admin/delete-key" style="display:inline"
+        onsubmit="return confirm('确定删除这张卡密？删除后无法恢复')">
+    <input type="hidden" name="key" value="${esc(rec.key)}">
+    <button class="small warn">删除</button>
+  </form>
 </td></tr>`;
     })
     .join('');
@@ -590,6 +595,13 @@ function adminPage(keys, users, flash, generated) {
 <td>${user.expiresAt ? remainingDays(user.expiresAt) + ' 天' : '<span class="muted">未兑换</span>'}</td>
 <td class="muted">${esc(user.deviceName || user.deviceId || '-')}</td>
 <td>${user.banned ? '<span class="badge off">封禁</span>' : '<span class="badge ok">正常</span>'}</td>
+<td>
+  <form method="post" action="/admin/delete-user" style="display:inline"
+        onsubmit="return confirm('确定删除该用户？其卡密不会被删除')">
+    <input type="hidden" name="username" value="${esc(user.username)}">
+    <button class="small warn">删除</button>
+  </form>
+</td>
 </tr>`)
     .join('');
 
@@ -629,7 +641,7 @@ ${generated.length ? `<h2>刚生成的卡密</h2><div class="card">
 
 <h2>账号列表</h2>
 <div class="card" style="overflow-x:auto">
-<table><thead><tr><th>账号</th><th>昵称</th><th>剩余</th><th>设备</th><th>状态</th></tr></thead>
+<table><thead><tr><th>账号</th><th>昵称</th><th>剩余</th><th>设备</th><th>状态</th><th>操作</th></tr></thead>
 <tbody>${userRows || '<tr><td colspan="5" class="muted">还没有注册用户</td></tr>'}</tbody></table>
 </div>
 
@@ -717,6 +729,29 @@ async function route(req, res) {
           adminFlash = `已为 ${rec.key} 续期 30 天`;
         }
         saveDb();
+      }
+      return redirect(res, '/admin');
+    }
+
+    if (req.method === 'POST' && p === '/admin/delete-key') {
+      const form = await readForm(req);
+      const rec = findKeyRecord(form.key);
+      if (rec) {
+        delete db.keys[rec.key];
+        if (keyIndex) keyIndex.delete(normalizeKey(rec.key));
+        saveDb();
+        adminFlash = `已删除卡密 ${rec.key}`;
+      }
+      return redirect(res, '/admin');
+    }
+
+    if (req.method === 'POST' && p === '/admin/delete-user') {
+      const form = await readForm(req);
+      const username = String(form.username || '').trim();
+      if (db.users[username]) {
+        delete db.users[username];
+        saveDb();
+        adminFlash = `已删除用户 ${username}`;
       }
       return redirect(res, '/admin');
     }
@@ -1017,6 +1052,27 @@ async function route(req, res) {
         return send(res, 200, { ok: true, username: target, deviceId: null });
       }
       return send(res, 404, { ok: false, error: 'not_found' });
+    }
+
+    if (req.method === 'POST' && p === '/api/admin/delete-key') {
+      const body = await readBody(req);
+      const rec = findKeyRecord(body.key);
+      if (!rec) return send(res, 404, { ok: false, error: 'key_not_found' });
+      delete db.keys[rec.key];
+      if (keyIndex) keyIndex.delete(normalizeKey(rec.key));
+      saveDb();
+      return send(res, 200, { ok: true, deleted: rec.key });
+    }
+
+    if (req.method === 'POST' && p === '/api/admin/delete-user') {
+      const body = await readBody(req);
+      const username = String(body.username || '').trim();
+      if (!db.users[username]) {
+        return send(res, 404, { ok: false, error: 'user_not_found' });
+      }
+      delete db.users[username];
+      saveDb();
+      return send(res, 200, { ok: true, deleted: username });
     }
 
     if (req.method === 'POST' && p === '/api/admin/extend') {

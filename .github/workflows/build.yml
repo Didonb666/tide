@@ -324,6 +324,19 @@ jobs:
           Copy-Item -Path (Join-Path $dir '*') -Destination dist/windows -Recurse -Force
           Get-ChildItem dist/windows | Select-Object Name, Length
 
+      - name: 7b. 下载 mihomo 内核（Windows amd64）
+        shell: pwsh
+        run: |
+          $ver = "v1.19.33"
+          $url = "https://github.com/MetaCubeX/mihomo/releases/download/$ver/mihomo-windows-amd64-$ver.zip"
+          New-Item -ItemType Directory -Force dist/core | Out-Null
+          curl.exe -L --retry 3 -o dist/core/mihomo.zip $url
+          Expand-Archive dist/core/mihomo.zip -DestinationPath dist/core -Force
+          $exe = Get-ChildItem dist/core -Recurse -Filter mihomo*.exe | Select-Object -First 1
+          if (-not $exe) { Write-Error "没有找到 mihomo 可执行文件"; exit 1 }
+          Copy-Item $exe.FullName dist/windows/mihomo.exe -Force
+          Get-ChildItem dist/windows | Select-Object Name, Length
+
       - name: 8. 上传 EXE（解压即用）
         uses: actions/upload-artifact@v4
         with:

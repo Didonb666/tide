@@ -29,6 +29,9 @@ class LicenseController extends ChangeNotifier {
 
   static const Duration offlineGrace = Duration(days: 3);
 
+  /// 网络失败时的重试退避（毫秒）
+  static const List<int> _retryDelaysMs = <int>[400, 1200, 2500];
+
   final LicenseApi _api;
 
   String? _token;
@@ -292,13 +295,23 @@ class LicenseController extends ChangeNotifier {
   Future<Map<String, dynamic>> _withRetry(
     Future<Map<String, dynamic>> Function() call,
   ) async {
-    try {
-      return await call();
-    } on LicenseApiException catch (error) {
-      if (error.code != 'network' && error.code != 'tls') rethrow;
-      await Future<void>.delayed(Duration(milliseconds: 500));
-      return await call();
+    // 首次请求最容易失败：刚装好 App、射频/DNS 还没就绪。
+    // 做 3 次退避重试（0.4s / 1.2s / 2.5s），用户基本无感。
+    Object? lastError;
+    for (int attempt = 0; attempt <= _retryDelaysMs.length; attempt += 1) {
+      try {
+        return await call();
+      } on LicenseApiException catch (error) {
+        lastError = error;
+        if (error.code != 'network' && error.code != 'tls') rethrow;
+        if (attempt < _retryDelaysMs.length) {
+          await Future<void>.delayed(
+            Duration(milliseconds: _retryDelaysMs[attempt]),
+          );
+        }
+      }
     }
+    throw lastError!;
   }
 
   void _applyServerData(Map<String, dynamic> data) {

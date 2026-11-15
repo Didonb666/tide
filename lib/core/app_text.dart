@@ -334,6 +334,8 @@ class AppText {
     '天前': {'en': ' d ago', 'it': ' g fa', 'ru': ' дн. назад'},
     '已设为当前配置': {'en': 'Set as active: ', 'it': 'Impostato attivo: ', 'ru': 'Активный профиль: '},
     '已导入：': {'en': 'Imported: ', 'it': 'Importato: ', 'ru': 'Импортировано: '},
+    '演示模式（未连接内核）': {'en': 'Demo mode (core not connected)', 'it': 'Modalità demo (core non connesso)', 'ru': 'Демо (ядро не подключено)'},
+    '已连接（演示模式，未启动内核）': {'en': 'Connected (demo, core not started)', 'it': 'Connesso (demo, core spento)', 'ru': 'Подключено (демо, ядро выкл.)'},
   };
 
   static String t(BuildContext context, String key) {

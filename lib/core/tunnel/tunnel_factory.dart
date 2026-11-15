@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'method_channel_tunnel.dart';
 import 'simulated_tunnel.dart';
+import 'windows_mihomo_tunnel.dart';
 import 'tunnel_platform.dart';
 
 /// 平台选择只发生在这里。
@@ -13,6 +14,10 @@ import 'tunnel_platform.dart';
 TunnelPlatform createTunnelPlatform() {
   if (defaultTargetPlatform == TargetPlatform.android) {
     return MethodChannelTunnelPlatform();
+  }
+  // Windows：随包分发 mihomo.exe，可用则走真实内核（不可用时上层自动回退到模拟）
+  if (defaultTargetPlatform == TargetPlatform.windows) {
+    return WindowsMihomoTunnelPlatform();
   }
   return SimulatedTunnelPlatform();
 }

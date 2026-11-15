@@ -14,7 +14,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
       StreamController<TunnelState>.broadcast();
   final Random _random = Random(7);
 
-  TunnelState _state = TunnelState(message: tr('演示模式：未接入内核'));
+  TunnelState _state = TunnelState(message: tr('演示模式（未连接内核）'));
   Timer? _traffic;
   bool _disposed = false;
 
@@ -54,7 +54,7 @@ class SimulatedTunnelPlatform implements TunnelPlatform {
 
     _emit(_state.copyWith(
       phase: TunnelPhase.connected,
-      message: tr('已连接（桌面演示模式，未启动内核）'),
+      message: tr('已连接（演示模式，未启动内核）'),
     ));
     _startTraffic();
   }
