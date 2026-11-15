@@ -91,9 +91,9 @@ class AppController extends ChangeNotifier {
   /// 若之前降级成了模拟实现，连接前尝试升级回原生内核。
   Future<void> _ensureRealPlatform() async {
     if (_platform is! SimulatedTunnelPlatform) return;
-    if (defaultTargetPlatform != TargetPlatform.android) return;
     try {
-      final MethodChannelTunnelPlatform real = MethodChannelTunnelPlatform();
+      // Android / Windows 都尝试升级回真实内核
+      final TunnelPlatform real = createTunnelPlatform();
       if (await real.isAvailable()) {
         await _platform.dispose();
         _platform = real;
